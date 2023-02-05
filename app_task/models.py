@@ -3,6 +3,66 @@ from django.conf import settings
 from datetime import datetime  # noqa
 
 
+class Projs(models.Model):
+    name = models.CharField(
+        help_text="Название проекта", verbose_name="Название", max_length=120
+    )
+    desc = models.TextField(
+        help_text="Описание проекта", verbose_name="Описание", max_length=250
+    )
+    date_beg = models.DateTimeField(
+        help_text="Дата создания проекта",
+        verbose_name="Создано",
+        default=datetime.now,
+    )
+    date_end = models.DateTimeField(
+        help_text="Дата завершения проекта",
+        verbose_name="Завершено",
+        null=True,
+        blank=True,
+    )
+    author = models.ForeignKey(  # связь внешним ключом
+        help_text="Автор проекта",
+        verbose_name="Автор",
+        to=settings.AUTH_USER_MODEL,  # на модель аутентификации пользователей
+        on_delete=models.SET_NULL,  # При удалении пользователя задача не удалится
+        blank=True,
+        null=True,
+        # имя, для обращения из объекта пользователя к его списку задач
+        related_name="tasks_author",
+    )
+
+
+class Sprints(models.Model):
+    name = models.CharField(
+        help_text="Название спринта", verbose_name="Название", max_length=120
+    )
+    desc = models.TextField(
+        help_text="Описание спринта", verbose_name="Описание", max_length=250
+    )
+    date_beg = models.DateTimeField(
+        help_text="Дата создания спринта",
+        verbose_name="Создано",
+        default=datetime.now,
+    )
+    date_end = models.DateTimeField(
+        help_text="Дата завершения спринта",
+        verbose_name="Завершено",
+        null=True,
+        blank=True,
+    )
+    author = models.ForeignKey(  # связь внешним ключом
+        help_text="Автор спринта",
+        verbose_name="Автор",
+        to=settings.AUTH_USER_MODEL,  # на модель аутентификации пользователей
+        on_delete=models.SET_NULL,  # При удалении пользователя задача не удалится
+        blank=True,
+        null=True,
+        # имя, для обращения из объекта пользователя к его списку задач
+        related_name="tasks_author",
+    )
+
+
 class Tasks(models.Model):
     name = models.CharField(
         help_text="Название задачи", verbose_name="Название", max_length=120
@@ -29,7 +89,25 @@ class Tasks(models.Model):
         blank=True,
         null=True,
         # имя, для обращения из объекта пользователя к его списку задач
-        related_name="tasks_author",
+        related_name="author_tasks",
+    )
+    proj = models.ForeignKey(
+        help_text="Проект",
+        verbose_name="Проект",
+        to="Projs",
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="proj_tasks",
+    )
+    sprint = models.ForeignKey(
+        help_text="Спринт",
+        verbose_name="Спринт",
+        to="Sprints",
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="sprint_tasks",
     )
 
 
@@ -77,7 +155,7 @@ class TaskSteps(models.Model):
         blank=True,
         null=True,
         # имя, для обращения из объекта пользователя к его списку шагов как автора
-        related_name="steps_author",
+        related_name="author_steps",
     )
     # parent = models.ForeignKey(  # связь внешним ключом
     #     help_text="Предыдущий шаг",  # текст для человека
@@ -89,7 +167,7 @@ class TaskSteps(models.Model):
     #     # имя, по которому (родительской) задачи можно найти следующую
     #     related_name="next",
     # )
-    sreps = models.ForeignKey(  # связь внешним ключом
+    task = models.ForeignKey(  # связь внешним ключом
         help_text="Задача",
         verbose_name="Задача",
         to="Tasks",  # на модель аутентификации пользователей
