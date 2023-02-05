@@ -21,14 +21,13 @@ class Projs(models.Model):
         null=True,
         blank=True,
     )
-    author = models.ForeignKey(  # связь внешним ключом
+    author = models.ForeignKey(
         help_text="Автор проекта",
         verbose_name="Автор",
-        to=settings.AUTH_USER_MODEL,  # на модель аутентификации пользователей
-        on_delete=models.SET_NULL,  # При удалении пользователя задача не удалится
+        to=settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
         blank=True,
         null=True,
-        # имя, для обращения из объекта пользователя к его списку задач
         related_name="tasks_author",
     )
 
@@ -51,14 +50,13 @@ class Sprints(models.Model):
         null=True,
         blank=True,
     )
-    author = models.ForeignKey(  # связь внешним ключом
+    author = models.ForeignKey(
         help_text="Автор спринта",
         verbose_name="Автор",
-        to=settings.AUTH_USER_MODEL,  # на модель аутентификации пользователей
-        on_delete=models.SET_NULL,  # При удалении пользователя задача не удалится
+        to=settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
         blank=True,
         null=True,
-        # имя, для обращения из объекта пользователя к его списку задач
         related_name="tasks_author",
     )
 
@@ -81,14 +79,13 @@ class Tasks(models.Model):
         null=True,
         blank=True,
     )
-    author = models.ForeignKey(  # связь внешним ключом
+    author = models.ForeignKey(
         help_text="Автор задачи",
         verbose_name="Автор",
-        to=settings.AUTH_USER_MODEL,  # на модель аутентификации пользователей
-        on_delete=models.SET_NULL,  # При удалении пользователя задача не удалится
+        to=settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
         blank=True,
         null=True,
-        # имя, для обращения из объекта пользователя к его списку задач
         related_name="author_tasks",
     )
     proj = models.ForeignKey(
@@ -125,11 +122,9 @@ class TaskSteps(models.Model):
         blank=True,
     )
     date_beg = models.DateTimeField(
-        help_text="Дата начала шага",
-        verbose_name="Начат",
-        # default=datetime.now,
-        null=True,
-        blank=True,
+        help_text="Дата создания шага",
+        verbose_name="Создан",
+        default=datetime.now,
     )
     date_end = models.DateTimeField(
         help_text="Дата завершения шага",
@@ -137,28 +132,26 @@ class TaskSteps(models.Model):
         null=True,
         blank=True,
     )
-    user = models.ForeignKey(  # связь внешним ключом
+    user = models.ForeignKey(
         help_text="Исполнитель шага",
         verbose_name="Исполнитель",
-        to=settings.AUTH_USER_MODEL,  # на модель аутентификации пользователей
-        on_delete=models.SET_NULL,  # При удалении пользователя задача не удалится
+        to=settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
         blank=True,
         null=True,
-        # имя, для обращения из объекта пользователя к его списку шагов как исполнителя
         related_name="steps_user",
     )
-    author = models.ForeignKey(  # связь внешним ключом
+    author = models.ForeignKey(
         help_text="Автор шага",
         verbose_name="Автор",
-        to=settings.AUTH_USER_MODEL,  # на модель аутентификации пользователей
-        on_delete=models.SET_NULL,  # При удалении пользователя задача не удалится
+        to=settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
         blank=True,
         null=True,
-        # имя, для обращения из объекта пользователя к его списку шагов как автора
         related_name="author_steps",
     )
-    # parent = models.ForeignKey(  # связь внешним ключом
-    #     help_text="Предыдущий шаг",  # текст для человека
+    # parent = models.ForeignKey(
+    #     help_text="Предыдущий шаг",
     #     to="self",  # на эту же таблицу
     #     # при удалении категории НЕ удалится все поддерево, null где надо
     #     on_delete=models.SET_NULL,
@@ -167,11 +160,10 @@ class TaskSteps(models.Model):
     #     # имя, по которому (родительской) задачи можно найти следующую
     #     related_name="next",
     # )
-    task = models.ForeignKey(  # связь внешним ключом
+    task = models.ForeignKey(
         help_text="Задача",
         verbose_name="Задача",
-        to="Tasks",  # на модель аутентификации пользователей
-        on_delete=models.CASCADE,  # При удалении задачи удаляются все подзадачи
-        # имя, для обращения из подзадачи к задаче
+        to="Tasks",
+        on_delete=models.CASCADE,
         related_name="task_steps",
     )
