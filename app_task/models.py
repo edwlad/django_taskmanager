@@ -21,15 +21,15 @@ class Tasks(models.Model):
         null=True,
         blank=True,
     )
-    sreps = models.ForeignKey(  # связь внешним ключом
-        help_text="Подзадачи задания",
-        verbose_name="Подзадачи",
-        to=".TaskSteps",  # на модель аутентификации пользователей
-        on_delete=models.CASCADE,  # При удалении задачи удаляются все подзадачи
+    author = models.ForeignKey(  # связь внешним ключом
+        help_text="Автор задачи",
+        verbose_name="Автор",
+        to=settings.AUTH_USER_MODEL,  # на модель аутентификации пользователей
+        on_delete=models.SET_NULL,  # При удалении пользователя задача не удалится
         blank=True,
         null=True,
-        # имя, для обращения из подзадачи к задаче
-        related_name="task",
+        # имя, для обращения из объекта пользователя к его списку задач
+        related_name="tasks_author",
     )
 
 
@@ -66,16 +66,34 @@ class TaskSteps(models.Model):
         on_delete=models.SET_NULL,  # При удалении пользователя задача не удалится
         blank=True,
         null=True,
-        # имя, для обращения из объекта пользователя можно к его списку задач
-        related_name="user_tasks",
+        # имя, для обращения из объекта пользователя к его списку шагов как исполнителя
+        related_name="steps_user",
     )
-    parent = models.ForeignKey(  # связь внешним ключом
-        help_text="Предыдущий шаг",  # текст для человека
-        to="self",  # на эту же таблицу
-        # при удалении категории НЕ удалится все поддерево, null где надо
-        on_delete=models.SET_NULL,
+    author = models.ForeignKey(  # связь внешним ключом
+        help_text="Автор шага",
+        verbose_name="Автор",
+        to=settings.AUTH_USER_MODEL,  # на модель аутентификации пользователей
+        on_delete=models.SET_NULL,  # При удалении пользователя задача не удалится
         blank=True,
-        null=True,  # Может не быть предыдущей (родительской) задачи
-        # имя, по которому (родительской) задачи можно найти следующую
-        related_name="next",
+        null=True,
+        # имя, для обращения из объекта пользователя к его списку шагов как автора
+        related_name="steps_author",
+    )
+    # parent = models.ForeignKey(  # связь внешним ключом
+    #     help_text="Предыдущий шаг",  # текст для человека
+    #     to="self",  # на эту же таблицу
+    #     # при удалении категории НЕ удалится все поддерево, null где надо
+    #     on_delete=models.SET_NULL,
+    #     blank=True,
+    #     null=True,  # Может не быть предыдущей (родительской) задачи
+    #     # имя, по которому (родительской) задачи можно найти следующую
+    #     related_name="next",
+    # )
+    sreps = models.ForeignKey(  # связь внешним ключом
+        help_text="Задача",
+        verbose_name="Задача",
+        to="Tasks",  # на модель аутентификации пользователей
+        on_delete=models.CASCADE,  # При удалении задачи удаляются все подзадачи
+        # имя, для обращения из подзадачи к задаче
+        related_name="task_steps",
     )
