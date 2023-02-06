@@ -14,8 +14,23 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, re_path
+from app_task.views import (
+    error,
+    Index,
+)
+from django.http.response import HttpResponseRedirect
+
+# from django.views.generic import TemplateView
+
 
 urlpatterns = [
+    path("", Index.as_view(), name="index"),
+    path("detail/<int:pk>/", Index.as_view(), name="detail"),
+    path("edit/<int:pk>/", Index.as_view(), name="edit"),
+    path("delete/<int:pk>/", Index.as_view(), name="delete"),
+    path("add/", Index.as_view(), name="add"),
     path("admin/", admin.site.urls),
+    re_path(r"^admin.*", lambda _: HttpResponseRedirect("/admin/")),
+    re_path(r".+", error, kwargs={"title": "Не найдено", "status": 404}),
 ]

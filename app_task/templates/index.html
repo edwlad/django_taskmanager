@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}Список задач{% endblock title %}
+{% block header %}Список задач{% endblock header %}
+
+{% block content %}
+<table border=1 cellspacing=1 width=100%>
+    <thead>
+        <tr>
+            <th colspan=2 width=80%>Описание</th>
+            <th colspan=3>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in context %}
+        <tr>
+            <td class="center" width=1%>
+                <span tooltip="Выполнение">{% if item.date_end %}&#10003;{% else %}&#9744;{% endif %}</span>
+            </td>
+            <td>{{ item.id }}. {{ item.name }}</td>
+            <td class="center">
+                <a alt="12345" href={% url "detail" item.id %}><button>&#9995;</button></a>
+            </td>
+            <td class="center">
+                <a href={% url "edit" item.id %}><button>&#9998;</button></a>
+            </td>
+            <td class="center">
+                <a href={% url "delete" item.id %}><button>&#10007;</button></a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% include "buttons.html" %}
+
+<ul>
+    <li>&#10003; - задача выполнена</li>
+    <li>&#9744; - задача не выполнена</li>
+    <li>&#9995; - детальный просмотр</li>
+    <li>&#9998; - редактировать</li>
+    <li>&#10007; - удалить</li>
+</ul>
+
+{% endblock content %}

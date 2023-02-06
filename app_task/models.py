@@ -3,7 +3,7 @@ from django.conf import settings
 from datetime import datetime  # noqa
 
 
-class Projs(models.Model):
+class Proj(models.Model):
     name = models.CharField(
         help_text="Название проекта", verbose_name="Название", max_length=120
     )
@@ -28,11 +28,14 @@ class Projs(models.Model):
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
-        related_name="tasks_author",
+        related_name="author_proj",
     )
 
+    def __str__(self) -> str:
+        return f"{self.id}: {self.name}"
 
-class Sprints(models.Model):
+
+class Sprint(models.Model):
     name = models.CharField(
         help_text="Название спринта", verbose_name="Название", max_length=120
     )
@@ -57,11 +60,14 @@ class Sprints(models.Model):
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
-        related_name="tasks_author",
+        related_name="author_sprint",
     )
 
+    def __str__(self) -> str:
+        return f"{self.id}: {self.name}"
 
-class Tasks(models.Model):
+
+class Task(models.Model):
     name = models.CharField(
         help_text="Название задачи", verbose_name="Название", max_length=120
     )
@@ -91,7 +97,7 @@ class Tasks(models.Model):
     proj = models.ForeignKey(
         help_text="Проект",
         verbose_name="Проект",
-        to="Projs",
+        to="Proj",
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
@@ -100,15 +106,18 @@ class Tasks(models.Model):
     sprint = models.ForeignKey(
         help_text="Спринт",
         verbose_name="Спринт",
-        to="Sprints",
+        to="Sprint",
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
         related_name="sprint_tasks",
     )
 
+    def __str__(self) -> str:
+        return f"{self.id}: {self.name}"
 
-class TaskSteps(models.Model):
+
+class TaskStep(models.Model):
     work_beg = models.TextField(
         help_text="Необходимая работа по шагу",
         verbose_name="Что сделать",
@@ -163,7 +172,10 @@ class TaskSteps(models.Model):
     task = models.ForeignKey(
         help_text="Задача",
         verbose_name="Задача",
-        to="Tasks",
+        to="Task",
         on_delete=models.CASCADE,
         related_name="task_steps",
     )
+
+    def __str__(self) -> str:
+        return f"{self.id}: {self.work_beg[:30]}"

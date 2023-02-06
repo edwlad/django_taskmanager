@@ -1,0 +1,26 @@
+{% if buttons %}
+    <br>
+    {% if "back" in buttons %}
+        <input type=button value="Назад" class="mr" onClick="javascript:history.go(-1);">
+    {% endif %}
+    {% if "items" in buttons %}
+        <a href={% url "index" %}?f=all class="mr"><button>Показать всё</button></a>
+        <a href={% url "index" %}?f=on class="mr"><button>Выполненные</button></a>
+        <a href={% url "index" %}?f=off class="mr"><button>Не выполненные</button></a>
+    {% endif %}
+    {% if "index" in buttons %}
+        <a href={% url "index" %} class="mr"><button>На главную</button></a>
+    {% endif %}
+    {% if "add" in buttons %}
+        <a href={% url "add" %} class="mr"><button>Добавить задачу</button></a>
+    {% endif %}
+    {% if "edit" in buttons %}
+        <a href={% url "edit" context.id %} class="mr"><button>Редактировать</button></a>
+    {% endif %}
+    {% if "detail" in buttons %}
+        <a href={% url "detail" context.id %} class="mr"><button>Просмотр</button></a>
+    {% endif %}
+    {% if "delete" in buttons %}
+        <a href={% url "delete" context.id %} class="mr"><button>Удалить</button></a>
+    {% endif %}
+{% endif %}

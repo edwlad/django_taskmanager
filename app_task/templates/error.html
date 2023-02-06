@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block title %}Не найдено{% endblock title %}
+{% block header %}Не найдено{% endblock header %}
+
+{% block content %}
+    {% autoescape off %}{{ content }}{% endautoescape %}
+    {% include "buttons.html" %}
+{% endblock content %}

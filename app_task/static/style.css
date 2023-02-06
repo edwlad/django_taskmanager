@@ -1,0 +1,14 @@
+body {
+    max-width: 992px;
+    margin: 0 auto;
+    padding: 10px;
+}
+
+.center {
+    text-align: center
+}
+
+/* для кнопок */
+a.mr {
+    margin: 0 5px;
+}
