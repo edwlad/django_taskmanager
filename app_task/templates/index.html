@@ -3,28 +3,40 @@
 {% block header %}Список задач{% endblock header %}
 
 {% block content %}
-<table border=1 cellspacing=1 width=100%>
+<table class="table table-sm table-hover align-middle">
     <thead>
         <tr>
-            <th colspan=2 width=80%>Описание</th>
-            <th colspan=3>Действия</th>
+            <th colspan=3 width=1% class="text-center border-end">Действия</th>
+            <th colspan=2 class="ps-3">Описание</th>
         </tr>
     </thead>
-    <tbody>
+    <tbody class="table-group-divider">
         {% for item in context %}
         <tr>
-            <td class="center" width=1%>
-                <span tooltip="Выполнение">{% if item.date_end %}&#10003;{% else %}&#9744;{% endif %}</span>
+            <td class="">
+                <a href={% url "delete" item.id %} class="btn btn-sm btn-outline-danger">
+                    <i class="bi-trash"></i>
+                </a>
             </td>
-            <td>{{ item.id }}. {{ item.name }}</td>
-            <td class="center">
-                <a alt="12345" href={% url "detail" item.id %}><button>&#9995;</button></a>
+            <td class="">
+                <a href={% url "edit" item.id %} class="btn btn-sm btn-outline-success">
+                    <i class="bi-pencil"></i>
+                </a>
             </td>
-            <td class="center">
-                <a href={% url "edit" item.id %}><button>&#9998;</button></a>
+            <td class="border-end">
+                <a href={% url "detail" item.id %} class="btn btn-sm btn-outline-primary">
+                    <i class="bi-eye"></i>
+                </a>
             </td>
-            <td class="center">
-                <a href={% url "delete" item.id %}><button>&#10007;</button></a>
+            <td width=1% class="ps-3">
+                {% if item.date_end %}
+                <i class="bi-check-circle"></i>
+                {% else %}
+                <i class="bi-circle"></i>
+                {% endif %}
+            </td>
+            <td class="">
+                {{ item.id }}. {{ item.name }}
             </td>
         </tr>
         {% endfor %}
@@ -34,11 +46,30 @@
 {% include "buttons.html" %}
 
 <ul>
-    <li>&#10003; - задача выполнена</li>
-    <li>&#9744; - задача не выполнена</li>
-    <li>&#9995; - детальный просмотр</li>
-    <li>&#9998; - редактировать</li>
-    <li>&#10007; - удалить</li>
+    <li>
+        <i style="pointer-events: none;"
+        class="bi-check-circle btn btn-sm btn-outline border-0">
+        </i> - выполнено
+    </li>
+    <li>        
+        <i style="pointer-events: none;"
+        class="bi-circle btn btn-sm btn-outline border-0">
+        </i> - не выполнено
+    </li>
+    <li>
+        <i style="pointer-events: none;"
+        class="bi-eye btn btn-sm btn-outline-primary">
+        </i> - детальный просмотр</li>
+    <li>
+        <i style="pointer-events: none;"
+        class="bi-pencil btn btn-sm btn-outline-success">
+        </i> - редактировать
+    </li>
+    <li>
+        <i style="pointer-events: none;"
+        class="bi-trash btn btn-sm btn-outline-danger">
+        </i> - удалить
+    </li>
 </ul>
 
 {% endblock content %}

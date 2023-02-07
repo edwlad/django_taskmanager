@@ -15,17 +15,18 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, re_path
-from app_task.views import (
-    error,
-    Index,
-)
+from app_task.views import error, Index
+from app_task.models import Proj
+
 from django.http.response import HttpResponseRedirect
+from iommi import Table
 
 # from django.views.generic import TemplateView
 
 
 urlpatterns = [
     path("", Index.as_view(), name="index"),
+    # path("", Table(auto__model=Proj, page_size=2).as_view(), name="index"),
     path("detail/<int:pk>/", Index.as_view(), name="detail"),
     path("edit/<int:pk>/", Index.as_view(), name="edit"),
     path("delete/<int:pk>/", Index.as_view(), name="delete"),
