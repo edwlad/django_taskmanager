@@ -28,11 +28,14 @@ class Proj(models.Model):
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
-        related_name="author_proj",
+        related_name="author_projs",
     )
 
     def __str__(self) -> str:
         return f"{self.id}: {self.name}"
+
+    class META:
+        verbose_name = "proj"
 
 
 class Sprint(models.Model):
@@ -60,11 +63,21 @@ class Sprint(models.Model):
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
-        related_name="author_sprint",
+        related_name="author_sprints",
+    )
+    proj = models.ForeignKey(
+        help_text="Проект",
+        verbose_name="Проект",
+        to="Proj",
+        on_delete=models.CASCADE,
+        related_name="proj_sprints",
     )
 
     def __str__(self) -> str:
         return f"{self.id}: {self.name}"
+
+    class META:
+        verbose_name = "sprint"
 
 
 class Task(models.Model):
@@ -98,9 +111,7 @@ class Task(models.Model):
         help_text="Проект",
         verbose_name="Проект",
         to="Proj",
-        on_delete=models.SET_NULL,
-        blank=True,
-        null=True,
+        on_delete=models.CASCADE,
         related_name="proj_tasks",
     )
     sprint = models.ForeignKey(
@@ -115,6 +126,9 @@ class Task(models.Model):
 
     def __str__(self) -> str:
         return f"{self.id}: {self.name}"
+
+    class META:
+        verbose_name = "task"
 
 
 class TaskStep(models.Model):
@@ -159,6 +173,13 @@ class TaskStep(models.Model):
         null=True,
         related_name="author_steps",
     )
+    task = models.ForeignKey(
+        help_text="Задача",
+        verbose_name="Задача",
+        to="Task",
+        on_delete=models.CASCADE,
+        related_name="task_steps",
+    )
     # parent = models.ForeignKey(
     #     help_text="Предыдущий шаг",
     #     to="self",  # на эту же таблицу
@@ -169,13 +190,9 @@ class TaskStep(models.Model):
     #     # имя, по которому (родительской) задачи можно найти следующую
     #     related_name="next",
     # )
-    task = models.ForeignKey(
-        help_text="Задача",
-        verbose_name="Задача",
-        to="Task",
-        on_delete=models.CASCADE,
-        related_name="task_steps",
-    )
 
     def __str__(self) -> str:
         return f"{self.id}: {self.work_beg[:30]}"
+
+    class META:
+        verbose_name = "task_step"

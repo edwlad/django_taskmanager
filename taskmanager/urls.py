@@ -27,7 +27,8 @@ from iommi import Table
 urlpatterns = [
     path("", Index.as_view(), name="index"),
     # path("", Table(auto__model=Proj, page_size=2).as_view(), name="index"),
-    path("detail/<int:pk>/", Index.as_view(), name="detail"),
+    path("<str:model>/<int:pk>/", Index.as_view(), name="detail"),
+    # path("detail/<str:model>/<int:pk>/", Index.as_view(), name="detail"),
     path("edit/<int:pk>/", Index.as_view(), name="edit"),
     path("delete/<int:pk>/", Index.as_view(), name="delete"),
     path("add/", Index.as_view(), name="add"),

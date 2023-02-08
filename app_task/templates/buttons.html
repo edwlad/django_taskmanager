@@ -1,26 +1,56 @@
 {% if buttons %}
-    <br>
-    {% if "back" in buttons %}
-        <input type=button value="Назад" class="mr" onClick="javascript:history.go(-1);">
+    {% if "back" in buttons%}
+        <input 
+        type=button 
+        value="Назад" 
+        class="btn btn-sm btn-outline-dark" 
+        onClick="javascript:history.go(-1);"
+        >
     {% endif %}
     {% if "items" in buttons %}
-        <a href={% url "index" %}?f=all class="mr"><button>Показать всё</button></a>
-        <a href={% url "index" %}?f=on class="mr"><button>Выполненные</button></a>
-        <a href={% url "index" %}?f=off class="mr"><button>Не выполненные</button></a>
+    <div class="btn-group">
+        <a href={% url "index" %}?f=all 
+        class="btn btn-sm btn-outline-secondary">
+            Показать всё
+        </a>
+        <a href={% url "index" %}?f=on 
+        class="btn btn-sm btn-outline-secondary">
+            Выполненные
+        </a>
+        <a href={% url "index" %}?f=off 
+        class="btn btn-sm btn-outline-secondary">
+            Не выполненные
+        </a>
+    </div>
     {% endif %}
     {% if "index" in buttons %}
-        <a href={% url "index" %} class="mr"><button>На главную</button></a>
+        <a href={% url "index" %} 
+        class="btn btn-sm btn-outline-dark">
+            На главную
+        </a>
     {% endif %}
     {% if "add" in buttons %}
-        <a href={% url "add" %} class="mr"><button>Добавить задачу</button></a>
+        <a href={% url "add" %} 
+        class="btn btn-sm btn-outline-primary">
+            Добавить
+        </a>
     {% endif %}
     {% if "edit" in buttons %}
-        <a href={% url "edit" context.id %} class="mr"><button>Редактировать</button></a>
+        <a href={% url "edit" context.id %} 
+        class="btn btn-sm btn-outline-success">
+            Редактировать
+        </a>
     {% endif %}
     {% if "detail" in buttons %}
-        <a href={% url "detail" context.id %} class="mr"><button>Просмотр</button></a>
+        <a href={% url "detail" context.id %} 
+        class="btn btn-sm btn-outline-dark">
+            Просмотр
+        </a>
     {% endif %}
     {% if "delete" in buttons %}
-        <a href={% url "delete" context.id %} class="mr"><button>Удалить</button></a>
+        <a href={% url "delete" context.id %} 
+        class="btn btn-sm btn-outline-danger">
+            Удалить
+        </a>
     {% endif %}
 {% endif %}
