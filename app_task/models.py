@@ -111,7 +111,9 @@ class Task(models.Model):
         help_text="Проект",
         verbose_name="Проект",
         to="Proj",
-        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
         related_name="proj_tasks",
     )
     sprint = models.ForeignKey(

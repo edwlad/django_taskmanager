@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% comment %} {% extends 'base.html' %} {% endcomment %}
 {% block title %}Просмотр задачи{% endblock title %}
 {% block header %}Просмотр задачи №{{ context.id }}{% endblock header %}
 
@@ -16,11 +16,11 @@
     </thead>
     <tr>
         <td>Задача</td>
-        <td>{{ context.desc }}</td>
+        <td>{{ context.name }}</td>
     </tr>
     <tr>
         <td>Записана</td>
-        <td class="bold">{{ context.date_add|date:"d.m.Y H:i" }}</td>
+        <td class="bold">{{ context.date_beg|date:"d.m.Y H:i" }}</td>
     </tr>
     <tr>
         <td>Завершена</td>

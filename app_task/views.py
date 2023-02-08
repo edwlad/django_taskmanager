@@ -3,8 +3,8 @@ from django.http.response import HttpResponse  # noqa
 from django.http.request import HttpRequest  # noqa
 from django.views.generic import (
     TemplateView,
-    # ListView,
-    # DetailView,
+    ListView,
+    DetailView,
     # UpdateView,
     # CreateView,
     # DeleteView,
@@ -66,21 +66,49 @@ class Index(TemplateView):
             case TaskStep.META.verbose_name:
                 self.model = TaskStep
             case _:
-                self.model = Proj
+                self.model = Task
 
         queryset = self.model.objects.all()
         match self.params.get("f", "off"):
-            case "on":
-                queryset = queryset.filter(date_end=None)
             case "off":
+                queryset = queryset.filter(date_end=None)
+            case "on":
                 queryset = queryset.exclude(date_end=None)
 
         return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["data"] = self.get_queryset()
-        context.update(self.params.items())
+        context["details"] = []
+        context["lists"] = []
+
+        match self.kwargs.get("model", ""):
+            case Proj.META.verbose_name:
+                self.model = Proj
+            case Sprint.META.verbose_name:
+                self.model = Sprint
+            case Task.META.verbose_name:
+                self.model = Task
+                obj = TaskDetail(kwargs=self.kwargs)
+                obj.object = obj.get_object()
+                obj.request = self.request
+                # context["details"].append(obj.get_context_data())
+                context["context"] = obj.render_to_response(
+                    obj.get_context_data()
+                ).rendered_content
+            case TaskStep.META.verbose_name:
+                self.model = TaskStep
+            case _:
+                self.model = Task
+
+        # context["data"] = self.get_queryset()
+        # context.update(self.params.items())
         context["buttons"] = ("add", "items")
         # context["model"] = self.model.META.verbose_name
         return context
+
+
+class TaskDetail(DetailView):
+    template_name = "detail.html"
+    context_object_name = "context"
+    queryset = Task.objects.all()
