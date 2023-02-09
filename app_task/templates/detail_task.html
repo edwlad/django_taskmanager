@@ -1,0 +1,42 @@
+<h2>Задача</h2>
+<table class="table table-sm table-hover table-borderless align-middle">
+    {% comment %} <thead>
+        <tr>
+            <th colspan=2 class="text-center">{{ data.title }}</th>
+        </tr>
+    </thead> {% endcomment %}
+    <tbody class="">
+        <tr>
+            <td width=20%>
+                <abbr title="{{view.fields.name.help_text}}">
+                    {{view.fields.name.verbose_name}}
+                </abbr>
+            </td>
+            <td>{{ data.name }}</td>
+        </tr>
+        <tr>
+            <td>            
+                <abbr title="{{view.fields.date_beg.help_text}}">
+                    {{view.fields.date_beg.verbose_name}}
+                </abbr>
+            </td>
+            <td class="">{{ data.date_beg|date:"d.m.Y H:i" }}</td>
+        </tr>
+        <tr>
+            <td>
+                <abbr title="{{view.fields.date_end.help_text}}">
+                    {{view.fields.date_end.verbose_name}}
+                </abbr>
+            </td>
+            {% if data.chk_end %}
+                <td class="">{{ data.date_end|date:"d.m.Y H:i" }}</td>
+            {% else %}
+                <td class="">Нет</td>
+            {% endif %}
+        </tr>
+    </tbody>
+</table>
+
+{% include "buttons.html" with buttons="('add', 'edit', 'delete')" model=view.url_name pk=data.id %}
+<hr>
+

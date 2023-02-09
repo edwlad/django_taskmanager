@@ -1,80 +1,32 @@
 {% extends 'base.html' %}
-{% block title %}Список задач{% endblock title %}
-{% block header %}Список задач{% endblock header %}
+{% block title %}{{ title }}{% endblock title %}
+{% block header %}{{ header }}{% endblock header %}
 
 {% block content %}
 
-{% include "buttons.html" with buttons="('items',)" %}
-<table class="table table-sm table-hover align-middle mt-3">
-    <thead>
-        <tr>
-            <th class="text-center p-0">
-                <i style="pointer-events: none;" class="bi-pencil btn btn-sm border-0"></i>
-            </th>
-            <th class="border-end border-start ps-3">Описание</th>
-            <th class="text-center p-0">
-                <i style="pointer-events: none;" class="bi-trash btn btn-sm border-0"></i>
-            </th>
-        </tr>
-    </thead>
-    <tbody class="table-group-divider">
-        {% for item in data %}
-        <tr>
-            <td width=1% class="">
-                <a href={% url "edit" item.id %} class="btn btn-sm btn-outline-success">
-                    <i class="bi-pencil"></i>
-                </a>
-            </td>
-            {% comment %} <td width=1% class="">
-                {{ item.date_end|date:"d.m.Y" }}
-            </td> {% endcomment %}
-            <td class="border-end border-start p-0">
-                <a href={% url "detail" model=view.model.META.verbose_name pk=item.id %} class="btn btn-sm fs-6 w-100 border-0 text-start">
-                    {% if item.date_end %}
-                    <i class="bi-check-circle"></i>
-                    {% else %}
-                    <i class="bi-circle"></i>
-                    {% endif %}
-                    {{ item.name }}
-                </a>
-            </td>
-            <td width=1% class="">
-                <a href={% url "delete" item.id %} class="btn btn-sm btn-outline-danger">
-                    <i class="bi-trash"></i>
-                </a>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-
-{% include "buttons.html" %}
+{% for detail in details %}
+    {{ detail.rendered_content}}
+{% endfor %}
 
 <p class="h6 mt-3 mb-0">Легенда:</p>
 <ul>
     <li>
-        <i style="pointer-events: none;"
-        class="bi-check-circle btn btn-sm border-0">
+        <i class="pe-none bi-check-circle btn btn-sm border-0">
         </i> - выполнено
     </li>
     <li>        
-        <i style="pointer-events: none;"
-        class="bi-circle btn btn-sm border-0">
+        <i class="pe-none bi-circle btn btn-sm border-0">
         </i> - не выполнено
     </li>
     <li> 
-        <i style="pointer-events: none;"
-        class="bi-pencil btn btn-sm border-0">
+        <i class="pe-none bi-pencil btn btn-sm border-0">
         </i> - редактировать
     </li>
     <li>
-        <i style="pointer-events: none;"
-        class="bi-trash btn btn-sm border-0">
+        <i class="pe-none bi-trash btn btn-sm border-0">
         </i> - удалить
      </li>
 </ul>
-
-{{ context }}
 
 {% endblock content %}
 

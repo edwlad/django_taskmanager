@@ -9,14 +9,14 @@
     <title>{% block title %}Base page{% endblock title %}</title>
     <link rel="stylesheet" type="text/css" href="{% static 'bootstrap.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'bootstrap-icons.css' %}">
-    {% comment %} <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}"/> {% endcomment %}
+    <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}"/>
 </head>
 
 <body style="max-width: 992px;" class="container">
-    <h1>{% block header %}Base page{% endblock header %}</h1>
     <nav><a href="/">Главная</a> | <a href="/admin/">Администрирование</a></nav>
-    <br>
-    <article>{% block content %}{% endblock content %}</article>
+    <hr>
+    <h1>{% block header %}Base page{% endblock header %}</h1>
+    {% block content %}{% endblock content %}
 </body>
 
 </html>

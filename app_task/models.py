@@ -21,6 +21,12 @@ class Proj(models.Model):
         null=True,
         blank=True,
     )
+    date_max = models.DateTimeField(
+        help_text="Планируемая дата завершения проекта",
+        verbose_name="План",
+        null=True,
+        blank=True,
+    )
     author = models.ForeignKey(
         help_text="Автор проекта",
         verbose_name="Автор",
@@ -35,7 +41,7 @@ class Proj(models.Model):
         return f"{self.id}: {self.name}"
 
     class META:
-        verbose_name = "proj"
+        url_name = "proj"
 
 
 class Sprint(models.Model):
@@ -53,6 +59,12 @@ class Sprint(models.Model):
     date_end = models.DateTimeField(
         help_text="Дата завершения спринта",
         verbose_name="Завершено",
+        null=True,
+        blank=True,
+    )
+    date_max = models.DateTimeField(
+        help_text="Планируемая дата завершения спринта",
+        verbose_name="План",
         null=True,
         blank=True,
     )
@@ -77,7 +89,7 @@ class Sprint(models.Model):
         return f"{self.id}: {self.name}"
 
     class META:
-        verbose_name = "sprint"
+        url_name = "sprint"
 
 
 class Task(models.Model):
@@ -98,6 +110,12 @@ class Task(models.Model):
         null=True,
         blank=True,
     )
+    date_max = models.DateTimeField(
+        help_text="Планируемая дата завершения задачи",
+        verbose_name="План",
+        null=True,
+        blank=True,
+    )
     author = models.ForeignKey(
         help_text="Автор задачи",
         verbose_name="Автор",
@@ -106,6 +124,15 @@ class Task(models.Model):
         blank=True,
         null=True,
         related_name="author_tasks",
+    )
+    user = models.ForeignKey(
+        help_text="Исполнитель задачи",
+        verbose_name="Исполнитель",
+        to=settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="user_tasks",
     )
     proj = models.ForeignKey(
         help_text="Проект",
@@ -125,31 +152,31 @@ class Task(models.Model):
         null=True,
         related_name="sprint_tasks",
     )
+    # parent = models.ForeignKey(
+    #     help_text="Предыдущиая задача",
+    #     to="self",  # на эту же таблицу
+    #     # при удалении категории НЕ удалится все поддерево, null где надо
+    #     on_delete=models.SET_NULL,
+    #     blank=True,
+    #     null=True,  # Может не быть предыдущей (родительской) задачи
+    #     # имя, по которому (родительской) задачи можно найти следующую
+    #     related_name="parent_next",
+    # )
 
     def __str__(self) -> str:
         return f"{self.id}: {self.name}"
 
     class META:
-        verbose_name = "task"
+        url_name = "task"
 
 
 class TaskStep(models.Model):
-    work_beg = models.TextField(
-        help_text="Необходимая работа по шагу",
-        verbose_name="Что сделать",
-        max_length=250,
-    )
-    work_end = models.TextField(
-        help_text="Выполненая работа по шагу",
+    desс = models.TextField(
+        help_text="Выполненая работа по задаче",
         verbose_name="Что сделано",
         max_length=250,
         null=True,
         blank=True,
-    )
-    date_beg = models.DateTimeField(
-        help_text="Дата создания шага",
-        verbose_name="Создан",
-        default=datetime.now,
     )
     date_end = models.DateTimeField(
         help_text="Дата завершения шага",
@@ -164,16 +191,7 @@ class TaskStep(models.Model):
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
-        related_name="steps_user",
-    )
-    author = models.ForeignKey(
-        help_text="Автор шага",
-        verbose_name="Автор",
-        to=settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        blank=True,
-        null=True,
-        related_name="author_steps",
+        related_name="user_steps",
     )
     task = models.ForeignKey(
         help_text="Задача",
@@ -182,19 +200,9 @@ class TaskStep(models.Model):
         on_delete=models.CASCADE,
         related_name="task_steps",
     )
-    # parent = models.ForeignKey(
-    #     help_text="Предыдущий шаг",
-    #     to="self",  # на эту же таблицу
-    #     # при удалении категории НЕ удалится все поддерево, null где надо
-    #     on_delete=models.SET_NULL,
-    #     blank=True,
-    #     null=True,  # Может не быть предыдущей (родительской) задачи
-    #     # имя, по которому (родительской) задачи можно найти следующую
-    #     related_name="next",
-    # )
 
     def __str__(self) -> str:
         return f"{self.id}: {self.work_beg[:30]}"
 
     class META:
-        verbose_name = "task_step"
+        url_name = "task_step"

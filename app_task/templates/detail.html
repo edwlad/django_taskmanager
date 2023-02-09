@@ -1,12 +1,8 @@
 {% comment %} {% extends 'base.html' %} {% endcomment %}
-{% block title %}Просмотр задачи{% endblock title %}
-{% block header %}Просмотр задачи №{{ context.id }}{% endblock header %}
+{% comment %} {% block title %}Просмотр задачи{% endblock title %}
+{% block header %}Просмотр задачи №{{ object.id }}{% endblock header %}
 
-{% block content %}
-<style>
-    .bold {font-weight: bold;}
-</style>
-
+{% block content %} {% endcomment %}
 <table border=1 cellspacing=1 width=100%>
     <thead>
         <tr>
@@ -16,16 +12,16 @@
     </thead>
     <tr>
         <td>Задача</td>
-        <td>{{ context.name }}</td>
+        <td>{{ object.name }}</td>
     </tr>
     <tr>
         <td>Записана</td>
-        <td class="bold">{{ context.date_beg|date:"d.m.Y H:i" }}</td>
+        <td class="bold">{{ object.date_beg|date:"d.m.Y H:i" }}</td>
     </tr>
     <tr>
         <td>Завершена</td>
-        {% if context.chk_end %}
-            <td class="bold">{{ context.date_end|date:"d.m.Y H:i" }}</td>
+        {% if object.chk_end %}
+            <td class="bold">{{ object.date_end|date:"d.m.Y H:i" }}</td>
         {% else %}
             <td class="bold">Нет</td>
         {% endif %}
@@ -34,4 +30,4 @@
 
 {% include "buttons.html" %}
 
-{% endblock content %}
+{% comment %} {% endblock content %} {% endcomment %}

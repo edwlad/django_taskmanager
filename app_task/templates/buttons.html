@@ -30,25 +30,25 @@
         </a>
     {% endif %}
     {% if "add" in buttons %}
-        <a href={% url "add" %} 
+        <a href={% url "add" model=model %} 
         class="btn btn-sm btn-outline-primary">
             Добавить
         </a>
     {% endif %}
     {% if "edit" in buttons %}
-        <a href={% url "edit" context.id %} 
+        <a href={% url "edit" model=model pk=pk %} 
         class="btn btn-sm btn-outline-success">
             Редактировать
         </a>
     {% endif %}
     {% if "detail" in buttons %}
-        <a href={% url "detail" context.id %} 
+        <a href={% url "detail" model=model pk=pk %} 
         class="btn btn-sm btn-outline-dark">
             Просмотр
         </a>
     {% endif %}
     {% if "delete" in buttons %}
-        <a href={% url "delete" context.id %} 
+        <a href={% url "delete" model=model pk=pk %} 
         class="btn btn-sm btn-outline-danger">
             Удалить
         </a>
