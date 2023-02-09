@@ -23,9 +23,10 @@ from django.http.response import HttpResponseRedirect
 
 urlpatterns = [
     path("", Index.as_view(), name="index"),
-    # path("", Table(auto__model=Proj, page_size=2).as_view(), name="index"),
+    # re_path(
+    #     r"(?P<oper>\w+)/(?P<model>\w+)/(?P<pk>\d+)/", Index.as_view(), name="full"
+    # ),
     path("<str:model>/<int:pk>/", Index.as_view(), name="detail"),
-    # path("detail/<str:model>/<int:pk>/", Index.as_view(), name="detail"),
     path("edit/<str:model>/<int:pk>/", Index.as_view(), name="edit"),
     path("delete/<str:model>/<int:pk>/", Index.as_view(), name="delete"),
     path("add/<str:model>/", Index.as_view(), name="add"),

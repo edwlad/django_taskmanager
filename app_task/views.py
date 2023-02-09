@@ -33,6 +33,32 @@ def error(req: HttpRequest, *args, **kwargs):
     )
 
 
+def ProjTemplate(request, key, **kwargs):
+    match key:
+        case "list":
+            pass
+        case _:
+            obj = DetailView(
+                # queryset=Task.objects.annotate(title=models.Value("Проект")),
+                template_name="detail_proj.html",
+            )
+    obj.model = Proj
+    obj.fields = {v.name: v for v in obj.model._meta.get_fields()}
+    obj.url_name = obj.model.META.url_name
+    obj.request = request
+    obj.kwargs = kwargs
+    obj.context_object_name = "data"
+    try:
+        render = obj.get(obj.request)
+    except Exception as err:
+        text = f"ERROR: {type(err).__name__} - {err}"
+        print(text)
+        return error(request, content=text)
+    render.context_data["sprints"] = obj.object.proj_sprints.all()
+    render.context_data["tasks"] = obj.object.proj_tasks.all()
+    return render
+
+
 def TaskTemplate(request, key, **kwargs):
     match key:
         case "list":
@@ -48,15 +74,22 @@ def TaskTemplate(request, key, **kwargs):
     obj.request = request
     obj.kwargs = kwargs
     obj.context_object_name = "data"
-    return obj
+    try:
+        render = obj.get(obj.request)
+    except Exception as err:
+        text = f"ERROR: {type(err).__name__} - {err}"
+        print(text)
+        return error(request, content=text)
+    return render
 
 
 def TaskStepTemplate(request, key, **kwargs):
     match key:
         case "list":
             obj = ListView(
-                queryset=TaskStep.objects.filter(task_id=kwargs.get("pk", 0)),
+                queryset=TaskStep.objects.filter(task_id=kwargs.get("pk", -1)),
                 template_name="list_task_step.html",
+                ordering="-date_end",
             )
         case _:
             pass
@@ -66,7 +99,13 @@ def TaskStepTemplate(request, key, **kwargs):
     obj.request = request
     obj.kwargs = kwargs
     obj.context_object_name = "data"
-    return obj
+    try:
+        render = obj.get(obj.request)
+    except Exception as err:
+        text = f"ERROR: {type(err).__name__} - {err}"
+        print(text)
+        return error(request, content=text)
+    return render
 
 
 class Index(TemplateView):
@@ -90,28 +129,37 @@ class Index(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        objs = []
+        context["details"] = []
 
         match self.kwargs.get("model", ""):
             case Proj.META.url_name:
-                self.model = Proj
+                context["title"] = "Просмотр проекта"
+                context["header"] = "Просмотр проекта"
+                context["details"].append(
+                    ProjTemplate(self.request, "detail", **self.kwargs)
+                )
             case Sprint.META.url_name:
-                self.model = Sprint
+                context["title"] = "Просмотр спринта"
+                context["header"] = "Просмотр спринта"
             case Task.META.url_name:
                 context["title"] = "Просмотр задачи"
                 context["header"] = "Просмотр задачи"
-                objs.append(TaskTemplate(self.request, "detail", **self.kwargs))
-                objs.append(TaskStepTemplate(self.request, "list", **self.kwargs))
+                context["details"].append(
+                    TaskTemplate(self.request, "detail", **self.kwargs)
+                )
+                context["details"].append(
+                    TaskStepTemplate(self.request, "list", **self.kwargs)
+                )
             case TaskStep.META.url_name:
                 self.model = TaskStep
             case _:
                 self.model = Task
+        # try:
+        #     context["details"] = [v.get(self.request) for v in objs]
+        # except Exception as err:
+        #     print("ERROR:", type(err).__name__, "-", err)
+        #     pass
 
-        try:
-            context["details"] = [v.get(self.request) for v in objs]
-        except Exception as err:
-            print("ERROR:", type(err).__name__, "-", err)
-            pass
         # context["data"] = self.get_queryset()
         # context.update(self.params.items())
         # context["buttons"] = ("add", "items")

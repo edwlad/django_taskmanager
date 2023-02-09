@@ -7,9 +7,7 @@ class Proj(models.Model):
     name = models.CharField(
         help_text="Название проекта", verbose_name="Название", max_length=120
     )
-    desc = models.TextField(
-        help_text="Описание проекта", verbose_name="Описание", max_length=250
-    )
+    desc = models.TextField(help_text="Описание проекта", verbose_name="Описание")
     date_beg = models.DateTimeField(
         help_text="Дата создания проекта",
         verbose_name="Создано",
@@ -48,9 +46,7 @@ class Sprint(models.Model):
     name = models.CharField(
         help_text="Название спринта", verbose_name="Название", max_length=120
     )
-    desc = models.TextField(
-        help_text="Описание спринта", verbose_name="Описание", max_length=250
-    )
+    desc = models.TextField(help_text="Описание спринта", verbose_name="Описание")
     date_beg = models.DateTimeField(
         help_text="Дата создания спринта",
         verbose_name="Создано",
@@ -96,9 +92,7 @@ class Task(models.Model):
     name = models.CharField(
         help_text="Название задачи", verbose_name="Название", max_length=120
     )
-    desc = models.TextField(
-        help_text="Описание задачи", verbose_name="Описание", max_length=250
-    )
+    desc = models.TextField(help_text="Описание задачи", verbose_name="Описание")
     date_beg = models.DateTimeField(
         help_text="Дата создания задачи",
         verbose_name="Создано",
@@ -171,18 +165,12 @@ class Task(models.Model):
 
 
 class TaskStep(models.Model):
-    desс = models.TextField(
+    desc = models.TextField(
         help_text="Выполненая работа по задаче",
         verbose_name="Что сделано",
-        max_length=250,
-        null=True,
-        blank=True,
     )
     date_end = models.DateTimeField(
-        help_text="Дата завершения шага",
-        verbose_name="Завершён",
-        null=True,
-        blank=True,
+        help_text="Дата завершения шага", verbose_name="Завершён", default=datetime.now
     )
     user = models.ForeignKey(
         help_text="Исполнитель шага",
@@ -202,7 +190,7 @@ class TaskStep(models.Model):
     )
 
     def __str__(self) -> str:
-        return f"{self.id}: {self.work_beg[:30]}"
+        return f"{self.id}: {self.desс[:30]}"
 
     class META:
         url_name = "task_step"

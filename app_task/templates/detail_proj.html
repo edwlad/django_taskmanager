@@ -1,4 +1,4 @@
-<h2>Задача</h2>
+<h2>Проект</h2>
 <div class="row mb-3">
     {% comment %} <div class="col-2 text-end">
         <abbr title="{{view.fields.name.help_text}}">
@@ -16,6 +16,7 @@
 
     <div class="w-100"></div>
 
+{% comment %}
     <div class="col-2 text-end">{{view.fields.proj.verbose_name}}</div>
     <div class="col">
     {% if data.proj %}
@@ -46,8 +47,8 @@
 
     <div class="w-100"></div>
 
+{% endcomment %}
     <div class="col text-center border-end">{{view.fields.author.verbose_name}}</div>
-    <div class="col text-center border-end">{{view.fields.user.verbose_name}}</div>
     <div class="col text-center border-end">{{view.fields.date_beg.verbose_name}}</div>
     <div class="col text-center border-end">{{view.fields.date_end.verbose_name}}</div>
     <div class="col text-center border-end">{{view.fields.date_max.verbose_name}}</div>
@@ -56,12 +57,19 @@
     <div class="w-100"></div>
 
     <div class="col text-center border-end">{{ data.author.username }}</div>
-    <div class="col text-center border-end">{{ data.user.username }}</div>
     <div class="col text-center border-end">{{ data.date_beg|date:"d.m.Y H:i" }}</div>
     <div class="col text-center border-end">{{ data.date_end|date:"d.m.Y H:i" }}</div>
     <div class="col text-center border-end">{{ data.date_max|date:"d.m.Y H:i" }}</div>
     <div class="col text-center">-|-</div>
 </div>
+
+{% for item in sprints %}
+{{ item.name }}<br>
+{% endfor %}
+
+{% for item in tasks %}
+{{ item.name }}<br>
+{% endfor %}
 
 {% include "buttons.html" with buttons="('back','add','edit','delete')" model=view.url_name pk=data.id %}
 <hr>
