@@ -1,4 +1,9 @@
-<h2>Спринты</h2>
+<div class="row">
+    <div class="h2 align-self-center col-3 col-sm-2">Спринты</div>
+    <div class="align-self-center col">
+        {% include "buttons.html" with btn_max="items add" model=view.url_name get_par=view.get_par %}
+    </div>
+</div>
 <table class="table table-sm table-hover align-middle">
     <tbody>
     {% for item in data %}
@@ -10,7 +15,12 @@
             <a href={% url "detail" model=view.url_name pk=item.id %}
             class="btn btn-light w-100 border-0 text-start"
             title="Подробнее о спринте">
-                {{ item.name }}
+            {% if item.date_end %}
+                {% include "buttons.html" with btn_min="is_ok" %}
+            {% else %}
+                {% include "buttons.html" with btn_min="no_ok" %}
+            {% endif %}
+            {{ item.name }}
             </a>
         </td>
         <td width=1%>

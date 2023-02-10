@@ -7,22 +7,46 @@
         onClick="javascript:history.go(-1);"
         >
     {% endif %}
+    {% if btn == "forw" %}
+        <input 
+        type=button 
+        value="Вперёд" 
+        class="btn btn-sm btn-outline-dark" 
+        onClick="javascript:history.go(1);"
+        >
+    {% endif %}
     {% if btn == "items" %}
     <div class="btn-group">
-        <a href={% url "index" %}?f=all 
-        class="btn btn-sm btn-outline-secondary">
+        <a href="?{{get_par}}&{{model}}=all&{{view.page_kwarg}}=1"
+        class="btn btn-sm btn-outline-secondary {% if model|add:"=all" in get_par %}active{% endif %}">
             Показать всё
         </a>
-        <a href={% url "index" %}?f=on 
-        class="btn btn-sm btn-outline-secondary">
+        <a href="?{{get_par}}&{{model}}=on&{{view.page_kwarg}}=1"
+        class="btn btn-sm btn-outline-secondary {% if model|add:"=on" in get_par %}active{% endif %}">
             Выполненные
         </a>
-        <a href={% url "index" %}?f=off 
-        class="btn btn-sm btn-outline-secondary">
+        <a href="?{{get_par}}&{{model}}=off&{{view.page_kwarg}}=1"
+        class="btn btn-sm btn-outline-secondary {% if model|add:"=off" in get_par %}active{% endif %}">
             Не выполненные
         </a>
     </div>
     {% endif %}
+    {% comment %} {% if btn == "items" %}
+    <div class="btn-group">
+        <a href={% url "list" model=view.kwargs.model %}?{{get_par}}&{{model}}=all&{{view.page_kwarg}}=1
+        class="btn btn-sm btn-outline-secondary {% if model|add:"=all" in get_par %}active{% endif %}">
+            Показать всё
+        </a>
+        <a href={% url "list" model=view.kwargs.model %}?{{get_par}}&{{model}}=on&{{view.page_kwarg}}=1
+        class="btn btn-sm btn-outline-secondary {% if model|add:"=on" in get_par %}active{% endif %}">
+            Выполненные
+        </a>
+        <a href={% url "list" model=view.kwargs.model %}?{{get_par}}&{{model}}=off&{{view.page_kwarg}}=1
+        class="btn btn-sm btn-outline-secondary {% if model|add:"=off" in get_par %}active{% endif %}">
+            Не выполненные
+        </a>
+    </div>
+    {% endif %} {% endcomment %}
     {% if btn == "index" %}
         <a href={% url "index" %} 
         class="btn btn-sm btn-outline-dark">
@@ -30,7 +54,7 @@
         </a>
     {% endif %}
     {% if btn == "add" %}
-        <a href={% url "add" model=model %} 
+        <a href={% url "add" model=model %}?{{get_par}}
         class="btn btn-sm btn-outline-primary">
             Добавить
         </a>
@@ -56,43 +80,6 @@
 {% endfor %}
 
 {% for btn in btn_min.split %}
-    {% if btn == "back" %}
-        <input 
-        type=button 
-        value="Назад" 
-        class="btn btn-sm btn-outline-dark" 
-        onClick="javascript:history.go(-1);"
-        >
-    {% endif %}
-    {% if btn == "items" %}
-        <div class="btn-group">
-        <a href={% url "index" %}?f=all 
-        class="btn btn-sm btn-outline-secondary">
-            Показать всё
-        </a>
-        <a href={% url "index" %}?f=on 
-        class="btn btn-sm btn-outline-secondary">
-            Выполненные
-        </a>
-        <a href={% url "index" %}?f=off 
-        class="btn btn-sm btn-outline-secondary">
-            Не выполненные
-        </a>
-        </div>
-    {% endif %}
-    {% if btn == "index" %}
-        <a href={% url "index" %} 
-        class="btn btn-sm btn-outline-dark">
-            На главную
-        </a>
-    {% endif %}
-    {% if btn == "add" %}
-        <a href={% url "add" model=model %} 
-        class="btn btn-sm btn-outline-primary"
-        title="Добавить">
-            <i class="bi bi-plus"></i>
-        </a>
-    {% endif %}
     {% if btn == "edit" %}
         <a href={% url "edit" model=model pk=pk %} 
         class="btn btn-sm btn-outline-success"

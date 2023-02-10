@@ -6,8 +6,8 @@
 
     <div class="w-100"></div>
 
-    <div class="col-2 text-end">{{view.fields.desc.verbose_name}}</div>
-    <div class="col">{{ data.desc }}</div>
+    <div class="col-2 text-end border-bottom">{{view.fields.desc.verbose_name}}</div>
+    <div class="col border-bottom">{{ data.desc }}</div>
 
     <div class="w-100"></div>
 
@@ -25,14 +25,6 @@
     <div class="col text-center border-end">{{ data.date_max|date:"d.m.Y H:i" }}</div>
     <div class="col text-center">-|-</div>
 </div>
-
-{% for item in sprints %}
-{{ item.name }}<br>
-{% endfor %}
-
-{% for item in tasks %}
-{{ item.name }}<br>
-{% endfor %}
 
 {% include "buttons.html" with btn_max="back add edit delete" model=view.url_name pk=data.id %}
 <hr>

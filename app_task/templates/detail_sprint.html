@@ -11,8 +11,8 @@
 
     <div class="w-100"></div>
 
-    <div class="col-2 text-end">{{view.fields.proj.verbose_name}}</div>
-    <div class="col">
+    <div class="col-2 text-end border-bottom">{{view.fields.proj.verbose_name}}</div>
+    <div class="col border-bottom">
     {% if data.proj %}
         <a href={% url "detail" model=view.fields.proj.related_model.META.url_name pk=data.proj.id %}
         class="btn btn-light w-100 border-0 text-start"
@@ -26,23 +26,6 @@
 
     <div class="w-100"></div>
 
-{% comment %}
-    <div class="col-2 text-end border-bottom">{{view.fields.sprint.verbose_name}}</div>
-    <div class="col border-bottom">
-    {% if data.sprint %}
-        <a href={% url "detail" model=view.fields.sprint.related_model.META.url_name pk=data.sprint.id %}
-        class="btn btn-light w-100 border-0 text-start"
-        title="Подробнее о спринте">
-            {{ data.sprint.name }}
-        </a>
-    {% else %}
-            <span class="pe-none btn border-0">Нет</span>
-    {% endif %}
-    </div>
-
-    <div class="w-100"></div>
-
-{% endcomment %}
     <div class="col text-center border-end">{{view.fields.author.verbose_name}}</div>
     <div class="col text-center border-end">{{view.fields.date_beg.verbose_name}}</div>
     <div class="col text-center border-end">{{view.fields.date_end.verbose_name}}</div>
@@ -57,14 +40,6 @@
     <div class="col text-center border-end">{{ data.date_max|date:"d.m.Y H:i" }}</div>
     <div class="col text-center">-|-</div>
 </div>
-
-{% for item in sprints %}
-{{ item.name }}<br>
-{% endfor %}
-
-{% for item in tasks %}
-{{ item.name }}<br>
-{% endfor %}
 
 {% include "buttons.html" with btn_max="back add edit delete" model=view.url_name pk=data.id %}
 <hr>
