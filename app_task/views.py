@@ -1,5 +1,5 @@
 from django.shortcuts import render  # noqa
-from django.http.response import HttpResponse  # noqa
+from django.http.response import HttpResponse, Http404  # noqa
 from django.http.request import HttpRequest  # noqa
 from django.db import models  # noqa
 from django.views.generic import (
@@ -34,134 +34,175 @@ def error(req: HttpRequest, *args, **kwargs):
 
 
 def ProjTemplate(request, key, **kwargs):
+    model = Proj
+    # model_url = kwargs.get("model", "")
+    # pk_url = kwargs.get("pk", 0)
+
+    list_queryset = model.objects.all()
     match key:
         case "list":
-            pass
+            obj = ListView(
+                queryset=list_queryset,
+                template_name="list_proj.html",
+                ordering="-date_beg",
+            )
         case _:
             obj = DetailView(
                 # queryset=Task.objects.annotate(title=models.Value("Проект")),
                 template_name="detail_proj.html",
             )
-    obj.model = Proj
-    obj.fields = {v.name: v for v in obj.model._meta.get_fields()}
-    obj.url_name = obj.model.META.url_name
+    obj.model = model
     obj.request = request
     obj.kwargs = kwargs
     obj.context_object_name = "data"
-    try:
-        render = obj.get(obj.request)
-    except Exception as err:
-        text = f"ERROR: {type(err).__name__} - {err}"
-        print(text)
-        return error(request, content=text)
-    render.context_data["sprints"] = obj.object.proj_sprints.all()
-    render.context_data["tasks"] = obj.object.proj_tasks.all()
-    return render
-
-
-def TaskTemplate(request, key, **kwargs):
-    match key:
-        case "list":
-            pass
-        case _:
-            obj = DetailView(
-                # queryset=Task.objects.annotate(title=models.Value("Задача")),
-                template_name="detail_task.html",
-            )
-    obj.model = Task
     obj.fields = {v.name: v for v in obj.model._meta.get_fields()}
     obj.url_name = obj.model.META.url_name
-    obj.request = request
-    obj.kwargs = kwargs
-    obj.context_object_name = "data"
-    try:
-        render = obj.get(obj.request)
-    except Exception as err:
-        text = f"ERROR: {type(err).__name__} - {err}"
-        print(text)
-        return error(request, content=text)
-    return render
+    return obj
 
 
-def TaskStepTemplate(request, key, **kwargs):
+def SprintTemplate(request, key, **kwargs):
+    model = Sprint
+    model_url = kwargs.get("model", "")
+    pk_url = kwargs.get("pk", 0)
+
+    if model_url == Proj.META.url_name:
+        list_queryset = model.objects.filter(proj_id=pk_url)
+    else:
+        list_queryset = model.objects.all()
     match key:
         case "list":
             obj = ListView(
-                queryset=TaskStep.objects.filter(task_id=kwargs.get("pk", -1)),
+                queryset=list_queryset,
+                template_name="list_sprint.html",
+                ordering="-date_beg",
+            )
+        case _:
+            obj = DetailView(
+                # queryset=model.objects.annotate(title=models.Value("Проект")),
+                template_name="detail_sprint.html",
+            )
+    obj.model = model
+    obj.request = request
+    obj.kwargs = kwargs
+    obj.context_object_name = "data"
+    obj.fields = {v.name: v for v in obj.model._meta.get_fields()}
+    obj.url_name = obj.model.META.url_name
+    return obj
+
+
+def TaskTemplate(request, key, **kwargs):
+    model = Task
+    model_url = kwargs.get("model", "")
+    pk_url = kwargs.get("pk", 0)
+
+    if model_url == Sprint.META.url_name:
+        list_queryset = model.objects.filter(sprint_id=pk_url)
+    elif model_url == Proj.META.url_name:
+        list_queryset = model.objects.filter(proj_id=pk_url)
+    else:
+        list_queryset = model.objects.all()
+    match key:
+        case "list":
+            obj = ListView(
+                queryset=list_queryset,
+                template_name="list_task.html",
+                ordering="-date_beg",
+            )
+        case _:
+            obj = DetailView(
+                # queryset=model.objects.annotate(title=models.Value("Задача")),
+                template_name="detail_task.html",
+            )
+    obj.model = model
+    obj.request = request
+    obj.kwargs = kwargs
+    obj.context_object_name = "data"
+    obj.fields = {v.name: v for v in obj.model._meta.get_fields()}
+    obj.url_name = obj.model.META.url_name
+    return obj
+
+
+def TaskStepTemplate(request, key, **kwargs):
+    model = TaskStep
+    # model_url = kwargs.get("model", "")
+    pk_url = kwargs.get("pk", 0)
+
+    match key:
+        case "list":
+            obj = ListView(
+                queryset=model.objects.filter(task_id=pk_url),
                 template_name="list_task_step.html",
                 ordering="-date_end",
             )
         case _:
             pass
-    obj.model = TaskStep
-    obj.fields = {v.name: v for v in obj.model._meta.get_fields()}
-    obj.url_name = obj.model.META.url_name
+    obj.model = model
     obj.request = request
     obj.kwargs = kwargs
     obj.context_object_name = "data"
-    try:
-        render = obj.get(obj.request)
-    except Exception as err:
-        text = f"ERROR: {type(err).__name__} - {err}"
-        print(text)
-        return error(request, content=text)
-    return render
+    obj.fields = {v.name: v for v in obj.model._meta.get_fields()}
+    obj.url_name = obj.model.META.url_name
+    return obj
 
 
 class Index(TemplateView):
     template_name = "index.html"
-    # model = Proj
-    # paginate_by = 2
-    # context_object_name = "data"
 
-    def get_queryset(self):
-        # self.params = self.request.GET.copy()
-        # self.params.update(self.request.POST)
-        # self.params.update(self.kwargs)
-        queryset = self.model.objects.all()
-        match self.request.GET.get("f", "off"):
-            case "off":
-                queryset = queryset.filter(date_end=None)
-            case "on":
-                queryset = queryset.exclude(date_end=None)
+    # def get_queryset(self):
+    #     queryset = self.model.objects.all()
+    #     match self.request.GET.get("f", "off"):
+    #         case "off":
+    #             queryset = queryset.filter(date_end=None)
+    #         case "on":
+    #             queryset = queryset.exclude(date_end=None)
 
-        return queryset
+    #     return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["details"] = []
+        model_url = kwargs.get("model", "")
+        pk_url = kwargs.get("pk", 0)
+        objs = []
 
-        match self.kwargs.get("model", ""):
-            case Proj.META.url_name:
+        match model_url, pk_url:
+            case "projs" | Proj.META.url_name, 0:
+                context["title"] = "Все проекты"
+                context["header"] = "Все проекты"
+                objs.append(ProjTemplate(self.request, "list", **self.kwargs))
+            case "sprints" | Sprint.META.url_name, 0:
+                context["title"] = "Все спринты"
+                context["header"] = "Все спринты"
+                objs.append(SprintTemplate(self.request, "list", **self.kwargs))
+            case "tasks" | Task.META.url_name, 0:
+                context["title"] = "Все задачи"
+                context["header"] = "Все задачи"
+                objs.append(TaskTemplate(self.request, "list", **self.kwargs))
+            case Proj.META.url_name, _:
                 context["title"] = "Просмотр проекта"
                 context["header"] = "Просмотр проекта"
-                context["details"].append(
-                    ProjTemplate(self.request, "detail", **self.kwargs)
-                )
-            case Sprint.META.url_name:
+                objs.append(ProjTemplate(self.request, "detail", **self.kwargs))
+                objs.append(SprintTemplate(self.request, "list", **self.kwargs))
+                objs.append(TaskTemplate(self.request, "list", **self.kwargs))
+            case Sprint.META.url_name, _:
                 context["title"] = "Просмотр спринта"
                 context["header"] = "Просмотр спринта"
-            case Task.META.url_name:
+                objs.append(SprintTemplate(self.request, "detail", **self.kwargs))
+                objs.append(TaskTemplate(self.request, "list", **self.kwargs))
+            case Task.META.url_name, _:
                 context["title"] = "Просмотр задачи"
                 context["header"] = "Просмотр задачи"
-                context["details"].append(
-                    TaskTemplate(self.request, "detail", **self.kwargs)
-                )
-                context["details"].append(
-                    TaskStepTemplate(self.request, "list", **self.kwargs)
-                )
-            case TaskStep.META.url_name:
-                self.model = TaskStep
+                objs.append(TaskTemplate(self.request, "detail", **self.kwargs))
+                objs.append(TaskStepTemplate(self.request, "list", **self.kwargs))
+            case TaskStep.META.url_name, _:
+                context["title"] = "Просмотр шага"
+                context["header"] = "Просмотр шага"
             case _:
-                self.model = Task
-        # try:
-        #     context["details"] = [v.get(self.request) for v in objs]
-        # except Exception as err:
-        #     print("ERROR:", type(err).__name__, "-", err)
-        #     pass
+                pass
+        try:
+            context["details"] = [v.get(self.request) for v in objs]
+        except Exception as err:
+            text = f"ERROR: {type(err).__name__} - {err}"
+            print(text)
+            context["details"] = [{"rendered_content": text}]
 
-        # context["data"] = self.get_queryset()
-        # context.update(self.params.items())
-        # context["buttons"] = ("add", "items")
-        # context["model"] = self.model.META.url_name
         return context

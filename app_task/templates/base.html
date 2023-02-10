@@ -13,7 +13,13 @@
 </head>
 
 <body style="max-width: 992px;" class="container">
-    <nav><a href="/">Главная</a> | <a href="/admin/">Администрирование</a></nav>
+    <nav>
+        <a href="/">Главная</a> | 
+        <a href="{% url "list" model="projs" %}">Проекты</a> | 
+        <a href="{% url "list" model="sprints" %}">Спринты</a> | 
+        <a href="{% url "list" model="tasks" %}">Задачи</a> | 
+        <a href="/admin/">Администрирование</a>
+    </nav>
     <hr>
     <h1>{% block header %}Base page{% endblock header %}</h1>
     {% block content %}{% endblock content %}

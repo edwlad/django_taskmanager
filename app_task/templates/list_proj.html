@@ -1,0 +1,27 @@
+<h2>Проекты</h2>
+<table class="table table-sm table-hover align-middle">
+    <tbody>
+    {% for item in data %}
+    <tr>
+        <td width=1%>
+            {% include "buttons.html" with btn_min="edit" model=view.url_name pk=item.id %}
+        </td>
+        <td>
+            <a href={% url "detail" model=view.url_name pk=item.id %}
+            class="btn btn-light w-100 border-0 text-start"
+            title="Подробнее о проекте">
+                {% if  %}
+                {% endif %}
+                {% include "buttons.html" with btn_min="is_ok" model=view.url_name pk=item.id %}
+                {{ item.name }}
+            </a>
+        </td>
+        <td width=1%>
+            {% include "buttons.html" with btn_min="delete" model=view.url_name pk=item.id %}
+        </td>
+    </tr>
+    {% empty %}
+        <span class="pe-none btn border-0">Нет спринтов</span>
+    {% endfor %}
+    </tbody>
+</table>

@@ -16,6 +16,8 @@
             {{ item.desc }}
         </td>
     </tr>
+    {% empty %}
+        <span class="pe-none btn border-0">Нет истории</span>
     {% endfor %}
     </tbody>
 </table>
