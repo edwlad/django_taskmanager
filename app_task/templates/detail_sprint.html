@@ -29,16 +29,29 @@
     <div class="col text-center border-end">{{view.fields.author.verbose_name}}</div>
     <div class="col text-center border-end">{{view.fields.date_beg.verbose_name}}</div>
     <div class="col text-center border-end">{{view.fields.date_end.verbose_name}}</div>
-    <div class="col text-center border-end">{{view.fields.date_max.verbose_name}}</div>
-    <div class="col text-center">Осталось</div>
+    <div class="col text-center border-end">План</div>
+    <div class="col text-center">Осталось дней</div>
 
     <div class="w-100"></div>
 
     <div class="col text-center border-end">{{ data.author.username }}</div>
     <div class="col text-center border-end">{{ data.date_beg|date:"d.m.Y H:i" }}</div>
     <div class="col text-center border-end">{{ data.date_end|date:"d.m.Y H:i" }}</div>
-    <div class="col text-center border-end">{{ data.date_max|date:"d.m.Y H:i" }}</div>
-    <div class="col text-center">-|-</div>
+    <div class="col text-center border-end">
+        {{ data.date_plan|date:"d.m.Y H:i" }}<br>
+        <p style="font-size: 0.8rem;" class="lh-1 m-0 text-start">
+            Минимальное из<br>
+            Проект {{ data.proj.date_max|date:"d.m.Y" }}<br>
+            Спринт {{ data.date_max|date:"d.m.Y" }}
+        </p>
+    </div>
+    <div class="col text-center">
+        {% if data.date_end %}
+        Завершено
+        {% else %}
+        {{ data.days_plan.days }}
+        {% endif %}
+    </div>
 </div>
 
 {% include "buttons.html" with btn_max="back add edit delete" model=view.url_name pk=data.id %}

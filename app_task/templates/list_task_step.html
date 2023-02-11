@@ -1,10 +1,9 @@
-<h2>История выполнения задачи</h2>
+<div class="h2">
+    История выполнения задачи<br>
+    {% include "paginate.html" %}
+</div>
+
 <table class="table table-sm table-hover align-middle">
-    {% comment %} <thead>
-    <tr>
-        <th>{{view.fields.desc.verbose_name}}</th>
-    </tr>
-    </thead> {% endcomment %}
     <tbody>
     {% for item in data %}
     <tr>

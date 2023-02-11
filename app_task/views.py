@@ -15,7 +15,7 @@ from .models import Proj, Sprint, Task, TaskStep
 # from django.urls import reverse, reverse_lazy
 # from datetime import datetime
 
-PAGINATE_BY = 2
+PAGINATE_BY = 5
 
 
 def error(req: HttpRequest, *args, **kwargs):
@@ -37,7 +37,7 @@ def error(req: HttpRequest, *args, **kwargs):
 
 def ProjTemplate(self: TemplateView, key):
     model = Proj
-    par = self.request.GET.dict()  # | self.kwargs
+    par = self.request.GET.dict() | self.kwargs
     url_name = model.META.url_name
 
     list_queryset = model.objects.all()
@@ -56,7 +56,7 @@ def ProjTemplate(self: TemplateView, key):
                 queryset=list_queryset,
                 template_name="list_proj.html",
                 ordering="-date_beg",
-                # paginate_by=PAGINATE_BY,
+                paginate_by=PAGINATE_BY,
                 page_kwarg=f"{url_name}_page",
             )
         case _:
@@ -78,14 +78,14 @@ def ProjTemplate(self: TemplateView, key):
 
 def SprintTemplate(self: TemplateView, key):
     model = Sprint
-    par = self.request.GET.dict()  # | self.kwargs
+    par = self.request.GET.dict() | self.kwargs
     model_url = str(par.get("model", ""))
-    pk_url = str(par.get("pk", "0"))
+    pk = str(par.get("pk", "0"))
     url_name = model.META.url_name
 
     list_queryset = model.objects.all()
     if model_url == Proj.META.url_name:
-        list_queryset = list_queryset.filter(proj_id=pk_url)
+        list_queryset = list_queryset.filter(proj_id=pk)
 
     match par.get(url_name, ""):
         case "on":
@@ -102,7 +102,7 @@ def SprintTemplate(self: TemplateView, key):
                 queryset=list_queryset,
                 template_name="list_sprint.html",
                 ordering="-date_beg",
-                # paginate_by=PAGINATE_BY,
+                paginate_by=PAGINATE_BY,
                 page_kwarg=f"{url_name}_page",
             )
         case _:
@@ -123,17 +123,16 @@ def SprintTemplate(self: TemplateView, key):
 
 def TaskTemplate(self: TemplateView, key):
     model = Task
-    par = self.request.GET.dict()  # | self.kwargs
+    par = self.request.GET.dict() | self.kwargs
     model_url = str(par.get("model", ""))
-    pk_url = str(par.get("pk", "0"))
+    pk = str(par.get("pk", "0"))
     url_name = model.META.url_name
 
+    list_queryset = model.objects.all()
     if model_url == Sprint.META.url_name:
-        list_queryset = model.objects.filter(sprint_id=pk_url)
+        list_queryset = list_queryset.filter(sprint_id=pk)
     elif model_url == Proj.META.url_name:
-        list_queryset = model.objects.filter(proj_id=pk_url)
-    else:
-        list_queryset = model.objects.all()
+        list_queryset = list_queryset.filter(proj_id=pk)
 
     match par.get(url_name, ""):
         case "on":
@@ -152,7 +151,6 @@ def TaskTemplate(self: TemplateView, key):
                 ordering="-date_beg",
                 paginate_by=PAGINATE_BY,
                 page_kwarg=f"{url_name}_page",
-                # paginate_orphans=0,
             )
         case _:
             obj = DetailView(
@@ -172,17 +170,18 @@ def TaskTemplate(self: TemplateView, key):
 
 def TaskStepTemplate(self: TemplateView, key):
     model = TaskStep
-    par = self.request.GET.dict()  # | self.kwargs
-    pk_url = str(par.get("pk", "0"))
+    par = self.request.GET.dict() | self.kwargs
+    pk = str(par.get("pk", "0"))
     url_name = model.META.url_name
 
+    list_queryset = model.objects.filter(task_id=pk)
     match key:
         case "list":
             obj = ListView(
-                queryset=model.objects.filter(task_id=pk_url),
+                queryset=list_queryset,
                 template_name="list_task_step.html",
                 ordering="-date_end",
-                # paginate_by=PAGINATE_BY,
+                paginate_by=PAGINATE_BY,
                 page_kwarg=f"{url_name}_page",
             )
         case _:

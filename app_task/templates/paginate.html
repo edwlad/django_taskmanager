@@ -1,30 +1,61 @@
 
-<ul class="pagination">
-    {% if page_obj.has_previous %}
-    <li class="page-item">
-        <a class="page-link" href="?{{ view.get_par }}&{{view.page_kwarg}}=1">&laquo; Первая</a>
-    </li>
-    <li class="page-item">
-        <a class="page-link" href="?{{ view.get_par }}&{{view.page_kwarg}}={{ page_obj.previous_page_number }}">Предыдущая</a>
-    </li>
-    {% endif %}
+{% load poll_extras %}
+{% my_get view.get_par as get_par %}
 
+{% if is_paginated and page_obj.paginator.num_pages > 1 %}
+<ul class="pagination pagination-sm">
     <li class="page-item">
-        <span class="page-link">
-            Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}.
-        </span>
+        <a class="page-link"
+        href="{% my_get get_par view.page_kwarg 1 %}"
+        title="Первая">
+          &laquo;&laquo;
+        </a>
     </li>
+    <li class="page-item">
+      <a class="page-link"
+      {% if page_obj.has_previous %}
+      href="{% my_get get_par view.page_kwarg page_obj.previous_page_number %}"
+      {% else %}
+      href="{% my_get get_par view.page_kwarg 1 %}"
+      {% endif %}
+      title="Предыдущая">
+      &nbsp;&laquo;&nbsp;
+      </a>
+    </li>
+    <li class="page-item">
+      <span 
+      class="page-link"
+      title="Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}">
+        {{ page_obj.number }}-{{ page_obj.paginator.num_pages }}
+      </span>
+    </li>
+    <li class="page-item">
+        <a class="page-link" 
+        {% if page_obj.has_next %}
+        href="{% my_get get_par view.page_kwarg page_obj.next_page_number %}"
+        {% else %}
+        href="{% my_get get_par view.page_kwarg page_obj.paginator.num_pages %}"
+        {% endif %}
+        title="Следующая">
+          &nbsp;&raquo;&nbsp;
+        </a>
+    </li>
+    <li class="page-item">
+        <a class="page-link" 
+        href="{% my_get get_par view.page_kwarg page_obj.paginator.num_pages %}"
+        title="Последняя">
+          &raquo;&raquo;
+        </a>
+    </li>
+    {% comment %} <li>
+      <span class="btn pe-none">
+        Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}.
+      </span>
+    </li> {% endcomment %}
+  </ul>
+{% endif %}
 
-    {% if page_obj.has_next %}
-    <li class="page-item">
-        <a class="page-link" href="?{{ view.get_par }}&{{view.page_kwarg}}={{ page_obj.next_page_number }}">Следующая</a>
-    </li>
-    <li class="page-item">
-        <a class="page-link" href="?{{ view.get_par }}&{{view.page_kwarg}}={{ page_obj.paginator.num_pages }}">Последняя &raquo;</a>
-    </li>
-    {% endif %}
-</ul>
-
+{% comment %}
 <div class="pagination">
     <span class="step-links">
         {% if page_obj.has_previous %}
@@ -96,3 +127,4 @@
       <li class="page-item"><a class="page-link" href="#">3</a></li>
     </ul>
   </nav>
+  {% endcomment %}

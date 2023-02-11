@@ -1,9 +1,12 @@
 from django.db import models
 from django.conf import settings
 from datetime import datetime  # noqa
+from .managers import TaskManager, SprintManager, ProjManager
 
 
 class Proj(models.Model):
+    objects = ProjManager()
+
     name = models.CharField(
         help_text="Название проекта", verbose_name="Название", max_length=120
     )
@@ -43,6 +46,8 @@ class Proj(models.Model):
 
 
 class Sprint(models.Model):
+    objects = SprintManager()
+
     name = models.CharField(
         help_text="Название спринта", verbose_name="Название", max_length=120
     )
@@ -89,6 +94,8 @@ class Sprint(models.Model):
 
 
 class Task(models.Model):
+    objects = TaskManager()
+
     name = models.CharField(
         help_text="Название задачи", verbose_name="Название", max_length=120
     )

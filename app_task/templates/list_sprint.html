@@ -1,7 +1,10 @@
 <div class="row">
-    <div class="h2 align-self-center col-3 col-sm-2">Спринты</div>
+    <div class="h2 align-self-center col-4 col-sm-3">
+        Спринты<br>
+        {% include "paginate.html" %}
+    </div>
     <div class="align-self-center col">
-        {% include "buttons.html" with btn_max="items add" model=view.url_name get_par=view.get_par %}
+        {% include "buttons.html" with btn_max="items add" model=view.url_name %}
     </div>
 </div>
 <table class="table table-sm table-hover align-middle">
@@ -16,12 +19,28 @@
             class="btn btn-light w-100 border-0 text-start"
             title="Подробнее о спринте">
             {% if item.date_end %}
-                {% include "buttons.html" with btn_min="is_ok" %}
+                <span class="badge bg-success bg-opacity-50 p-1">
+                    <i class="bi-check2"></i>
+                </span>
+            {% elif item.days_plan.days > 6 %}
+                <span class="badge text-bg-primary">
+                    {{ item.days_plan.days }}
+                </span>
+            {% elif item.days_plan.days > 2 %}
+                <span class="badge text-bg-warning">
+                    {{ item.days_plan.days }}
+                </span>
+            {% elif item.days_plan.days %}
+                <span class="badge text-bg-danger">
+                    {{ item.days_plan.days }}
+                </span>
             {% else %}
-                {% include "buttons.html" with btn_min="no_ok" %}
+                <span class="badge bg-secondary bg-opacity-50">
+                    &nbsp;&nbsp;
+                </span>
             {% endif %}
             {{ item.name }}
-            </a>
+        </a>
         </td>
         <td width=1%>
             {% include "buttons.html" with btn_min="delete" model=view.url_name pk=item.id %}
