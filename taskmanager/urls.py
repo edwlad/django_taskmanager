@@ -26,7 +26,6 @@ urlpatterns = [
     path("api/", include("api_task.urls")),
     path("api-auth/", include("rest_framework.urls")),
     path("admin/", admin.site.urls, name="admin"),
-    # re_path(r"^admin.*", lambda _: HttpResponseRedirect("/admin/")),
     path("add/<str:model>/", Index.as_view(), name="add"),
     path("edit/<str:model>/<int:pk>/", Index.as_view(), name="edit"),
     path("delete/<str:model>/<int:pk>/", Index.as_view(), name="delete"),
