@@ -14,21 +14,23 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, re_path
+from django.urls import path, re_path, include
 from app_task.views import error, Index
-from django.http.response import HttpResponseRedirect
 
+# from django.http.response import HttpResponseRedirect
 # from django.views.generic import TemplateView
 
 
 urlpatterns = [
     path("", Index.as_view(), kwargs={"model": "tasks"}, name="index"),
-    path("<str:model>/", Index.as_view(), name="list"),
-    path("<str:model>/<int:pk>/", Index.as_view(), name="detail"),
+    path("api/", include("api_task.urls")),
+    path("api-auth/", include("rest_framework.urls")),
+    path("admin/", admin.site.urls, name="admin"),
+    # re_path(r"^admin.*", lambda _: HttpResponseRedirect("/admin/")),
+    path("add/<str:model>/", Index.as_view(), name="add"),
     path("edit/<str:model>/<int:pk>/", Index.as_view(), name="edit"),
     path("delete/<str:model>/<int:pk>/", Index.as_view(), name="delete"),
-    path("add/<str:model>/", Index.as_view(), name="add"),
-    path("admin/", admin.site.urls, name="admin"),
-    re_path(r"^admin.*", lambda _: HttpResponseRedirect("/admin/")),
+    path("<str:model>/<int:pk>/", Index.as_view(), name="detail"),
+    path("<str:model>/", Index.as_view(), name="list"),
     re_path(r".+", error, kwargs={"title": "Не найдено", "status": 404}),
 ]

@@ -42,7 +42,7 @@ class Proj(models.Model):
         return f"{self.id}: {self.name}"
 
     class META:
-        url_name = "proj"
+        url_name = "projs"
 
 
 class Sprint(models.Model):
@@ -90,7 +90,7 @@ class Sprint(models.Model):
         return f"{self.id}: {self.name}"
 
     class META:
-        url_name = "sprint"
+        url_name = "sprints"
 
 
 class Task(models.Model):
@@ -167,8 +167,13 @@ class Task(models.Model):
     def __str__(self) -> str:
         return f"{self.id}: {self.name}"
 
+    def save(self, **kwargs) -> None:
+        if self.sprint:
+            self.proj = self.sprint.proj
+        return super().save(**kwargs)
+
     class META:
-        url_name = "task"
+        url_name = "tasks"
 
 
 class TaskStep(models.Model):
@@ -200,4 +205,4 @@ class TaskStep(models.Model):
         return f"{self.id}: {self.desс[:30]}"
 
     class META:
-        url_name = "task_step"
+        url_name = "task_steps"

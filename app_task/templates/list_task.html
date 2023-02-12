@@ -11,6 +11,7 @@
 <table class="table table-sm table-hover align-middle">
     <tbody>
     {% for item in data %}
+    {% comment %} {{ item|json_script:view.url_name|add:item.id }} {% endcomment %}
     <tr>
         <td width=1%>
             {% include "buttons.html" with btn_min="edit" model=view.url_name pk=item.id %}

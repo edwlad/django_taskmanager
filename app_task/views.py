@@ -11,11 +11,15 @@ from django.views.generic import (
     # DeleteView,
 )
 from .models import Proj, Sprint, Task, TaskStep
+from django.conf import settings
+
+# from api_task.views import ProjApi, SprintApi, TaskApi, TaskStepApi
 
 # from django.urls import reverse, reverse_lazy
 # from datetime import datetime
 
-PAGINATE_BY = 5
+PAGINATE_BY = settings.PAGINATE_BY
+PAGINATE_ORPHANS = settings.PAGINATE_ORPHANS
 
 
 def error(req: HttpRequest, *args, **kwargs):
@@ -57,6 +61,7 @@ def ProjTemplate(self: TemplateView, key):
                 template_name="list_proj.html",
                 ordering="-date_beg",
                 paginate_by=PAGINATE_BY,
+                paginate_orphans=PAGINATE_ORPHANS,
                 page_kwarg=f"{url_name}_page",
             )
         case _:
@@ -103,6 +108,7 @@ def SprintTemplate(self: TemplateView, key):
                 template_name="list_sprint.html",
                 ordering="-date_beg",
                 paginate_by=PAGINATE_BY,
+                paginate_orphans=PAGINATE_ORPHANS,
                 page_kwarg=f"{url_name}_page",
             )
         case _:
@@ -150,6 +156,7 @@ def TaskTemplate(self: TemplateView, key):
                 template_name="list_task.html",
                 ordering="-date_beg",
                 paginate_by=PAGINATE_BY,
+                paginate_orphans=PAGINATE_ORPHANS,
                 page_kwarg=f"{url_name}_page",
             )
         case _:
@@ -182,6 +189,7 @@ def TaskStepTemplate(self: TemplateView, key):
                 template_name="list_task_step.html",
                 ordering="-date_end",
                 paginate_by=PAGINATE_BY,
+                paginate_orphans=PAGINATE_ORPHANS,
                 page_kwarg=f"{url_name}_page",
             )
         case _:
@@ -212,15 +220,15 @@ class Index(TemplateView):
         objs = []
 
         match self.kwargs.get("model"), self.kwargs.get("pk"):
-            case "projs" | Proj.META.url_name, "0":
+            case Proj.META.url_name, "0":
                 context["title"] = "Все проекты"
                 context["header"] = "Все проекты"
                 objs.append(ProjTemplate(self, "list"))
-            case "sprints" | Sprint.META.url_name, "0":
+            case Sprint.META.url_name, "0":
                 context["title"] = "Все спринты"
                 context["header"] = "Все спринты"
                 objs.append(SprintTemplate(self, "list"))
-            case "tasks" | Task.META.url_name, "0":
+            case Task.META.url_name, "0":
                 context["title"] = "Все задачи"
                 context["header"] = "Все задачи"
                 objs.append(TaskTemplate(self, "list"))
@@ -249,7 +257,7 @@ class Index(TemplateView):
             context["details"] = [v.get(self.request) for v in objs]
         except Exception as err:
             text = f"ERROR: {type(err).__name__} - {err}"
-            print(text)
+            # print(text)
             context["details"] = [{"rendered_content": text}]
 
         return context
