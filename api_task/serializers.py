@@ -12,20 +12,25 @@ class ProjSerializer(serializers.ModelSerializer):
     class Meta:
         model = Proj
         fields = "__all__"
+        # fields = read_only_fields + ("id", "name", "date_beg", "date_end", "date_max")
+        # fields = tuple(v.attname for v in Proj._meta.fields)
+        # read_only_fields = fields
 
 
 class SprintSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sprint
-        fields = "__all__"
+        # fields = "__all__"
+        fields = tuple(v.attname for v in Sprint._meta.fields)
+        read_only_fields = fields
 
 
 class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
-        # read_only_fields = ("date_plan", "days_plan")
-        fields = "__all__"
-        # fields = tuple(v.attname for v in Task._meta.fields)
+        # fields = "__all__"
+        fields = tuple(v.attname for v in Task._meta.fields)
+        read_only_fields = fields
 
 
 class TaskStepSerializer(serializers.ModelSerializer):

@@ -5,15 +5,15 @@ from django.db import models  # noqa
 from django.views.generic import (
     TemplateView,
     ListView,
-    DetailView,
+    # DetailView,
     # UpdateView,
     # CreateView,
     # DeleteView,
 )
 from .models import Proj, Sprint, Task, TaskStep
 from django.conf import settings
-
-# from api_task.views import ProjApi, SprintApi, TaskApi, TaskStepApi
+from api_task.views import ProjApi, SprintApi, TaskApi, TaskStepApi
+from api_task.serializers import ProjSerializer
 
 # from django.urls import reverse, reverse_lazy
 # from datetime import datetime
@@ -42,9 +42,16 @@ def error(req: HttpRequest, *args, **kwargs):
 def ProjTemplate(self: TemplateView, key):
     model = Proj
     par = self.request.GET.dict() | self.kwargs
+    model_url = str(par.get("model", ""))
+    pk = str(par.get("pk", "0"))
     url_name = model.META.url_name
 
     list_queryset = model.objects.all()
+    if model_url == Sprint.META.url_name:
+        pk = Sprint.objects.filter(id=pk).get().proj_id
+    elif model_url == Task.META.url_name:
+        pk = Task.objects.filter(id=pk).get().proj_id
+
     match par.get(url_name, ""):
         case "on":
             list_queryset = list_queryset.exclude(date_end=None)
@@ -65,19 +72,21 @@ def ProjTemplate(self: TemplateView, key):
                 page_kwarg=f"{url_name}_page",
             )
         case _:
-            obj = DetailView(
-                # queryset=Task.objects.annotate(title=models.Value("Проект")),
+            obj = ListView(
+                queryset=list_queryset.filter(id=pk),
                 template_name="detail_proj.html",
             )
 
+    obj.kwargs = self.kwargs
     obj.model = model
     obj.request = self.request
-    obj.kwargs = self.kwargs
     obj.context_object_name = "data"
     obj.fields = {v.name: v for v in obj.model._meta.get_fields()}
     obj.url_name = url_name
     obj.par = par
     obj.get_par = "&".join(map("=".join, par.items()))
+    obj.ser = ProjSerializer
+    obj.api = {v.data["id"]: v.data for v in map(ProjSerializer, obj.queryset)}
     return obj
 
 
@@ -91,6 +100,8 @@ def SprintTemplate(self: TemplateView, key):
     list_queryset = model.objects.all()
     if model_url == Proj.META.url_name:
         list_queryset = list_queryset.filter(proj_id=pk)
+    elif model_url == Task.META.url_name:
+        pk = Task.objects.filter(id=pk).get().proj_id
 
     match par.get(url_name, ""):
         case "on":
@@ -112,13 +123,14 @@ def SprintTemplate(self: TemplateView, key):
                 page_kwarg=f"{url_name}_page",
             )
         case _:
-            obj = DetailView(
-                # queryset=model.objects.annotate(title=models.Value("Проект")),
+            obj = ListView(
+                queryset=list_queryset.filter(id=pk),
                 template_name="detail_sprint.html",
             )
+
+    obj.kwargs = self.kwargs
     obj.model = model
     obj.request = self.request
-    obj.kwargs = self.kwargs
     obj.context_object_name = "data"
     obj.fields = {v.name: v for v in obj.model._meta.get_fields()}
     obj.url_name = url_name
@@ -160,13 +172,14 @@ def TaskTemplate(self: TemplateView, key):
                 page_kwarg=f"{url_name}_page",
             )
         case _:
-            obj = DetailView(
-                # queryset=model.objects.annotate(title=models.Value("Задача")),
+            obj = ListView(
+                queryset=list_queryset.filter(id=pk),
                 template_name="detail_task.html",
             )
+
+    obj.kwargs = self.kwargs
     obj.model = model
     obj.request = self.request
-    obj.kwargs = self.kwargs
     obj.context_object_name = "data"
     obj.fields = {v.name: v for v in obj.model._meta.get_fields()}
     obj.url_name = url_name
@@ -195,9 +208,9 @@ def TaskStepTemplate(self: TemplateView, key):
         case _:
             pass
 
+    obj.kwargs = self.kwargs
     obj.model = model
     obj.request = self.request
-    obj.kwargs = self.kwargs
     obj.context_object_name = "data"
     obj.fields = {v.name: v for v in obj.model._meta.get_fields()}
     obj.url_name = url_name
@@ -242,11 +255,14 @@ class Index(TemplateView):
                 context["title"] = "Просмотр спринта"
                 context["header"] = "Просмотр спринта"
                 objs.append(SprintTemplate(self, "detail"))
+                objs.append(ProjTemplate(self, "detail"))
                 objs.append(TaskTemplate(self, "list"))
             case Task.META.url_name, _:
                 context["title"] = "Просмотр задачи"
                 context["header"] = "Просмотр задачи"
                 objs.append(TaskTemplate(self, "detail"))
+                objs.append(SprintTemplate(self, "detail"))
+                objs.append(ProjTemplate(self, "detail"))
                 objs.append(TaskStepTemplate(self, "list"))
             case TaskStep.META.url_name, _:
                 context["title"] = "Просмотр шага"

@@ -1,13 +1,14 @@
 <h2>Проект</h2>
 <div class="row mb-3">
+{% for item in data %}
     <div class="col-2 text-end" title="{{view.fields.name.help_text}}">
         {{view.fields.name.verbose_name}}</div>
-    <div class="col">{{ data.name }}</div>
+    <div class="col">{{ item.name }}</div>
 
     <div class="w-100"></div>
 
     <div class="col-2 text-end border-bottom">{{view.fields.desc.verbose_name}}</div>
-    <div class="col border-bottom">{{ data.desc }}</div>
+    <div class="col border-bottom">{{ item.desc }}</div>
 
     <div class="w-100"></div>
 
@@ -19,21 +20,35 @@
 
     <div class="w-100"></div>
 
-    <div class="col text-center border-end">{{ data.author.username }}</div>
-    <div class="col text-center border-end">{{ data.date_beg|date:"d.m.Y H:i" }}</div>
-    <div class="col text-center border-end">{{ data.date_end|date:"d.m.Y H:i" }}</div>
+    <div class="col text-center border-end">{{ item.author.username }}</div>
+    <div class="col text-center border-end">{{ item.date_beg|date:"d.m.Y H:i" }}</div>
+    <div class="col text-center border-end">{{ item.date_end|date:"d.m.Y H:i" }}</div>
     <div class="col text-center border-end">
-        {{ data.date_plan|date:"d.m.Y H:i" }}<br>
+        {{ item.date_plan|date:"d.m.Y H:i" }}<br>
     </div>
     <div class="col text-center">
-        {% if data.date_end %}
+        {% if item.date_end %}
         Завершено
         {% else %}
-        {{ data.days_plan.days }}
+        {{ item.days_plan.days }}
         {% endif %}
     </div>
+
+    <div class="w-100"></div>
+
+    <div class="col">
+        {% include "buttons.html" with btn_max="back add edit delete" model=view.url_name pk=item.id %}
+    </div>
+
+
+{% empty %}
+    <div class="col">
+        Нет проекта
+        {% include "buttons.html" with btn_max="back add" model=view.url_name %}
+    </div>
+{% endfor %}
 </div>
 
-{% include "buttons.html" with btn_max="back add edit delete" model=view.url_name pk=data.id %}
+
 <hr>
 

@@ -23,8 +23,8 @@ from app_task.views import error, Index
 
 urlpatterns = [
     path("", Index.as_view(), kwargs={"model": "tasks"}, name="index"),
-    path("api/", include("api_task.urls")),
-    path("api-auth/", include("rest_framework.urls")),
+    path("api/", include("api_task.urls"), name="api"),
+    path("api-auth/", include("rest_framework.urls"), name="api-auth"),
     path("admin/", admin.site.urls, name="admin"),
     path("add/<str:model>/", Index.as_view(), name="add"),
     path("edit/<str:model>/<int:pk>/", Index.as_view(), name="edit"),

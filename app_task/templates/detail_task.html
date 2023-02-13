@@ -1,28 +1,30 @@
 <h2>Задача</h2>
 <div class="row mb-3">
-    {% comment %} <div class="col-2 text-end">
-        <abbr title="{{view.fields.name.help_text}}">
-            {{view.fields.name.verbose_name}}
-        </abbr>
-    </div> {% endcomment %}
+{% for item in data %}
+    <div class="col-2 text-end" title="{{view.fields.author.help_text}}">
+        {{view.fields.author.verbose_name}}</div>
+    <div class="col">{{ item.author.username }}</div>
+
+    <div class="w-100"></div>
+
     <div class="col-2 text-end" title="{{view.fields.name.help_text}}">
         {{view.fields.name.verbose_name}}</div>
-    <div class="col">{{ data.name }}</div>
+    <div class="col">{{ item.name }}</div>
 
     <div class="w-100"></div>
 
     <div class="col-2 text-end">{{view.fields.desc.verbose_name}}</div>
-    <div class="col">{{ data.desc }}</div>
+    <div class="col">{{ item.desc }}</div>
 
     <div class="w-100"></div>
 
     <div class="col-2 text-end">{{view.fields.proj.verbose_name}}</div>
     <div class="col">
-    {% if data.proj %}
-        <a href={% url "detail" model=view.fields.proj.related_model.META.url_name pk=data.proj.id %}
+    {% if item.proj %}
+        <a href={% url "detail" model=view.fields.proj.related_model.META.url_name pk=item.proj.id %}
         class="btn btn-light w-100 border-0 text-start"
-        title="Подробнее о проекте">
-            {{ data.proj.name }}
+        title="Перейти к проекту">
+            {{ item.proj.name }}
         </a>
     {% else %}
         <span class="pe-none btn border-0">Нет</span>
@@ -33,11 +35,11 @@
 
     <div class="col-2 text-end border-bottom">{{view.fields.sprint.verbose_name}}</div>
     <div class="col border-bottom">
-    {% if data.sprint %}
-        <a href={% url "detail" model=view.fields.sprint.related_model.META.url_name pk=data.sprint.id %}
+    {% if item.sprint %}
+        <a href={% url "detail" model=view.fields.sprint.related_model.META.url_name pk=item.sprint.id %}
         class="btn btn-light w-100 border-0 text-start"
-        title="Подробнее о спринте">
-            {{ data.sprint.name }}
+        title="Перейти к спринту">
+            {{ item.sprint.name }}
         </a>
     {% else %}
             <span class="pe-none btn border-0">Нет</span>
@@ -46,7 +48,6 @@
 
     <div class="w-100"></div>
 
-    <div class="col text-center border-end">{{view.fields.author.verbose_name}}</div>
     <div class="col text-center border-end">{{view.fields.user.verbose_name}}</div>
     <div class="col text-center border-end">{{view.fields.date_beg.verbose_name}}</div>
     <div class="col text-center border-end">{{view.fields.date_end.verbose_name}}</div>
@@ -55,28 +56,38 @@
 
     <div class="w-100"></div>
 
-    <div class="col text-center border-end">{{ data.author.username }}</div>
-    <div class="col text-center border-end">{{ data.user.username }}</div>
-    <div class="col text-center border-end">{{ data.date_beg|date:"d.m.Y H:i" }}</div>
-    <div class="col text-center border-end">{{ data.date_end|date:"d.m.Y H:i" }}</div>
+    <div class="col text-center border-end">{{ item.user.username }}</div>
+    <div class="col text-center border-end">{{ item.date_beg|date:"d.m.Y H:i" }}</div>
+    <div class="col text-center border-end">{{ item.date_end|date:"d.m.Y H:i" }}</div>
     <div class="col text-center border-end">
-        {{ data.date_plan|date:"d.m.Y H:i" }}<br>
+        {{ item.date_plan|date:"d.m.Y H:i" }}<br>
         <p style="font-size: 0.8rem;" class="lh-1 m-0 text-start">
             Минимальное из<br>
-            Проект {{ data.proj.date_max|date:"d.m.Y" }}<br>
-            Спринт {{ data.sprint.date_max|date:"d.m.Y" }}<br>
-            Задача {{ data.date_max|date:"d.m.Y" }}
+            Проект {{ item.proj.date_max|date:"d.m.Y" }}<br>
+            Спринт {{ item.sprint.date_max|date:"d.m.Y" }}<br>
+            Задача {{ item.date_max|date:"d.m.Y" }}
         </p>
     </div>
     <div class="col text-center">
-        {% if data.date_end %}
+        {% if item.date_end %}
         Завершено
         {% else %}
-        {{ data.days_plan.days }}
+        {{ item.days_plan.days }}
         {% endif %}
     </div>
+
+    <div class="w-100"></div>
+
+    <div class="col">
+        {% include "buttons.html" with btn_max="back add edit delete" model=view.url_name pk=item.id %}
+    </div>
+{% empty %}
+    <div class="col">
+        Нет задачи
+        {% include "buttons.html" with btn_max="back add" model=view.url_name %}
+    </div>
+{% endfor %}
 </div>
 
-{% include "buttons.html" with btn_max="back add edit delete" model=view.url_name pk=data.id %}
 <hr>
 
