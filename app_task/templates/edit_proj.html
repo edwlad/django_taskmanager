@@ -1,4 +1,4 @@
-<p>
+{% comment %} <p>
     Задача записана: <span class="bold">{{ context.date_add|date:"d.m.Y H:i" }}</span><br>
     Задача завершена: 
     {% if context.chk_end %}
@@ -6,8 +6,12 @@
     {% else %}
         <span class="bold">&nbsp;Нет&nbsp;</span>
     {% endif %}
-</p>
+</p> {% endcomment %}
 <form action="" method="post">{% csrf_token %}
     {{ form.as_p }}
+    <input type="submit" value="Сохранить">
+</form>
+<form action="" method="post">{% csrf_token %}
+    {{ form.as_div }}
     <input type="submit" value="Сохранить">
 </form>

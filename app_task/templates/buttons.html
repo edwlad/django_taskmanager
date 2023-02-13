@@ -47,19 +47,19 @@
         </a>
     {% endif %}
     {% if btn == "edit" %}
-        <a href={% url "edit" model=model pk=pk %} 
+        <a href={% url "oper" oper="edit" model=model pk=pk %} 
         class="btn btn-sm btn-outline-success">
             Редактировать
         </a>
     {% endif %}
     {% if btn == "detail" %}
-        <a href={% url "detail" model=model pk=pk %} 
+        <a href={% url "oper" oper="detail" model=model pk=pk %} 
         class="btn btn-sm btn-outline-dark">
             Просмотр
         </a>
     {% endif %}
     {% if btn == "delete" %}
-        <a href={% url "delete" model=model pk=pk %} 
+        <a href={% url "oper" oper="delete" model=model pk=pk %} 
         class="btn btn-sm btn-outline-danger">
             Удалить
         </a>
@@ -68,21 +68,21 @@
 
 {% for btn in btn_min.split %}
     {% if btn == "edit" %}
-        <a href={% url "edit" model=model pk=pk %} 
+        <a href={% url "oper" oper="edit" model=model pk=pk %} 
         class="btn btn-sm btn-outline-success"
         title="Редактировать">
             <i class="bi bi-pencil"></i>
         </a>
     {% endif %}
     {% if btn == "detail" %}
-        <a href={% url "detail" model=model pk=pk %} 
+        <a href={% url "oper" oper="detail" model=model pk=pk %} 
         class="btn btn-sm btn-outline-dark"
         title="Просмотр">
             <i class="bi bi-eye"></i>
         </a>
     {% endif %}
     {% if btn == "delete" %}
-        <a href={% url "delete" model=model pk=pk %} 
+        <a href={% url "oper" oper="delete" model=model pk=pk %} 
         class="btn btn-sm btn-outline-danger"
         title="Удалить">
             <i class="bi bi-trash"></i>

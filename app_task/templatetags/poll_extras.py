@@ -1,5 +1,6 @@
 from django import template
 from django.template.defaultfilters import stringfilter
+from django.db.models import QuerySet
 import re
 
 register = template.Library()
@@ -50,6 +51,17 @@ def my_get_filt(context, get_par: str, *args):
     if out:
         return "?" + "&".join(out)
     return ""
+
+
+@register.simple_tag(takes_context=True)
+def my_add_list(context, lst, *args):
+    inp = lst if isinstance(lst, list) else []
+    for v in args:
+        if type(v) in (list, tuple, QuerySet):
+            inp.extend(v)
+        else:
+            inp.append(v)
+    return inp
 
 
 @register.filter

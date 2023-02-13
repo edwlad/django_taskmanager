@@ -1,11 +1,3 @@
-{% extends 'base.html' %}
-{% block title %}Удаление задачи{% endblock title %}
-{% block header %}Удаление задачи №{{ context.id }}{% endblock header %}
-
-{% block content %}
-<style>
-    .bold {font-weight: bold;}
-</style>
 
 <table border=1 cellspacing=1 width=100%>
     <thead>
@@ -32,12 +24,9 @@
     </tr>
 </table>
 
-<form method="post">{% csrf_token %}
+<form method="post">
+    {% csrf_token %}
     <p>Удалить задачу?
     {{ form }}
     <input type="submit" value="Да, удалить"></p>
 </form>
-
-{% include "buttons.html" %}
-
-{% endblock content %}
