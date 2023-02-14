@@ -47,13 +47,13 @@
         </a>
     {% endif %}
     {% if btn == "edit" %}
-        <a href={% url "oper" oper="edit" model=model pk=pk %} 
+        <a href={% url "oper" oper="edit" model=model pk=pk %}
         class="btn btn-sm btn-outline-success">
             Редактировать
         </a>
     {% endif %}
-    {% if btn == "detail" %}
-        <a href={% url "oper" oper="detail" model=model pk=pk %} 
+    {% if btn == "detail" and model != view.kwargs.model %}
+        <a href={% url "detail" model=model pk=pk %}
         class="btn btn-sm btn-outline-dark">
             Просмотр
         </a>
@@ -62,6 +62,12 @@
         <a href={% url "oper" oper="delete" model=model pk=pk %} 
         class="btn btn-sm btn-outline-danger">
             Удалить
+        </a>
+    {% endif %}
+    {% if btn == "cancel" %}
+        <a href={% url "detail" model=model pk=pk %} 
+        class="btn btn-sm btn-outline-dark">
+            Отменить
         </a>
     {% endif %}
 {% endfor %}

@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-from datetime import datetime  # noqa
+from datetime import date  # noqa
 from .managers import TaskManager, SprintManager, ProjManager
 
 
@@ -11,18 +11,18 @@ class Proj(models.Model):
         help_text="Название проекта", verbose_name="Название", max_length=120
     )
     desc = models.TextField(help_text="Описание проекта", verbose_name="Описание")
-    date_beg = models.DateTimeField(
+    date_beg = models.DateField(
         help_text="Дата создания проекта",
         verbose_name="Создано",
-        default=datetime.now,
+        default=date.today,
     )
-    date_end = models.DateTimeField(
+    date_end = models.DateField(
         help_text="Дата завершения проекта",
         verbose_name="Завершено",
         null=True,
         blank=True,
     )
-    date_max = models.DateTimeField(
+    date_max = models.DateField(
         help_text="Планируемая дата завершения проекта",
         verbose_name="План",
         null=True,
@@ -52,18 +52,18 @@ class Sprint(models.Model):
         help_text="Название спринта", verbose_name="Название", max_length=120
     )
     desc = models.TextField(help_text="Описание спринта", verbose_name="Описание")
-    date_beg = models.DateTimeField(
+    date_beg = models.DateField(
         help_text="Дата создания спринта",
         verbose_name="Создано",
-        default=datetime.now,
+        default=date.today,
     )
-    date_end = models.DateTimeField(
+    date_end = models.DateField(
         help_text="Дата завершения спринта",
         verbose_name="Завершено",
         null=True,
         blank=True,
     )
-    date_max = models.DateTimeField(
+    date_max = models.DateField(
         help_text="Планируемая дата завершения спринта",
         verbose_name="План",
         null=True,
@@ -100,18 +100,18 @@ class Task(models.Model):
         help_text="Название задачи", verbose_name="Название", max_length=120
     )
     desc = models.TextField(help_text="Описание задачи", verbose_name="Описание")
-    date_beg = models.DateTimeField(
+    date_beg = models.DateField(
         help_text="Дата создания задачи",
         verbose_name="Создано",
-        default=datetime.now,
+        default=date.today,
     )
-    date_end = models.DateTimeField(
+    date_end = models.DateField(
         help_text="Дата завершения задачи",
         verbose_name="Завершено",
         null=True,
         blank=True,
     )
-    date_max = models.DateTimeField(
+    date_max = models.DateField(
         help_text="Планируемая дата завершения задачи",
         verbose_name="План",
         null=True,
@@ -181,8 +181,8 @@ class TaskStep(models.Model):
         help_text="Выполненая работа по задаче",
         verbose_name="Что сделано",
     )
-    date_end = models.DateTimeField(
-        help_text="Дата завершения шага", verbose_name="Завершён", default=datetime.now
+    date_end = models.DateField(
+        help_text="Дата завершения шага", verbose_name="Завершён", default=date.today
     )
     user = models.ForeignKey(
         help_text="Исполнитель шага",

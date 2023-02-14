@@ -2,7 +2,7 @@
 {% if view.kwargs.oper == "edit" and view.kwargs.model == view.url_name %}
     {% firstof "edit" as oper %}
 {% endif %}
-{% my_add_list "" data as data %}
+{% comment %} {% my_add_list "" data as data %} {% endcomment %}
 
 <h2>Проект</h2>
 <form action="" method="post" class="row mb-3">
@@ -33,13 +33,13 @@
     <div class="w-100"></div>
 
     {# Описание проекта #}
-    <div class="col-2 text-end border-bottom">
+    <div class="col-2 text-end mb-1">
         <label class="{% if oper == "edit" %}fw-bold required{% endif %}" 
         for="id_{{ view.fld.desc.name }}">
         {{view.fld.desc.verbose_name}}
         <label>
     </div>
-    <div class="col border-bottom" title="{{view.fld.desc.help_text}}">
+    <div class="col mb-1" title="{{view.fld.desc.help_text}}">
     {% if oper == "edit" %}
         <textarea class="form-control"
         rows="3"
@@ -56,19 +56,21 @@
     <div class="w-100"></div>
 
     {#  #}
-    <div class="col text-center border-end">{{view.fld.author.verbose_name}}</div>
+    <div class="col text-center border-end border-top">{{view.fld.author.verbose_name}}</div>
     {#  #}
-    <div class="col text-center border-end">{{view.fld.date_beg.verbose_name}}</div>
+    <div class="col text-center border-end border-top">{{view.fld.date_beg.verbose_name}}</div>
     {# дата завершения - название #}
-    <div class="col text-center border-end">
+    <div class="col-3 text-center border-end border-top">
         <label for="id_{{ view.fld.date_end.name }}">
             {{view.fld.date_end.verbose_name}}
         </label>
     </div>
     {# Планируемая дата - название #}
-    <div class="col text-center border-end">План</div>
+    <div class="col-3 text-center border-end border-top">
+        <label for="id_{{ view.fld.date_max.name }}">План</label>
+    </div>
     {#  #}
-    <div class="col text-center">Осталось дней</div>
+    <div class="col text-center border-top">Осталось дней</div>
 
     <div class="w-100"></div>
 
@@ -81,26 +83,24 @@
         {{ item.date_beg|date:"d.m.Y" }}
     </div>
     {# дата завершения - данные #}
-    <div class="col text-center border-end" title="{{view.fld.date_end.help_text}}">
+    <div class="col-3 text-center border-end" title="{{view.fld.date_end.help_text}}">
     {% if oper == "edit" %}
         <input class="form-control"
         type="date" 
         name="{{ view.fld.date_end.name }}"
         value="{{ item.date_end|date:"Y-m-d" }}"
-        placeholder="{{view.fld.date_end.help_text}}"
         id="id_{{ view.fld.date_end.name }}">
     {% else %}
         {{ item.date_end|date:"d.m.Y" }}
     {% endif %}
     </div>
     {# Планируемая дата - данные #}
-    <div class="col text-center border-end" title="{{view.fld.date_max.help_text}}">
+    <div class="col-3 text-center border-end" title="{{view.fld.date_max.help_text}}">
     {% if oper == "edit" %}
         <input class="form-control"
         type="date" 
         name="{{ view.fld.date_max.name }}"
         value="{{ item.date_max|date:"Y-m-d" }}"
-        placeholder="{{view.fld.date_max.help_text}}"
         id="id_{{ view.fld.date_max.name }}">
     {% else %}
         {{ item.date_plan|date:"d.m.Y" }}<br>
@@ -118,14 +118,17 @@
     <div class="w-100"></div>
 
     {% if oper == "edit" %}
-    <div class="col">
-        <input type="submit" value="Сохранить" class="btn btn-primary mb-3">
+    <div class="col d-flex justify-content-end align-items-center mb-1 mt-2">
+        <div class="me-2">
+            {% include "buttons.html" with btn_max="cancel" model=view.url_name pk=item.id %}
+        </div>
+        <input type="submit" value="Сохранить" class="btn btn-success">
     </div>
     <div class="w-100"></div>
     {% endif %}
 
     <div class="col">
-        {% include "buttons.html" with btn_max="back add edit delete" model=view.url_name pk=item.id %}
+        {% include "buttons.html" with btn_max="back detail add edit delete" model=view.url_name pk=item.id %}
     </div>
 {% empty %}
     <div class="col">

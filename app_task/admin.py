@@ -1,12 +1,12 @@
 from django.contrib import admin
 from .models import Proj, Sprint, Task, TaskStep
 from django.db import models
-from datetime import datetime
+from datetime import date
 
 
 @admin.action(description="Отметить как выполненное")
 def make_on_end(modeladmin, request, queryset: models.QuerySet):
-    queryset.update(date_end=datetime.now())
+    queryset.update(date_end=date.today())
 
 
 @admin.action(description="Отменить выполнение")
@@ -21,7 +21,7 @@ def make_not_end(modeladmin, request, queryset: models.QuerySet):
     #     item.save()
     queryset.update(
         date_end=models.Case(
-            models.When(date_end=None, then=datetime.now()),
+            models.When(date_end=None, then=date.today()),
             default=None,
         ),
     )

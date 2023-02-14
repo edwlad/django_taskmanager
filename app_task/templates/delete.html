@@ -12,12 +12,12 @@
     </tr>
     <tr>
         <td>Записана</td>
-        <td class="bold">{{ context.date_add|date:"d.m.Y H:i" }}</td>
+        <td class="bold">{{ context.date_add|date:"d.m.Y" }}</td>
     </tr>
     <tr>
         <td>Завершена</td>
         {% if context.chk_end %}
-            <td class="bold">{{ context.date_end|date:"d.m.Y H:i" }}</td>
+            <td class="bold">{{ context.date_end|date:"d.m.Y" }}</td>
         {% else %}
             <td class="bold">Нет</td>
         {% endif %}

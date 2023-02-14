@@ -1,7 +1,7 @@
 # from django.db import models
 from django.db.models import QuerySet
 from django.db.models import F, Manager, Min, Case, When
-from datetime import datetime, timedelta
+from datetime import date, timedelta
 
 
 class TaskManager(Manager):
@@ -25,7 +25,7 @@ class TaskManager(Manager):
             )
         ).annotate(
             days_plan=Case(
-                When(date_end=None, then=F("date_plan") - datetime.now()),
+                When(date_end=None, then=F("date_plan") - date.today()),
                 default=timedelta(0),
             ),
         )
@@ -44,7 +44,7 @@ class SprintManager(Manager):
             )
         ).annotate(
             days_plan=Case(
-                When(date_end=None, then=F("date_plan") - datetime.now()),
+                When(date_end=None, then=F("date_plan") - date.today()),
                 default=timedelta(0),
             ),
         )
@@ -57,7 +57,7 @@ class ProjManager(Manager):
         qs: QuerySet = super().get_queryset()
         qs = qs.annotate(date_plan=F("date_max")).annotate(
             days_plan=Case(
-                When(date_end=None, then=F("date_plan") - datetime.now()),
+                When(date_end=None, then=F("date_plan") - date.today()),
                 default=timedelta(0),
             ),
         )
