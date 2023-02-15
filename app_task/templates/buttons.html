@@ -1,5 +1,5 @@
 {% load poll_extras %}
-{% my_get view.get_par as get_par %}
+{% my_g view.get_par as get_par %}
 
 {% for btn in btn_max.split %}
     {% if btn == "back" %}
@@ -20,15 +20,15 @@
     {% endif %}
     {% if btn == "items" %}
     <div class="btn-group">
-        <a href="{% my_get get_par model "all" view.page_kwarg "1" %}"
-        class="btn btn-sm btn-outline-secondary {% if model|my_get_find:get_par == "all" %}active{% endif %}">
+        <a href="{% my_g get_par model "all" view.page_kwarg "1" %}"
+        class="btn btn-sm btn-outline-secondary {% if model|add:"=all" in get_par  %}active{% endif %}">
             Показать всё
         </a>
-        <a href="{% my_get get_par model "on" view.page_kwarg "1" %}"
+        <a href="{% my_g get_par model "on" view.page_kwarg "1" %}"
         class="btn btn-sm btn-outline-secondary {% if model|add:"=on" in get_par %}active{% endif %}">
             Выполненные
         </a>
-        <a href="{% my_get get_par model "off" view.page_kwarg "1" %}"
+        <a href="{% my_g get_par model "off" view.page_kwarg "1" %}"
         class="btn btn-sm btn-outline-secondary {% if model|add:"=off" in get_par %}active{% endif %}">
             Не выполненные
         </a>
@@ -41,7 +41,7 @@
         </a>
     {% endif %}
     {% if btn == "add" %}
-        <a href={% url "add" model=model %}{% my_get_filt get_par "model" "pk" %}
+        <a href={% url "add" model=model %}{% my_g "" view.kwargs.model pk %}
         class="btn btn-sm btn-outline-primary">
             Добавить
         </a>

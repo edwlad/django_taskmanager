@@ -4,7 +4,7 @@
         {% include "paginate.html" %}
     </div>
     <div class="align-self-center col">
-        {% include "buttons.html" with btn_max="items add" model=view.url_name %}
+        {% include "buttons.html" with btn_max="items add" model=view.url_name pk=view.kwargs.pk %}
     </div>
 </div>
 <table class="table table-sm table-hover align-middle">

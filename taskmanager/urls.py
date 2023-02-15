@@ -22,13 +22,28 @@ from app_task.views import error, Index
 
 
 urlpatterns = [
-    path("", Index.as_view(), kwargs={"model": "tasks"}, name="index"),
+    path(
+        "",
+        Index.as_view(),
+        kwargs={"oper": "list", "model": "tasks", "pk": 0},
+        name="index",
+    ),
     path("api/", include("api_task.urls"), name="api"),
     path("api-auth/", include("rest_framework.urls"), name="api-auth"),
     path("admin/", admin.site.urls, name="admin"),
     path("<str:oper>/<str:model>/<int:pk>/", Index.as_view(), name="oper"),
-    path("add/<str:model>/", Index.as_view(), kwargs={"oper": "add"}, name="add"),
-    path("<str:model>/<int:pk>/", Index.as_view(), name="detail"),
-    path("<str:model>/", Index.as_view(), name="list"),
+    path(
+        "add/<str:model>/",
+        Index.as_view(),
+        kwargs={"oper": "add", "pk": -1},
+        name="add",
+    ),
+    path(
+        "<str:model>/<int:pk>/",
+        Index.as_view(),
+        kwargs={"oper": "detail"},
+        name="detail",
+    ),
+    path("<str:model>/", Index.as_view(), {"oper": "list", "pk": 0}, name="list"),
     re_path(r".+", error, kwargs={"title": "Не найдено", "status": 404}),
 ]

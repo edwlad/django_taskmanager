@@ -3,9 +3,11 @@
     {% firstof "edit" as oper %}
 {% elif view.kwargs.oper == "add" and view.kwargs.model == view.url_name %}
     {% firstof "add" as oper %}
-    {% my_add_list "" "{'id':0}" as data%}
+    {% my_e "({'id':0},)" as data %}
 {% elif view.kwargs.oper == "delete" and view.kwargs.model == view.url_name %}
     {% firstof "delete" as oper %}
+{% else %}
+    {% firstof "detail" as oper %}
 {% endif %}
 
 <h2>Проект</h2>
@@ -13,19 +15,19 @@
 {% csrf_token %}
 {% for item in data %}
     {# Название проекта #}
-    <div class="col-2 text-end">
+    <div class="col-2 text-end mb-1">
         <label 
         class="{% if oper == "edit" or oper == "add" %}fw-bold required{% endif %}" 
         for="id_{{ view.fld.name.name }}">
             {{view.fld.name.verbose_name}}
         <label>
     </div>
-    <div class="col" title="{{view.fld.name.help_text}}">
+    <div class="col mb-1" title="{{view.fld.name.help_text}}">
     {% if oper == "edit" or oper == "add" %}
         <input class="form-control"
         type="text" 
         name="{{ view.fld.name.name }}"
-        value="{% if oper == "edit" %}{{ item.name }}{% endif %}"
+        value="{{ item.name }}"
         maxlength="{{ view.fld.name.max_length }}" 
         required
         placeholder="{{view.fld.name.help_text}}"
@@ -54,7 +56,7 @@
         required
         placeholder="{{view.fld.desc.help_text}}"
         id="id_{{ view.fld.desc.name }}"
-        >{% if oper == "edit" %}{{ item.desc }}{% endif %}</textarea>
+        >{{ item.desc }}</textarea>
     {% else %}
         {{ item.desc }}
     {% endif %}
@@ -89,7 +91,7 @@
     <div class="col text-center border-end" title="{{view.fld.author.help_text}}">
     {% if oper == "add" %}
         <div class="btn btn-light border w-100 pe-none">
-            {{ view.request.user.username }}
+            {{ view.request.user.username|default:"-" }}
         </div>
     {% else %}
         {{ item.author.username }}
@@ -111,7 +113,7 @@
         <input class="form-control"
         type="date" 
         name="{{ view.fld.date_end.name }}"
-        value="{% if oper == "edit" %}{{ item.date_end|date:"Y-m-d" }}{% endif %}"
+        value="{{ item.date_end|date:"Y-m-d" }}"
         id="id_{{ view.fld.date_end.name }}">
     {% else %}
         {{ item.date_end|date:"d.m.Y" }}
@@ -123,7 +125,7 @@
         <input class="form-control"
         type="date" 
         name="{{ view.fld.date_max.name }}"
-        value="{% if oper == "edit" %}{{ item.date_max|date:"Y-m-d" }}{% endif %}"
+        value="{{ item.date_max|date:"Y-m-d" }}"
         id="id_{{ view.fld.date_max.name }}">
     {% else %}
         {{ item.date_plan|date:"d.m.Y" }}<br>
@@ -131,12 +133,10 @@
     </div>
     {# Осталось дней - данные #}
     <div class="col text-center">
-    {% if oper != "add" %}
-        {% if item.date_end %}
-            Завершено
-        {% else %}
-            {{ item.days_plan.days }}
-        {% endif %}
+    {% if item.date_end %}
+        Завершено
+    {% else %}
+        {{ item.days_plan.days }}
     {% endif %}
     </div>
 
@@ -144,6 +144,12 @@
 
     {% if oper == "edit" or oper == "add" or oper == "delete"%}
     <div class="col d-flex justify-content-end align-items-center mb-1 mt-2">
+    {% if oper == "delete" %}
+        <div class="me-2 text-end">
+            Будут удалены спринты проекта.<br>
+            Задачи будут отмечены как свободные, без проекта.
+        </div>
+    {% endif %} 
         <div class="me-2">
             {% include "buttons.html" with btn_max="cancel" model=view.url_name pk=item.id %}
         </div>
@@ -174,9 +180,6 @@
 {% endfor %}
 
 </form>
-
-
-
 
 <hr>
 

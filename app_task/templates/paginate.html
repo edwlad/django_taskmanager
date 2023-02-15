@@ -1,12 +1,12 @@
 
 {% load poll_extras %}
-{% my_get view.get_par as get_par %}
+{% my_g view.get_par as get_par %}
 
 {% if is_paginated and page_obj.paginator.num_pages > 1 %}
 <ul class="pagination pagination-sm">
     <li class="page-item">
         <a class="page-link"
-        href="{% my_get get_par view.page_kwarg 1 %}"
+        href="{% my_g get_par view.page_kwarg 1 %}"
         title="Первая">
           &laquo;&laquo;
         </a>
@@ -14,9 +14,9 @@
     <li class="page-item">
       <a class="page-link"
       {% if page_obj.has_previous %}
-      href="{% my_get get_par view.page_kwarg page_obj.previous_page_number %}"
+      href="{% my_g get_par view.page_kwarg page_obj.previous_page_number %}"
       {% else %}
-      href="{% my_get get_par view.page_kwarg 1 %}"
+      href="{% my_g get_par view.page_kwarg 1 %}"
       {% endif %}
       title="Предыдущая">
       &nbsp;&laquo;&nbsp;
@@ -32,9 +32,9 @@
     <li class="page-item">
         <a class="page-link" 
         {% if page_obj.has_next %}
-        href="{% my_get get_par view.page_kwarg page_obj.next_page_number %}"
+        href="{% my_g get_par view.page_kwarg page_obj.next_page_number %}"
         {% else %}
-        href="{% my_get get_par view.page_kwarg page_obj.paginator.num_pages %}"
+        href="{% my_g get_par view.page_kwarg page_obj.paginator.num_pages %}"
         {% endif %}
         title="Следующая">
           &nbsp;&raquo;&nbsp;
@@ -42,7 +42,7 @@
     </li>
     <li class="page-item">
         <a class="page-link" 
-        href="{% my_get get_par view.page_kwarg page_obj.paginator.num_pages %}"
+        href="{% my_g get_par view.page_kwarg page_obj.paginator.num_pages %}"
         title="Последняя">
           &raquo;&raquo;
         </a>
