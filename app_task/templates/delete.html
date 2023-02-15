@@ -1,29 +1,4 @@
 
-<table border=1 cellspacing=1 width=100%>
-    <thead>
-        <tr>
-            <th width=20%>Имя</th>
-            <th>Значение</th>
-        </tr>
-    </thead>
-    <tr>
-        <td>Задача</td>
-        <td>{{ context.desc }}</td>
-    </tr>
-    <tr>
-        <td>Записана</td>
-        <td class="bold">{{ context.date_add|date:"d.m.Y" }}</td>
-    </tr>
-    <tr>
-        <td>Завершена</td>
-        {% if context.chk_end %}
-            <td class="bold">{{ context.date_end|date:"d.m.Y" }}</td>
-        {% else %}
-            <td class="bold">Нет</td>
-        {% endif %}
-    </tr>
-</table>
-
 <form method="post">
     {% csrf_token %}
     <p>Удалить задачу?

@@ -60,7 +60,7 @@ def my_add_list(context, lst, *args):
         if type(v) in (list, tuple, QuerySet):
             inp.extend(v)
         else:
-            inp.append(v)
+            inp.append(eval(v))
     return inp
 
 

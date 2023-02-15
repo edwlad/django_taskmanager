@@ -1,12 +1,3 @@
-<p>
-    Задача записана: <span class="bold">{{ context.date_add|date:"d.m.Y" }}</span><br>
-    Задача завершена: 
-    {% if context.chk_end %}
-        <span class="bold">&nbsp;{{ context.date_end|date:"d.m.Y" }}&nbsp;</span>
-    {% else %}
-        <span class="bold">&nbsp;Нет&nbsp;</span>
-    {% endif %}
-</p>
 <form action="" method="post">{% csrf_token %}
     {{ form.as_p }}
     <input type="submit" value="Сохранить">

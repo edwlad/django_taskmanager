@@ -41,6 +41,9 @@ class Proj(models.Model):
     def __str__(self) -> str:
         return f"{self.id}: {self.name}"
 
+    def save(self, **kwargs) -> None:
+        return super().save(**kwargs)
+
     class META:
         url_name = "projs"
 
