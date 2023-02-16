@@ -150,10 +150,11 @@
             Задачи будут отмечены как свободные, без проекта.
         </div>
     {% endif %} 
-        <div class="me-2">
-            {% include "buttons.html" with btn_max="cancel" model=view.url_name pk=item.id %}
+        <div class="me-3">
+            {% include "buttons.html" with btn_max="back" %}
         </div>
-        <input type="submit" 
+        <input id="btn-proj-submit" 
+        type="submit" 
         value=
         {% if oper == "edit" %}"Сохранить"
         {% elif oper == "delete" %}"Да, удалить"

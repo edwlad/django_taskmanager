@@ -3,6 +3,8 @@ from django.http.response import HttpResponseRedirect, HttpResponse  # noqa
 from django.http.request import HttpRequest  # noqa
 from django.db import models  # noqa
 from django.urls import reverse, reverse_lazy  # noqa
+from django.conf import settings
+from django.contrib.auth.models import User
 
 from django.views.generic import (
     TemplateView,
@@ -13,7 +15,6 @@ from django.views.generic import (
     DeleteView,
 )
 from .models import Proj, Sprint, Task, TaskStep
-from django.conf import settings
 from api_task.serializers import (
     ProjSerializer,
     SprintSerializer,
@@ -21,13 +22,11 @@ from api_task.serializers import (
     TaskStepSerializer,
 )
 
-# from datetime import date
-
 PAGINATE_BY = settings.PAGINATE_BY
 PAGINATE_ORPHANS = settings.PAGINATE_ORPHANS
 
 
-def error(req: HttpRequest, *args, **kwargs):
+def error(req: HttpRequest, *args, **kwargs) -> HttpResponse:
     status = int(kwargs.get("status", 400))
     title = kwargs.get("title", "Ошибка")
     content = kwargs.get("content", f"<p>Код ошибки: {status}</p>")
@@ -50,25 +49,52 @@ def ProjTemplate(self: TemplateView, oper):
     model_url = self.kwargs.get("model")
     pk = self.kwargs.get("pk")
     url_name = model.META.url_name
+    url_filt = model.META.url_filt
 
+    # если есть данные в GET о модели и ключе, то собираем их
+    task_id = 0
+    if par.get("model", "") == Task.META.url_name:
+        task_id = int(par.get("pk", 0))
+
+    sprint_id = 0
+    if task_id > 0:
+        qs = Task.objects.filter(pk=task_id).exclude(sprint_id=None).first()
+        sprint_id = qs.sprint_id if qs else 0
+    if sprint_id <= 0 and par.get("model", "") == Sprint.META.url_name:
+        sprint_id = int(par.get("pk", 0))
+
+    proj_id = 0
+    if task_id > 0:
+        qs = Task.objects.filter(pk=task_id).exclude(proj_id=None).first()
+        proj_id = qs.proj_id if qs else 0
+    if proj_id <= 0 and sprint_id > 0:
+        qs = Sprint.objects.filter(pk=sprint_id).exclude(proj_id=None).first()
+        proj_id = qs.proj_id if qs else 0
+    if proj_id <= 0 and par.get("model", "") == Proj.META.url_name:
+        proj_id = int(par.get("pk", 0))
+
+    # смотрим с какой страницы обращение
     list_qs = model.objects.all()
     if model_url == Sprint.META.url_name:
-        qs = Sprint.objects.filter(id=pk).first()
+        qs = Sprint.objects.filter(id=pk).exclude(proj_id=None).first()
         pk = qs.proj_id if qs else 0
     elif model_url == Task.META.url_name:
-        qs = Task.objects.filter(id=pk).first()
+        qs = Task.objects.filter(id=pk).exclude(proj_id=None).first()
         pk = qs.proj_id if qs else 0
+    if pk <= 0 and proj_id > 0:
+        qs = Proj.objects.filter(id=proj_id).first()
+        pk = qs.id if qs else 0
     one_qs = model.objects.filter(id=pk)
 
     match oper:
         case "list":
-            match par.get(url_name, ""):
+            match par.get(url_filt, ""):
                 case "on":
                     list_qs = list_qs.exclude(date_end=None)
                 case "all":
                     pass
                 case _:
-                    par[url_name] = "off"
+                    par[url_filt] = "off"
                     list_qs = list_qs.filter(date_end=None)
 
             obj = ListView(
@@ -77,7 +103,7 @@ def ProjTemplate(self: TemplateView, oper):
                 ordering=("-date_beg", "-id"),
                 paginate_by=PAGINATE_BY,
                 paginate_orphans=PAGINATE_ORPHANS,
-                page_kwarg=f"{url_name}_page",
+                page_kwarg=model.META.url_page,
             )
         case "add":
             obj = CreateView(
@@ -121,8 +147,9 @@ def ProjTemplate(self: TemplateView, oper):
     obj.model = model
     obj.request = self.request
     obj.context_object_name = "data"
-    obj.fld = {v.name: v for v in obj.model._meta.get_fields()}
+    obj.url_filt = url_filt
     obj.url_name = url_name
+    obj.fld = {v.name: v for v in obj.model._meta.get_fields()}
     obj.get_par = "&".join(map("=".join, par.items()))
     obj.ser = ProjSerializer
     # obj.api = {v.data["id"]: v.data for v in map(ProjSerializer, obj.queryset)}
@@ -135,24 +162,52 @@ def SprintTemplate(self: TemplateView, oper):
     model_url = self.kwargs.get("model")
     pk = self.kwargs.get("pk")
     url_name = model.META.url_name
+    url_filt = model.META.url_filt
 
+    # если есть данные в GET о модели и ключе, то собираем их
+    task_id = 0
+    if par.get("model", "") == Task.META.url_name:
+        task_id = int(par.get("pk", 0))
+
+    sprint_id = 0
+    if task_id > 0:
+        qs = Task.objects.filter(pk=task_id).exclude(sprint_id=None).first()
+        sprint_id = qs.sprint_id if qs else 0
+    if sprint_id <= 0 and par.get("model", "") == Sprint.META.url_name:
+        sprint_id = int(par.get("pk", 0))
+
+    proj_id = 0
+    if task_id > 0:
+        qs = Task.objects.filter(pk=task_id).exclude(proj_id=None).first()
+        proj_id = qs.proj_id if qs else 0
+    if proj_id <= 0 and sprint_id > 0:
+        qs = Sprint.objects.filter(pk=sprint_id).exclude(proj_id=None).first()
+        proj_id = qs.proj_id if qs else 0
+    if proj_id <= 0 and par.get("model", "") == Proj.META.url_name:
+        proj_id = int(par.get("pk", 0))
+
+    # смотрим с какой страницы обращение
     list_qs = model.objects.all()
     if model_url == Proj.META.url_name:
         list_qs = list_qs.filter(proj_id=pk)
     elif model_url == Task.META.url_name:
-        qs = Task.objects.filter(id=pk).first()
-        pk = qs.proj_id if qs else 0
+        qs = Task.objects.filter(id=pk).exclude(sprint_id=None).first()
+        pk = qs.sprint_id if qs else 0
+    if pk <= 0 and sprint_id > 0:
+        qs = Sprint.objects.filter(id=sprint_id).first()
+        pk = qs.id if qs else 0
+
     one_qs = model.objects.filter(id=pk)
 
     match oper:
         case "list":
-            match par.get(url_name, ""):
+            match par.get(url_filt, ""):
                 case "on":
                     list_qs = list_qs.exclude(date_end=None)
                 case "all":
                     pass
                 case _:
-                    par[url_name] = "off"
+                    par[url_filt] = "off"
                     list_qs = list_qs.filter(date_end=None)
 
             obj = ListView(
@@ -161,7 +216,7 @@ def SprintTemplate(self: TemplateView, oper):
                 ordering=("-date_beg", "-id"),
                 paginate_by=PAGINATE_BY,
                 paginate_orphans=PAGINATE_ORPHANS,
-                page_kwarg=f"{url_name}_page",
+                page_kwarg=model.META.url_page,
             )
         case "add":
             obj = CreateView(
@@ -205,12 +260,16 @@ def SprintTemplate(self: TemplateView, oper):
     obj.model = model
     obj.request = self.request
     obj.context_object_name = "data"
-    obj.projs = Proj.objects.filter(date_end=None)
-    obj.projs_def = par.get(Proj.META.url_name, 0)
-    obj.fld = {v.name: v for v in obj.model._meta.get_fields()}
+    obj.url_filt = url_filt
     obj.url_name = url_name
+    obj.fld = {v.name: v for v in obj.model._meta.get_fields()}
+    obj.task_id = task_id
+    obj.sprint_id = sprint_id
+    obj.proj_id = proj_id
+    obj.projs = Proj.objects.filter(date_end=None)
     obj.get_par = "&".join(map("=".join, par.items()))
     obj.ser = SprintSerializer
+    # obj.api = {v.data["id"]: v.data for v in map(SprintSerializer, obj.queryset)}
     return obj
 
 
@@ -220,7 +279,31 @@ def TaskTemplate(self: TemplateView, oper):
     model_url = self.kwargs.get("model")
     pk = self.kwargs.get("pk")
     url_name = model.META.url_name
+    url_filt = model.META.url_filt
 
+    # если есть данные в GET о модели и ключе, то собираем их
+    task_id = 0
+    if par.get("model", "") == Task.META.url_name:
+        task_id = int(par.get("pk", 0))
+
+    sprint_id = 0
+    if task_id > 0:
+        qs = Task.objects.filter(pk=task_id).exclude(sprint_id=None).first()
+        sprint_id = qs.sprint_id if qs else 0
+    if sprint_id <= 0 and par.get("model", "") == Sprint.META.url_name:
+        sprint_id = int(par.get("pk", 0))
+
+    proj_id = 0
+    if task_id > 0:
+        qs = Task.objects.filter(pk=task_id).exclude(proj_id=None).first()
+        proj_id = qs.proj_id if qs else 0
+    if proj_id <= 0 and sprint_id > 0:
+        qs = Sprint.objects.filter(pk=sprint_id).exclude(proj_id=None).first()
+        proj_id = qs.proj_id if qs else 0
+    if proj_id <= 0 and par.get("model", "") == Proj.META.url_name:
+        proj_id = int(par.get("pk", 0))
+
+    # смотрим с какой страницы обращение
     list_qs = model.objects.all()
     if model_url == Sprint.META.url_name:
         list_qs = list_qs.filter(sprint_id=pk)
@@ -230,13 +313,13 @@ def TaskTemplate(self: TemplateView, oper):
 
     match oper:
         case "list":
-            match par.get(url_name, ""):
+            match par.get(url_filt, ""):
                 case "on":
                     list_qs = list_qs.exclude(date_end=None)
                 case "all":
                     pass
                 case _:
-                    par[url_name] = "off"
+                    par[url_filt] = "off"
                     list_qs = list_qs.filter(date_end=None)
 
             obj = ListView(
@@ -245,14 +328,39 @@ def TaskTemplate(self: TemplateView, oper):
                 ordering=("-date_beg", "-id"),
                 paginate_by=PAGINATE_BY,
                 paginate_orphans=PAGINATE_ORPHANS,
-                page_kwarg=f"{url_name}_page",
+                page_kwarg=model.META.url_page,
             )
         case "add":
-            pass
+            obj = CreateView(
+                fields=[
+                    "author",
+                    "user",
+                    "proj",
+                    "sprint",
+                    "name",
+                    "desc",
+                    "date_end",
+                    "date_max",
+                ],
+                success_url=reverse_lazy(
+                    "list",
+                    kwargs={
+                        "model": model_url,
+                    },
+                ),
+            )
         case "edit":
             obj = UpdateView(
                 queryset=one_qs,
-                fields=["name", "desc", "date_end", "date_max", "proj", "sprint"],
+                fields=[
+                    "user",
+                    "name",
+                    "desc",
+                    "date_end",
+                    "date_max",
+                    "proj",
+                    "sprint",
+                ],
                 success_url=reverse_lazy(
                     "detail",
                     kwargs={
@@ -262,7 +370,15 @@ def TaskTemplate(self: TemplateView, oper):
                 ),
             )
         case "delete":
-            pass
+            obj = DeleteView(
+                queryset=one_qs,
+                success_url=reverse(
+                    "list",
+                    kwargs={
+                        "model": model_url,
+                    },
+                ),
+            )
         case _:
             obj = ListView(
                 queryset=one_qs,
@@ -273,16 +389,19 @@ def TaskTemplate(self: TemplateView, oper):
     obj.model = model
     obj.request = self.request
     obj.context_object_name = "data"
+    obj.url_filt = url_filt
+    obj.url_name = url_name
     obj.fld = {v.name: v for v in obj.model._meta.get_fields()}
+    obj.task_id = task_id
+    obj.sprint_id = sprint_id
+    obj.proj_id = proj_id
     obj.projs = Proj.objects.filter(date_end=None)
     obj.sprints = Sprint.objects.filter(date_end=None)
-    # obj.sprints = Sprint.objects.filter(date_end=None).filter(
-    #     proj_id=model.objects.filter(id=pk).get().proj.id
-    # )
-    obj.url_name = url_name
+    obj.users = User.objects.all()
     obj.par = par
     obj.get_par = "&".join(map("=".join, par.items()))
     obj.ser = TaskSerializer
+    # obj.api = {v.data["id"]: v.data for v in map(TaskSerializer, obj.queryset)}
     return obj
 
 
@@ -292,6 +411,7 @@ def TaskStepTemplate(self: TemplateView, oper):
     # model_url = self.kwargs.get("model")
     pk = self.kwargs.get("pk")
     url_name = model.META.url_name
+    url_filt = model.META.url_filt
 
     match oper:
         case "list":
@@ -300,10 +420,10 @@ def TaskStepTemplate(self: TemplateView, oper):
             obj = ListView(
                 queryset=list_qs,
                 template_name="list_task_step.html",
-                ordering=("-date_beg", "-id"),
+                ordering=("-date_end", "-id"),
                 paginate_by=PAGINATE_BY,
                 paginate_orphans=PAGINATE_ORPHANS,
-                page_kwarg=f"{url_name}_page",
+                page_kwarg=model.META.url_page,
             )
         case _:
             pass
@@ -312,11 +432,12 @@ def TaskStepTemplate(self: TemplateView, oper):
     obj.model = model
     obj.request = self.request
     obj.context_object_name = "data"
-    obj.fields = {v.name: v for v in obj.model._meta.get_fields()}
     obj.url_name = url_name
-    obj.par = par
+    obj.url_filt = url_filt
+    obj.fields = {v.name: v for v in obj.model._meta.get_fields()}
     obj.get_par = "&".join(map("=".join, par.items()))
     obj.ser = TaskStepSerializer
+    # obj.api = {v.data["id"]: v.data for v in map(TaskStepSerializer, obj.queryset)}
     return obj
 
 
@@ -382,6 +503,7 @@ class Index(TemplateView):
                 context["header"] = "Просмотр шага"
             case _:
                 pass
+
         try:
             context["details"] = [v.get(self.request) for v in objs]
         except Exception as err:

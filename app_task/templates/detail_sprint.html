@@ -3,7 +3,7 @@
     {% firstof "edit" as oper %}
 {% elif view.kwargs.oper == "add" and view.kwargs.model == view.url_name %}
     {% firstof "add" as oper %}
-    {% my_e "({'id':0,'proj':{'id':" view.projs_def "}},)" as data %}
+    {% my_e "({'id':0},)" as data %}
 {% elif view.kwargs.oper == "delete" and view.kwargs.model == view.url_name %}
     {% firstof "delete" as oper %}
 {% else %}
@@ -73,13 +73,13 @@
         <select class="form-select form-select-sm"
         name="{{ view.fld.proj.name }}"
         id="id_{{ view.fld.proj.name }}"
+        title="Выбор проекта"
         required>
-            <option selected disabled>-----</option>
+            <option value="" selected disabled>-----</option>
         {% for pr in view.projs %}
             <option value="{{ pr.id }}"
-            {% if item.proj.id == pr.id %}selected{% endif %}
-            >
-                {{ pr.name }}
+            {% if view.proj_id == pr.id %}selected{% endif %}
+            >{{ pr.name }}
             </option>
         {% empty %}
             <option disabled>Все проекты завершены</option>
@@ -192,10 +192,11 @@
             но остануться в проеке.
         </div>
     {% endif %} 
-        <div class="me-2">
-            {% include "buttons.html" with btn_max="cancel" model=view.url_name pk=item.id %}
+        <div class="me-3">
+            {% include "buttons.html" with btn_max="back" %}
         </div>
-        <input type="submit" 
+        <input id="btn-sprint-submit"
+        type="submit" 
         value=
         {% if oper == "edit" %}"Сохранить"
         {% elif oper == "delete" %}"Да, удалить"

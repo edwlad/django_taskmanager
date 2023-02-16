@@ -1,5 +1,5 @@
 from django.db import models
-from django.conf import settings
+from django.contrib.auth.models import User
 from datetime import date  # noqa
 from .managers import TaskManager, SprintManager, ProjManager
 
@@ -31,7 +31,7 @@ class Proj(models.Model):
     author = models.ForeignKey(
         help_text="Автор проекта",
         verbose_name="Автор",
-        to=settings.AUTH_USER_MODEL,
+        to=User,
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
@@ -46,6 +46,9 @@ class Proj(models.Model):
 
     class META:
         url_name = "projs"
+        url_id = "projs_id"
+        url_page = "projs_p"
+        url_filt = "projs_f"
 
 
 class Sprint(models.Model):
@@ -75,7 +78,7 @@ class Sprint(models.Model):
     author = models.ForeignKey(
         help_text="Автор спринта",
         verbose_name="Автор",
-        to=settings.AUTH_USER_MODEL,
+        to=User,
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
@@ -94,6 +97,9 @@ class Sprint(models.Model):
 
     class META:
         url_name = "sprints"
+        url_id = "sprints_id"
+        url_page = "sprints_p"
+        url_filt = "sprints_f"
 
 
 class Task(models.Model):
@@ -123,7 +129,7 @@ class Task(models.Model):
     author = models.ForeignKey(
         help_text="Автор задачи",
         verbose_name="Автор",
-        to=settings.AUTH_USER_MODEL,
+        to=User,
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
@@ -132,7 +138,7 @@ class Task(models.Model):
     user = models.ForeignKey(
         help_text="Исполнитель задачи",
         verbose_name="Исполнитель",
-        to=settings.AUTH_USER_MODEL,
+        to=User,
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
@@ -158,12 +164,11 @@ class Task(models.Model):
     )
     # parent = models.ForeignKey(
     #     help_text="Предыдущиая задача",
-    #     to="self",  # на эту же таблицу
-    #     # при удалении категории НЕ удалится все поддерево, null где надо
+    #     verbose_name="Зависит от",
+    #     to="self",
     #     on_delete=models.SET_NULL,
     #     blank=True,
-    #     null=True,  # Может не быть предыдущей (родительской) задачи
-    #     # имя, по которому (родительской) задачи можно найти следующую
+    #     null=True,
     #     related_name="parent_next",
     # )
 
@@ -177,6 +182,9 @@ class Task(models.Model):
 
     class META:
         url_name = "tasks"
+        url_id = "tasks_id"
+        url_page = "tasks_p"
+        url_filt = "tasks_f"
 
 
 class TaskStep(models.Model):
@@ -190,7 +198,7 @@ class TaskStep(models.Model):
     user = models.ForeignKey(
         help_text="Исполнитель шага",
         verbose_name="Исполнитель",
-        to=settings.AUTH_USER_MODEL,
+        to=User,
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
@@ -209,3 +217,6 @@ class TaskStep(models.Model):
 
     class META:
         url_name = "task_steps"
+        url_id = "tsteps_id"
+        url_page = "tsteps_p"
+        url_filt = "tsteps_f"

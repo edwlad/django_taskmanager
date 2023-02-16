@@ -1,6 +1,13 @@
 {% load poll_extras %}
 {% if view.kwargs.oper == "edit" and view.kwargs.model == view.url_name %}
     {% firstof "edit" as oper %}
+{% elif view.kwargs.oper == "add" and view.kwargs.model == view.url_name %}
+    {% firstof "add" as oper %}
+    {% my_e "({'id':0},)" as data %}
+{% elif view.kwargs.oper == "delete" and view.kwargs.model == view.url_name %}
+    {% firstof "delete" as oper %}
+{% else %}
+    {% firstof "detail" as oper %}
 {% endif %}
 
 <h2>Задача</h2>
@@ -8,24 +15,30 @@
 {% for item in data %}
 {% csrf_token %}
     {# Автор задачи #}
-    <div class="col-2 text-end">
+    <div class="col-2 text-end mb-1">
         {{view.fld.author.verbose_name}}
     </div>
-    <div class="col" title="{{view.fld.author.help_text}}">
+    <div class="col mb-1" title="{{view.fld.author.help_text}}">
+    {% if oper == "add" %}
+        <div class="btn btn-light border w-100 pe-none text-start">
+            {{ view.request.user.username|default:"-" }}
+        </div>
+    {% else %}
         {{ item.author.username }}
+    {% endif %}
     </div>
 
     <div class="w-100"></div>
 
     {# Название задачи #}
-    <div class="col-2 text-end" title="{{view.fld.name.help_text}}">
-        <label class="{% if oper == "edit" %}fw-bold required{% endif %}" 
+    <div class="col-2 text-end mb-1" title="{{view.fld.name.help_text}}">
+        <label class="{% if oper == "edit" or oper == "add" %}fw-bold required{% endif %}" 
         for="id_{{ view.fld.name.name }}">
             {{view.fld.name.verbose_name}}
         </label>
     </div>
-    <div class="col">
-        {% if oper == "edit" %}
+    <div class="col mb-1">
+        {% if oper == "edit" or oper == "add" %}
         <input class="form-control"
         type="text" 
         name="{{ view.fld.name.name }}"
@@ -43,13 +56,13 @@
 
     {# Описание задачи #}
     <div class="col-2 text-end mb-1">
-        <label class="{% if oper == "edit" %}fw-bold required{% endif %}" 
+        <label class="{% if oper == "edit" or oper == "add" %}fw-bold required{% endif %}" 
             for="id_{{ view.fld.desc.name }}">
             {{view.fld.desc.verbose_name}}
         </label>
     </div>
     <div class="col mb-1" title="{{view.fld.desc.help_text}}">
-    {% if oper == "edit" %}
+    {% if oper == "edit" or oper == "add" %}
         <textarea class="form-control"
         rows="3"
         type="text" 
@@ -66,28 +79,25 @@
 
     {# Проект задачи #}
     <div class="col-2 text-end mb-1">
-        <label for="id_{{ view.fld.proj.name }}"
-        onclick="alert('Клик');">
+        <label for="id_{{ view.fld.proj.name }}">
             {{view.fld.proj.verbose_name}}
         </label>
     </div>
     <div class="col mb-1" title="{{view.fld.proj.help_text}}">
-    {% if oper == "edit" %}
+    {% if oper == "edit" or oper == "add" %}
         <select class="form-select form-select-sm"
         name="{{ view.fld.proj.name }}"
         id="id_{{ view.fld.proj.name }}"
-        onchange="console.log('Выбор значения', this.value, this.text);"
+        title="Выбор проекта"
         >
             <option value="" selected>-----</option>
-        {% if item.proj %}
-            <option value="{{ item.proj.id }}" selected>
-                {{ item.proj.name }}
-            </option>
-        {% endif %}
         {% for pr in view.projs %}
-            {% if item.proj.id != pr.id %}
-            <option value="{{ pr.id }}">{{ pr.name }}</option>
-            {% endif %}
+            <option value="{{ pr.id }}"
+            {% if view.proj_id == pr.id %}selected{% endif %}
+            >{{ pr.name }}
+            </option>
+        {% empty %}
+            <option disabled>Все проекты завершены</option>
         {% endfor %}
         </select>
     {% else %}
@@ -112,20 +122,19 @@
         </label>
     </div>
     <div class="col mb-1" title="{{view.fld.sprint.help_text}}">
-    {% if oper == "edit" %}
+    {% if oper == "edit" or oper == "add" %}
         <select class="form-select form-select-sm"
         name="{{ view.fld.sprint.name }}"
-        id="id_{{ view.fld.sprint.name }}">
+        id="id_{{ view.fld.sprint.name }}"
+        title="Выбор спринта">
             <option value="" selected>-----</option>
-        {% if item.sprint %}
-            <option value="{{ item.sprint.id }}" selected>
-                {{ item.sprint.name }}
+        {% for sp in view.sprints %}
+            <option value="{{ sp.id }}"
+            {% if view.sprint_id == sp.id %}selected{% endif %}
+            >{{ sp.name }}
             </option>
-        {% endif %}
-        {% for pr in view.sprints %}
-            {% if item.sprint.id != pr.id %}
-            <option value="{{ pr.id }}">{{ pr.name }}</option>
-            {% endif %}
+        {% empty %}
+            <option disabled>Все спринты завершены</option>
         {% endfor %}
         </select>
     {% else %}
@@ -143,10 +152,16 @@
 
     <div class="w-100"></div>
 
-    {#  #}
-    <div class="col text-center border-end border-top">{{view.fld.user.verbose_name}}</div>
-    {#  #}
-    <div class="col text-center border-end border-top">{{view.fld.date_beg.verbose_name}}</div>
+    {# исполнитель - название #}
+    <div class="col text-center border-end border-top">
+        <label for="id_{{ view.fld.user.name }}">
+            {{view.fld.user.verbose_name}}
+        </label>
+    </div>
+    {# дата создания - название #}
+    <div class="col text-center border-end border-top">
+        {{view.fld.date_beg.verbose_name}}
+    </div>
     {# дата завершения - название #}
     <div class="col-3 text-center border-end border-top">
         <label for="id_{{ view.fld.date_end.name }}">
@@ -162,13 +177,40 @@
 
     <div class="w-100"></div>
 
-    {#  #}
-    <div class="col text-center border-end" title="{{view.fld.user.help_text}}">{{ item.user.username }}</div>
-    {#  #}
-    <div class="col text-center border-end" title="{{view.fld.date_beg.help_text}}">{{ item.date_beg|date:"d.m.Y" }}</div>
+    {# исполнитель - данные #}
+    <div class="col text-center border-end" title="{{view.fld.user.help_text}}">
+    {% if oper == "edit" or oper == "add" %}
+        <select class="form-select form-select-sm"
+        name="{{ view.fld.user.name }}"
+        id="id_{{ view.fld.user.name }}"
+        title="Выбор исполнителя">
+            <option value="" selected>-----</option>
+        {% for us in view.users %}
+            <option value="{{ us.id }}"
+            {% if item.user_id == us.id %}selected{% endif %}
+            >{{ us.username }}
+            </option>
+        {% empty %}
+            <option disabled>Исполнители не найдены</option>
+        {% endfor %}
+        </select>
+    {% else %}
+        {{ item.user.username }}
+    {% endif %}
+    </div>
+    {# дата создания - данные #}
+    <div class="col text-center border-end" title="{{view.fld.date_beg.help_text}}">
+    {% if oper == "add" %}
+        <div class="btn  btn-light border w-100 pe-none">
+            {% now "d.m.Y" %}
+        </div>
+    {% else %}
+        {{ item.date_beg|date:"d.m.Y" }}
+    {% endif %}
+    </div>
     {# дата завершения - данные #}
     <div class="col-3 text-center border-end" title="{{view.fld.date_end.help_text}}">
-    {% if oper == "edit" %}
+    {% if oper == "edit" or oper == "add" %}
         <input class="form-control"
         type="date" 
         name="{{ view.fld.date_end.name }}"
@@ -180,7 +222,7 @@
     </div>
     {# Планируемая дата - данные #}
     <div class="col-3 text-center border-end" title="{{view.fld.date_max.help_text}}">
-    {% if oper == "edit" %}
+    {% if oper == "edit" or oper == "add" %}
         <input class="form-control"
         type="date" 
         name="{{ view.fld.date_max.name }}"
@@ -207,12 +249,24 @@
 
     <div class="w-100"></div>
 
-    {% if oper == "edit" %}
+    {% if oper == "edit" or oper == "add" or oper == "delete"%}
     <div class="col d-flex justify-content-end align-items-center mb-1 mt-2">
-        <div class="me-2">
-        {% include "buttons.html" with btn_max="cancel" model=view.url_name pk=item.id %}
+        <div class="me-3">
+            {% include "buttons.html" with btn_max="back" %}
         </div>
-        <input type="submit" value="Сохранить" class="btn btn-success">
+        <input id="btn-task-submit"
+        type="submit" 
+        value=
+        {% if oper == "edit" %}"Сохранить"
+        {% elif oper == "delete" %}"Да, удалить"
+        {% else %}"Создать"
+        {% endif %} 
+        class="btn 
+            {% if oper == "edit" %}btn-success
+            {% elif oper == "delete" %}btn-danger
+            {% else %}btn-primary
+            {% endif %}"
+        >
     </div>
     <div class="w-100"></div>
     {% endif %}

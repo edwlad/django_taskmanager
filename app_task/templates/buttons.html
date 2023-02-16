@@ -3,7 +3,7 @@
 
 {% for btn in btn_max.split %}
     {% if btn == "back" %}
-        <input 
+        <input id="btn-{{model}}-back"
         type=button 
         value="Назад" 
         class="btn btn-sm btn-outline-dark" 
@@ -11,7 +11,7 @@
         >
     {% endif %}
     {% if btn == "forw" %}
-        <input 
+        <input id="btn-{{model}}-forward"
         type=button 
         value="Вперёд" 
         class="btn btn-sm btn-outline-dark" 
@@ -20,52 +20,52 @@
     {% endif %}
     {% if btn == "items" %}
     <div class="btn-group">
-        <a href="{% my_g get_par model "all" view.page_kwarg "1" %}"
-        class="btn btn-sm btn-outline-secondary {% if model|add:"=all" in get_par  %}active{% endif %}">
+        <a id="btn-{{model}}-f-all" href="{% my_g get_par view.url_filt "all" view.page_kwarg "1" %}"
+        class="btn btn-sm btn-outline-secondary {% if view.url_filt|add:"=all" in get_par  %}active{% endif %}">
             Показать всё
         </a>
-        <a href="{% my_g get_par model "on" view.page_kwarg "1" %}"
-        class="btn btn-sm btn-outline-secondary {% if model|add:"=on" in get_par %}active{% endif %}">
+        <a id="btn-{{model}}-f-on" href="{% my_g get_par view.url_filt "on" view.page_kwarg "1" %}"
+        class="btn btn-sm btn-outline-secondary {% if view.url_filt|add:"=on" in get_par %}active{% endif %}">
             Выполненные
         </a>
-        <a href="{% my_g get_par model "off" view.page_kwarg "1" %}"
-        class="btn btn-sm btn-outline-secondary {% if model|add:"=off" in get_par %}active{% endif %}">
+        <a id="btn-{{model}}-f-off" href="{% my_g get_par view.url_filt "off" view.page_kwarg "1" %}"
+        class="btn btn-sm btn-outline-secondary {% if view.url_filt|add:"=off" in get_par %}active{% endif %}">
             Не выполненные
         </a>
     </div>
     {% endif %}
     {% if btn == "index" %}
-        <a href={% url "index" %} 
+        <a id="btn-{{model}}-index" href={% url "index" %} 
         class="btn btn-sm btn-outline-dark">
             На главную
         </a>
     {% endif %}
     {% if btn == "add" %}
-        <a href={% url "add" model=model %}{% my_g "" view.kwargs.model pk %}
+        <a id="btn-{{model}}-add" href={% url "add" model=model %}{% my_g "" model=view.kwargs.model pk=view.kwargs.pk %}
         class="btn btn-sm btn-outline-primary">
             Добавить
         </a>
     {% endif %}
     {% if btn == "edit" %}
-        <a href={% url "oper" oper="edit" model=model pk=pk %}
+        <a id="btn-{{model}}-edit" href={% url "oper" oper="edit" model=model pk=pk %}
         class="btn btn-sm btn-outline-success">
             Редактировать
         </a>
     {% endif %}
     {% if btn == "detail" and model != view.kwargs.model %}
-        <a href={% url "detail" model=model pk=pk %}
+        <a id="btn-{{model}}-detail" href={% url "detail" model=model pk=pk %}
         class="btn btn-sm btn-outline-dark">
             Просмотр
         </a>
     {% endif %}
     {% if btn == "delete" %}
-        <a href={% url "oper" oper="delete" model=model pk=pk %} 
+        <a id="btn-{{model}}-delete" href={% url "oper" oper="delete" model=model pk=pk %} 
         class="btn btn-sm btn-outline-danger">
             Удалить
         </a>
     {% endif %}
     {% if btn == "cancel" %}
-        <a href={% url "detail" model=model pk=pk %} 
+        <a id="btn-{{model}}-cancel" href={% url "detail" model=model pk=pk %} 
         class="btn btn-sm btn-outline-dark">
             Отменить
         </a>
@@ -74,33 +74,25 @@
 
 {% for btn in btn_min.split %}
     {% if btn == "edit" %}
-        <a href={% url "oper" oper="edit" model=model pk=pk %} 
+        <a id="btn-{{model}}-m-edit" href={% url "oper" oper="edit" model=model pk=pk %} 
         class="btn btn-sm btn-outline-success"
         title="Редактировать">
             <i class="bi bi-pencil"></i>
         </a>
     {% endif %}
     {% if btn == "detail" %}
-        <a href={% url "oper" oper="detail" model=model pk=pk %} 
+        <a id="btn-{{model}}-m-detail" href={% url "oper" oper="detail" model=model pk=pk %} 
         class="btn btn-sm btn-outline-dark"
         title="Просмотр">
             <i class="bi bi-eye"></i>
         </a>
     {% endif %}
     {% if btn == "delete" %}
-        <a href={% url "oper" oper="delete" model=model pk=pk %} 
+        <a id="btn-{{model}}-m-delete" href={% url "oper" oper="delete" model=model pk=pk %} 
         class="btn btn-sm btn-outline-danger"
         title="Удалить">
             <i class="bi bi-trash"></i>
         </a>
-    {% endif %}
-    {% if btn == "no_ok" %}
-        <i class="pe-none bi-circle btn btn-sm border-0 text-primary"
-        title="НЕ выполнено"></i>
-    {% endif %}
-    {% if btn == "is_ok" %}
-        <i class="pe-none bi-check-circle btn btn-sm border-0 text-success"
-        title="Выполнено"></i>
     {% endif %}
     
 {% endfor %}
