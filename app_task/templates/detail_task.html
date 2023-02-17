@@ -91,9 +91,16 @@
         title="Выбор проекта"
         >
             <option value="" selected>-----</option>
+        {% if oper == "edit" and item.proj_id and item.proj.date_end %}
+            <option value="{{ item.proj_id }}"
+            selected
+            class="text-success"
+            >{{ item.proj.name }}
+            </option>
+        {% endif %}
         {% for pr in view.projs %}
             <option value="{{ pr.id }}"
-            {% if view.proj_id == pr.id %}selected{% endif %}
+            {% if view.proj_id == pr.id or item.proj_id == pr.id %}selected{% endif %}
             >{{ pr.name }}
             </option>
         {% empty %}
@@ -128,9 +135,16 @@
         id="id_{{ view.fld.sprint.name }}"
         title="Выбор спринта">
             <option value="" selected>-----</option>
+        {% if oper == "edit" and item.sprint_id and item.sprint.date_end %}
+            <option value="{{ item.sprint_id }}"
+            selected
+            class="text-success"
+            >{{ item.sprint.name }}
+            </option>
+        {% endif %}
         {% for sp in view.sprints %}
             <option value="{{ sp.id }}"
-            {% if view.sprint_id == sp.id %}selected{% endif %}
+            {% if view.sprint_id == sp.id or item.sprint_id == sp.id %}selected{% endif %}
             >{{ sp.name }}
             </option>
         {% empty %}

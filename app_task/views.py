@@ -4,7 +4,7 @@ from django.http.request import HttpRequest  # noqa
 from django.db import models  # noqa
 from django.urls import reverse, reverse_lazy  # noqa
 from django.conf import settings
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 
 from django.views.generic import (
     TemplateView,
@@ -397,7 +397,7 @@ def TaskTemplate(self: TemplateView, oper):
     obj.proj_id = proj_id
     obj.projs = Proj.objects.filter(date_end=None)
     obj.sprints = Sprint.objects.filter(date_end=None)
-    obj.users = User.objects.all()
+    obj.users = get_user_model().objects.all()
     obj.par = par
     obj.get_par = "&".join(map("=".join, par.items()))
     obj.ser = TaskSerializer

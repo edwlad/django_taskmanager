@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from datetime import date  # noqa
 from .managers import TaskManager, SprintManager, ProjManager
 
@@ -31,7 +31,7 @@ class Proj(models.Model):
     author = models.ForeignKey(
         help_text="Автор проекта",
         verbose_name="Автор",
-        to=User,
+        to=get_user_model(),
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
@@ -78,7 +78,7 @@ class Sprint(models.Model):
     author = models.ForeignKey(
         help_text="Автор спринта",
         verbose_name="Автор",
-        to=User,
+        to=get_user_model(),
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
@@ -129,7 +129,7 @@ class Task(models.Model):
     author = models.ForeignKey(
         help_text="Автор задачи",
         verbose_name="Автор",
-        to=User,
+        to=get_user_model(),
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
@@ -138,7 +138,7 @@ class Task(models.Model):
     user = models.ForeignKey(
         help_text="Исполнитель задачи",
         verbose_name="Исполнитель",
-        to=User,
+        to=get_user_model(),
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
@@ -198,7 +198,7 @@ class TaskStep(models.Model):
     user = models.ForeignKey(
         help_text="Исполнитель шага",
         verbose_name="Исполнитель",
-        to=User,
+        to=get_user_model(),
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
