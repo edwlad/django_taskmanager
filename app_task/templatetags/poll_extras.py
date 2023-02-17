@@ -79,6 +79,12 @@ def my_e(context, *args):
     return eval(inp)
 
 
+@register.simple_tag(takes_context=True)
+def my_s(context, *args):
+    """Создание строки"""
+    return "".join(map(str, args))
+
+
 @register.filter
 @stringfilter
 def my_gi(value, get_par):
@@ -93,6 +99,30 @@ def my_gg(value, get_par):
     out = re.search(rf"(?<={value}=).+?(?=&)", get_par + "&")
     if out:
         return out[0]
+    return out
+
+
+@register.filter
+def my_ds(value: int, par):
+    """Склонение чисел
+    value - целое число
+    par - строка вида "рубль,рубля,рублей"
+    """
+    lst = str(par).split(",") + ["", ""]
+
+    if isinstance(value, str) and value.isdigit():
+        value = int(value)
+    elif not isinstance(value, int):
+        value = 0
+    value = abs(value)
+
+    out = lst[2]
+    if 11 <= value <= 14:
+        pass
+    elif value % 10 == 1:
+        out = lst[0]
+    elif 2 <= value % 10 <= 4:
+        out = lst[1]
     return out
 
 

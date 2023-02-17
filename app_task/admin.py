@@ -29,24 +29,23 @@ def make_not_end(modeladmin, request, queryset: models.QuerySet):
 
 @admin.register(Proj)
 class ProjAdmin(admin.ModelAdmin):
-    # fields = "__all__"
     list_display = tuple(v.attname for v in Proj._meta.fields)
-    actions = (make_on_end, make_off_end, make_not_end)
+    # actions = (make_on_end, make_off_end, make_not_end)
 
 
 @admin.register(Sprint)
 class SprintAdmin(admin.ModelAdmin):
     list_display = tuple(v.attname for v in Sprint._meta.fields)
-    actions = (make_on_end, make_off_end, make_not_end)
+    # actions = (make_on_end, make_off_end, make_not_end)
 
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
     list_display = tuple(v.attname for v in Task._meta.fields)
-    actions = (make_on_end, make_off_end, make_not_end)
+    # actions = (make_on_end, make_off_end, make_not_end)
 
 
 @admin.register(TaskStep)
 class TaskStepAdmin(admin.ModelAdmin):
     list_display = tuple(v.attname for v in TaskStep._meta.fields)
-    actions = (make_on_end, make_off_end, make_not_end)
+    # actions = (make_on_end, make_off_end, make_not_end)

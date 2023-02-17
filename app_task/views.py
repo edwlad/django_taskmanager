@@ -147,6 +147,14 @@ def ProjTemplate(self: TemplateView, oper):
     obj.model = model
     obj.request = self.request
     obj.context_object_name = "data"
+    obj.is_no_end = (
+        self.kwargs["oper"] == "edit"
+        and one_qs.exists()
+        and (
+            one_qs[0].proj_sprints.filter(date_end=None).exists()
+            or one_qs[0].proj_tasks.filter(date_end=None).exists()
+        )
+    )
     obj.url_filt = url_filt
     obj.url_name = url_name
     obj.fld = {v.name: v for v in obj.model._meta.get_fields()}

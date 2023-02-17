@@ -2,9 +2,3 @@
     content: "*";
     color: red;
 }
-
-.closed::before {
-    content: "(закрыт) ";
-    color: green;
-    font-weight: bold;
-}

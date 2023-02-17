@@ -52,7 +52,7 @@
             Редактировать
         </a>
     {% endif %}
-    {% if btn == "detail" and model != view.kwargs.model %}
+    {% if btn == "detail" %}
         <a id="btn-{{model}}-detail" href={% url "detail" model=model pk=pk %}
         class="btn btn-sm btn-outline-dark">
             Просмотр
