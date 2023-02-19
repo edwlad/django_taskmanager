@@ -106,12 +106,17 @@ def ProjTemplate(self: TemplateView, oper):
                 page_kwarg=model.META.url_page,
             )
         case "add":
+            if add_pk := model.objects.order_by("-id").first():
+                add_pk = add_pk.id + 1
+            else:
+                add_pk = 1
             obj = CreateView(
                 fields=["author", "name", "desc", "date_end", "date_max"],
                 success_url=reverse_lazy(
-                    "list",
+                    "detail",
                     kwargs={
                         "model": model_url,
+                        "pk": add_pk,
                     },
                 ),
             )
@@ -227,12 +232,17 @@ def SprintTemplate(self: TemplateView, oper):
                 page_kwarg=model.META.url_page,
             )
         case "add":
+            if add_pk := model.objects.order_by("-id").first():
+                add_pk = add_pk.id + 1
+            else:
+                add_pk = 1
             obj = CreateView(
                 fields=["author", "proj", "name", "desc", "date_end", "date_max"],
                 success_url=reverse_lazy(
-                    "list",
+                    "detail",
                     kwargs={
                         "model": model_url,
+                        "pk": add_pk,
                     },
                 ),
             )
@@ -276,6 +286,11 @@ def SprintTemplate(self: TemplateView, oper):
     obj.proj_id = proj_id
     obj.projs = Proj.objects.filter(date_end=None)
     obj.get_par = "&".join(map("=".join, par.items()))
+    obj.is_no_end = (
+        self.kwargs["oper"] == "edit"
+        and one_qs.exists()
+        and one_qs[0].sprint_tasks.filter(date_end=None).exists()
+    )
     obj.ser = SprintSerializer
     # obj.api = {v.data["id"]: v.data for v in map(SprintSerializer, obj.queryset)}
     return obj
@@ -339,6 +354,10 @@ def TaskTemplate(self: TemplateView, oper):
                 page_kwarg=model.META.url_page,
             )
         case "add":
+            if add_pk := model.objects.order_by("-id").first():
+                add_pk = add_pk.id + 1
+            else:
+                add_pk = 1
             obj = CreateView(
                 fields=[
                     "author",
@@ -351,9 +370,10 @@ def TaskTemplate(self: TemplateView, oper):
                     "date_max",
                 ],
                 success_url=reverse_lazy(
-                    "list",
+                    "detail",
                     kwargs={
                         "model": model_url,
+                        "pk": add_pk,
                     },
                 ),
             )
@@ -408,6 +428,7 @@ def TaskTemplate(self: TemplateView, oper):
     obj.users = get_user_model().objects.all()
     obj.par = par
     obj.get_par = "&".join(map("=".join, par.items()))
+    obj.is_no_end = False
     obj.ser = TaskSerializer
     # obj.api = {v.data["id"]: v.data for v in map(TaskSerializer, obj.queryset)}
     return obj

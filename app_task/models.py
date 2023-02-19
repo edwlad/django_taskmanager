@@ -53,10 +53,9 @@ class Proj(models.Model):
         ):
             self.date_end = None
 
-        # если дата закрытия проекта меньше даты закрытия задач или спринтов то правим
-        ma = max(self.date_end_task, self.date_end_sprint, self.date_end_proj)
-        if self.date_end and self.date_end < ma:
-            self.date_end = ma
+        # если дата закрытия проекта меньше вычисленой даты закрытия то правим
+        if self.date_end and self.date_end < self.date_end_proj:
+            self.date_end = self.date_end_proj
         return super().save(**kwargs)
 
     class META:
@@ -111,9 +110,17 @@ class Sprint(models.Model):
         return f"{self.id}: {self.name}"
 
     def save(self, **kwargs) -> None:
+        # если планируемая дата меньше даты создания
+        if self.date_max and self.date_max < self.date_beg:
+            self.date_max = self.date_beg
+
         # если есть не закрытые задачи то дату закрытия убираем
         if Task.objects.filter(sprint_id=self.id).filter(date_end=None).exists():
             self.date_end = None
+
+        # если дата закрытия спринта меньше вычисленой даты закрытия то правим
+        if self.date_end and self.date_end < self.date_end_sprint:
+            self.date_end = self.date_end_sprint
 
         super().save(**kwargs)
 
@@ -204,6 +211,10 @@ class Task(models.Model):
         return f"{self.id}: {self.name}"
 
     def save(self, **kwargs) -> None:
+        # если планируемая дата меньше даты создания
+        if self.date_max and self.date_max < self.date_beg:
+            self.date_max = self.date_beg
+
         # если есть спринт то проект изменяем на проект спринта
         if self.sprint:
             self.proj_id = self.sprint.proj_id

@@ -35,6 +35,7 @@ class TaskManager(Manager):
                 default=F("date_plan") - F("date_end"),
             ),
         )
+
         qs = qs.annotate(date_end_task=F("date_beg"))
         # print(qs.query)
         return qs
