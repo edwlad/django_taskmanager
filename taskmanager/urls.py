@@ -31,6 +31,7 @@ urlpatterns = [
     path("api/", include("api_task.urls"), name="api"),
     path("api-auth/", include("rest_framework.urls"), name="api-auth"),
     path("admin/", admin.site.urls, name="admin"),
+    path("accounts/", include("django.contrib.auth.urls")),
     path("<str:oper>/<str:model>/<int:pk>/", Index.as_view(), name="oper"),
     path(
         "add/<str:model>/",

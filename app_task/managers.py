@@ -1,6 +1,8 @@
 # from django.db import models
 from django.db.models import QuerySet
-from django.db.models import F, Manager, Min, Case, When, Max, Value
+from django.db.models import F, Manager, Min, Case, When, Max, Window
+from django.db.models.functions import FirstValue
+from django.db import models  # noqa
 from datetime import date, timedelta  # noqa
 
 
@@ -60,7 +62,10 @@ class SprintManager(Manager):
             )
         )
         qs = qs.annotate(
-            date_end_task=Value(qs.aggregate(v=Max(F("sprint_tasks__date_end")))["v"])
+            date_end_task=Window(
+                expression=FirstValue(Max("sprint_tasks__date_end")),
+                partition_by=F("id"),
+            )
         )
         qs = qs.annotate(date_end_sprint=Max(F("date_end_task"), F("date_beg")))
         # print(qs.query)
@@ -80,11 +85,18 @@ class ProjManager(Manager):
             )
         )
 
-        v = qs.aggregate(
-            v1=Max("proj_sprints__date_end"), v2=Max("proj_tasks__date_end")
+        qs = qs.annotate(
+            date_end_sprint=Window(
+                expression=FirstValue(Max("proj_sprints__date_end")),
+                partition_by=F("id"),
+            )
         )
-        qs = qs.annotate(date_end_sprint=Value(v["v1"]))
-        qs = qs.annotate(date_end_task=Value(v["v2"]))
+        qs = qs.annotate(
+            date_end_task=Window(
+                expression=FirstValue(Max("proj_tasks__date_end")),
+                partition_by=F("id"),
+            )
+        )
 
         qs = qs.annotate(
             date_end_proj=Max(F("date_end_sprint"), F("date_end_task"), F("date_beg"))

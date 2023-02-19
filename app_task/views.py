@@ -122,7 +122,7 @@ def ProjTemplate(self: TemplateView, oper):
             )
         case "edit":
             obj = UpdateView(
-                fields=["name", "desc", "date_end", "date_max"],
+                fields=["name", "desc", "date_max"],
                 queryset=one_qs,
                 success_url=reverse(
                     "detail",
@@ -237,7 +237,7 @@ def SprintTemplate(self: TemplateView, oper):
             else:
                 add_pk = 1
             obj = CreateView(
-                fields=["author", "proj", "name", "desc", "date_end", "date_max"],
+                fields=["author", "proj", "name", "desc", "date_max"],
                 success_url=reverse_lazy(
                     "detail",
                     kwargs={
@@ -366,7 +366,6 @@ def TaskTemplate(self: TemplateView, oper):
                     "sprint",
                     "name",
                     "desc",
-                    "date_end",
                     "date_max",
                 ],
                 success_url=reverse_lazy(
@@ -473,7 +472,18 @@ def TaskStepTemplate(self: TemplateView, oper):
 class Index(TemplateView):
     template_name = "index.html"
 
-    def post(self, request, *args, **kwargs):
+    def get(self, request: HttpRequest, *args, **kwargs):
+        if not request.user.is_authenticated and self.kwargs["oper"] not in (
+            "detail",
+            "list",
+        ):
+            return HttpResponseRedirect(reverse("index"))
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request: HttpRequest, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(reverse("index"))
+
         if not self.request.POST.get("author", None):
             self.request.POST._mutable = True
             self.request.POST["author"] = self.request.user.id

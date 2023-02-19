@@ -56,6 +56,7 @@ class Proj(models.Model):
         # если дата закрытия проекта меньше вычисленой даты закрытия то правим
         if self.date_end and self.date_end < self.date_end_proj:
             self.date_end = self.date_end_proj
+
         return super().save(**kwargs)
 
     class META:
@@ -218,6 +219,11 @@ class Task(models.Model):
         # если есть спринт то проект изменяем на проект спринта
         if self.sprint:
             self.proj_id = self.sprint.proj_id
+
+        # если дата закрытия задачи меньше вычисленой даты закрытия то правим
+        if self.date_end and self.date_end < self.date_end_task:
+            self.date_end = self.date_end_task
+
         return super().save(**kwargs)
 
     class META:

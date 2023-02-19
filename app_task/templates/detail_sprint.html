@@ -151,12 +151,23 @@
     </div>
     {# дата завершения - данные #}
     <div class="col-3 text-center border-end" title="{{view.fld.date_end.help_text}}">
-    {% if oper == "edit" or oper == "add" %}
+    {% if oper == "edit" %}
+        {% if view.is_no_end %}
+        <span class="text-danger fw-bold">Есть невыполненные задачи.</span>
+        {% else %}
         <input class="form-control"
         type="date" 
         name="{{ view.fld.date_end.name }}"
         value="{{ item.date_end|date:"Y-m-d" }}"
         id="id_{{ view.fld.date_end.name }}">
+        <p style="font-size: 0.8rem;"
+        class="lh-1 m-0 text-start"
+        title="Список последних дат">
+            Дата не раньше {{ item.date_end_sprint|date:"d.m.Y" }}:
+            <br>&nbsp;Спринт {{ item.date_beg|date:"d.m.Y" }}
+            <br>&nbsp;Задачи {{ item.date_end_task|date:"d.m.Y" }}
+        </p>
+        {% endif %}
     {% else %}
         {{ item.date_end|date:"d.m.Y" }}
     {% endif %}

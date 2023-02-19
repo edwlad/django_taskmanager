@@ -111,9 +111,9 @@
     </div>
     {# дата завершения - данные #}
     <div class="col-3 text-center border-end" title="{{view.fld.date_end.help_text}}">
-    {% if oper == "edit" or oper == "add" %}
+    {% if oper == "edit" %}
         {% if view.is_no_end %}
-        <span class="text-danger fw-bold">Есть не выполненные спринты или задачи.</span>
+        <span class="text-danger fw-bold">Есть невыполненные спринты или задачи.</span>
         {% else %}
         <input class="form-control"
         type="date" 

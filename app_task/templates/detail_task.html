@@ -222,7 +222,7 @@
     </div>
     {# дата завершения - данные #}
     <div class="col-3 text-center border-end" title="{{view.fld.date_end.help_text}}">
-    {% if oper == "edit" or oper == "add" %}
+    {% if oper == "edit" %}
         <input class="form-control"
         type="date" 
         name="{{ view.fld.date_end.name }}"
