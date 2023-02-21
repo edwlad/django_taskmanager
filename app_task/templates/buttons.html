@@ -40,25 +40,25 @@
             На главную
         </a>
     {% endif %}
-    {% if btn == "add" %}
+    {% if btn == "add" and perms.add %}
         <a id="btn-{{model}}-add" href={% url "add" model=model %}{% my_g "" model=view.kwargs.model pk=view.kwargs.pk %}
         class="btn btn-sm btn-outline-primary">
             Добавить
         </a>
     {% endif %}
-    {% if btn == "edit" %}
+    {% if btn == "edit" and perms.edit %}
         <a id="btn-{{model}}-edit" href={% url "oper" oper="edit" model=model pk=pk %}
         class="btn btn-sm btn-outline-success">
             Редактировать
         </a>
     {% endif %}
-    {% if btn == "detail" %}
+    {% if btn == "detail" and perms.detail %}
         <a id="btn-{{model}}-detail" href={% url "detail" model=model pk=pk %}
         class="btn btn-sm btn-outline-dark">
             Просмотр
         </a>
     {% endif %}
-    {% if btn == "delete" %}
+    {% if btn == "delete" and perms.delete %}
         <a id="btn-{{model}}-delete" href={% url "oper" oper="delete" model=model pk=pk %} 
         class="btn btn-sm btn-outline-danger">
             Удалить
@@ -73,21 +73,21 @@
 {% endfor %}
 
 {% for btn in btn_min.split %}
-    {% if btn == "edit" %}
+    {% if btn == "edit" and perms.edit %}
         <a id="btn-{{model}}-m-edit" href={% url "oper" oper="edit" model=model pk=pk %} 
         class="btn btn-sm btn-outline-success"
         title="Редактировать">
             <i class="bi bi-pencil"></i>
         </a>
     {% endif %}
-    {% if btn == "detail" %}
+    {% if btn == "detail" and perms.detail %}
         <a id="btn-{{model}}-m-detail" href={% url "oper" oper="detail" model=model pk=pk %} 
         class="btn btn-sm btn-outline-dark"
         title="Просмотр">
             <i class="bi bi-eye"></i>
         </a>
     {% endif %}
-    {% if btn == "delete" %}
+    {% if btn == "delete" and perms.delete %}
         <a id="btn-{{model}}-m-delete" href={% url "oper" oper="delete" model=model pk=pk %} 
         class="btn btn-sm btn-outline-danger"
         title="Удалить">

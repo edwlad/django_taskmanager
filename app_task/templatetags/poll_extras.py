@@ -1,6 +1,11 @@
 from django import template
 from django.template.defaultfilters import stringfilter
+from django.contrib.auth.models import User
+from django.db.models import Model
+
 import re
+
+# from django.contrib.auth import get_user_model
 
 register = template.Library()
 
@@ -70,6 +75,31 @@ def my_gf(context, get_par: str, *args):
     if out:
         return "?" + "&".join(out)
     return ""
+
+
+@register.simple_tag(takes_context=True)
+def my_hp(context, user: User, obj: Model) -> bool:
+    """Права на работу с записью
+    user - объект текущего пользователя
+    obj - объект текущей записи
+    выход словарь разрешений
+    """
+    temp: str = f"{obj._meta.app_label}.{{}}_{obj._meta.verbose_name}"
+    out = {
+        "detail": user.has_perm(temp.format("view")),
+        "add": user.has_perm(temp.format("add")),
+        "edit": user.has_perm(temp.format("change")),
+        "delete": user.has_perm(temp.format("delete")),
+    }
+    a_id = hasattr(obj, "author_id") and obj.author_id
+    u_id = hasattr(obj, "user_id") and obj.user_id
+    if user.is_superuser or a_id and user.id == a_id:
+        pass
+    elif u_id and user.id == u_id:
+        out.update({"delete": False})
+    elif a_id and user.id != a_id:
+        out.update({"edit": False, "delete": False})
+    return out
 
 
 @register.simple_tag(takes_context=True)

@@ -9,6 +9,7 @@
 {% else %}
     {% firstof "detail" as oper %}
 {% endif %}
+{% my_hp view.request.user data.0 as perms %}
 
 <h2>Спринт</h2>
 <form action="" method="post" class="row mb-3">

@@ -1,6 +1,9 @@
 {% load poll_extras %}
 {% if view.kwargs.oper == "edit" and view.kwargs.model == view.url_name %}
     {% firstof "edit" as oper %}
+    {% if view.request.user.is_superuser or item.author_id == view.request.user.id %}    
+        {% firstof "edit" as oper_user %}
+    {% endif %}
 {% elif view.kwargs.oper == "add" and view.kwargs.model == view.url_name %}
     {% firstof "add" as oper %}
     {% my_e "({'id':0},)" as data %}
@@ -9,6 +12,7 @@
 {% else %}
     {% firstof "detail" as oper %}
 {% endif %}
+{% my_hp view.request.user data.0 as perms %}
 
 <h2>Задача</h2>
 <form action="" method="post" class="row mb-3">
@@ -191,7 +195,7 @@
 
     {# исполнитель - данные #}
     <div class="col text-center border-end" title="{{view.fld.user.help_text}}">
-    {% if oper == "edit" or oper == "add" %}
+    {% if oper_user == "edit" or oper == "add" %}
         <select class="form-select form-select-sm"
         name="{{ view.fld.user.name }}"
         id="id_{{ view.fld.user.name }}"
