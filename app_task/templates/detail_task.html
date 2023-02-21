@@ -1,18 +1,19 @@
 {% load poll_extras %}
-{% if view.kwargs.oper == "edit" and view.kwargs.model == view.url_name %}
+
+{% my_hp view.request.user data.0 as perms %}
+{% my_hp view.request.user data.0.proj as perms_p %}
+{% my_hp view.request.user data.0.sprint as perms_s %}
+
+{% if perms.edit and view.kwargs.oper == "edit" and view.kwargs.model == view.url_name %}
     {% firstof "edit" as oper %}
-    {% if view.request.user.is_superuser or item.author_id == view.request.user.id %}    
-        {% firstof "edit" as oper_user %}
-    {% endif %}
-{% elif view.kwargs.oper == "add" and view.kwargs.model == view.url_name %}
+{% elif perms.add and view.kwargs.oper == "add" and view.kwargs.model == view.url_name %}
     {% firstof "add" as oper %}
     {% my_e "({'id':0},)" as data %}
-{% elif view.kwargs.oper == "delete" and view.kwargs.model == view.url_name %}
+{% elif perms.delete and view.kwargs.oper == "delete" and view.kwargs.model == view.url_name %}
     {% firstof "delete" as oper %}
 {% else %}
     {% firstof "detail" as oper %}
 {% endif %}
-{% my_hp view.request.user data.0 as perms %}
 
 <h2>Задача</h2>
 <form action="" method="post" class="row mb-3">
@@ -87,7 +88,7 @@
             {{view.fld.proj.verbose_name}}
         </label>
     </div>
-    <div class="col mb-1" title="{{view.fld.proj.help_text}}">
+    <div class="col d-flex align-items-center mb-1" title="{{view.fld.proj.help_text}}">
     {% if oper == "edit" or oper == "add" %}
         <select class="form-select form-select-sm"
         name="{{ view.fld.proj.name }}"
@@ -95,12 +96,6 @@
         title="Выбор проекта"
         >
             <option value="" selected>-----</option>
-        {% if oper == "edit" and item.proj_id and item.proj.date_end %}
-            <option value="{{ item.proj_id }}"
-            class="fw-bold"
-            >{{ item.proj.name }}
-            </option>
-        {% endif %}
         {% for pr in view.projs %}
             <option value="{{ pr.id }}"
             {% if view.proj_id == pr.id or item.proj_id == pr.id %}selected{% endif %}
@@ -112,11 +107,20 @@
         </select>
     {% else %}
         {% if item.proj %}
-            <a href={% url "detail" model=view.fld.proj.related_model.META.url_name pk=item.proj.id %}
-            class="btn btn-light w-100 border-0 text-start"
-            title="Перейти к проекту">
-                {{ item.proj.name }}
-            </a>
+            {% with model_p=item.proj.META.url_name pk_p=item.proj.id %}
+                <div>
+                    {% include "buttons.html" with btn_min="add edit" model=model_p pk=pk_p perms=perms_p %}
+                </div>
+                <a href={% url "detail" model=model_p pk=pk_p %}
+                class="flex-grow-1 btn btn-light border-0 text-start mx-1"
+                title="Перейти к проекту">
+                    {% include "badge.html" with item=item.proj %}
+                    {{ item.proj.name }}
+                </a>
+                <div>
+                    {% include "buttons.html" with btn_min="delete" model=model_p pk=pk_p perms=perms_p %}
+                </div>
+            {% endwith %}
         {% else %}
             <span class="pe-none btn border-0">Нет</span>
         {% endif %}
@@ -131,19 +135,13 @@
         {{view.fld.sprint.verbose_name}}
         </label>
     </div>
-    <div class="col mb-1" title="{{view.fld.sprint.help_text}}">
+    <div class="col d-flex align-items-center mb-1" title="{{view.fld.sprint.help_text}}">
     {% if oper == "edit" or oper == "add" %}
         <select class="form-select form-select-sm"
         name="{{ view.fld.sprint.name }}"
         id="id_{{ view.fld.sprint.name }}"
         title="Выбор спринта">
             <option value="" selected>-----</option>
-        {% if oper == "edit" and item.sprint_id and item.sprint.date_end %}
-            <option value="{{ item.sprint_id }}"
-            selected
-            >{{ item.sprint.name }}
-            </option>
-        {% endif %}
         {% for sp in view.sprints %}
             <option value="{{ sp.id }}"
             {% if view.sprint_id == sp.id or item.sprint_id == sp.id %}selected{% endif %}
@@ -155,11 +153,20 @@
         </select>
     {% else %}
         {% if item.sprint %}
-            <a href={% url "detail" model=view.fld.sprint.related_model.META.url_name pk=item.sprint.id %}
-            class="btn btn-light w-100 border-0 text-start"
-            title="Перейти к спринту">
-                {{ item.sprint.name }}
-            </a>
+            {% with model_s=item.sprint.META.url_name pk_s=item.sprint.id %}
+                <div>
+                {% include "buttons.html" with btn_min="add edit" model=model_s pk=pk_s perms=perms_s %}
+                </div>
+                <a href={% url "detail" model=model_s pk=pk_s %}
+                class="btn flex-grow-1 btn-light border-0 text-start mx-1"
+                title="Перейти к спринту">
+                    {% include "badge.html" with item=item.sprint %}
+                    {{ item.sprint.name }}
+                </a>
+                <div>
+                {% include "buttons.html" with btn_min="delete" model=model_s pk=pk_s perms=perms_s %}
+                </div>
+            {% endwith %}
         {% else %}
                 <span class="pe-none btn border-0">Нет</span>
         {% endif %}
@@ -195,7 +202,7 @@
 
     {# исполнитель - данные #}
     <div class="col text-center border-end" title="{{view.fld.user.help_text}}">
-    {% if oper_user == "edit" or oper == "add" %}
+    {% if oper == "edit" and perms.edit_user or oper == "add" %}
         <select class="form-select form-select-sm"
         name="{{ view.fld.user.name }}"
         id="id_{{ view.fld.user.name }}"

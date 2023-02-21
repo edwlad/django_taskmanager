@@ -111,7 +111,7 @@ def ProjTemplate(self: TemplateView, oper):
             else:
                 add_pk = 1
             obj = CreateView(
-                fields=["author", "name", "desc", "date_end", "date_max"],
+                fields=["author", "name", "desc", "date_max"],
                 success_url=reverse_lazy(
                     "detail",
                     kwargs={
@@ -122,7 +122,7 @@ def ProjTemplate(self: TemplateView, oper):
             )
         case "edit":
             obj = UpdateView(
-                fields=["name", "desc", "date_max"],
+                fields=["name", "desc", "date_end", "date_max"],
                 queryset=one_qs,
                 success_url=reverse(
                     "detail",
@@ -528,14 +528,14 @@ class Index(TemplateView):
                 context["title"] = "Просмотр спринта"
                 context["header"] = "Просмотр спринта"
                 objs.append(SprintTemplate(self, "detail"))
-                objs.append(ProjTemplate(self, "detail"))
+                # objs.append(ProjTemplate(self, "detail"))
                 objs.append(TaskTemplate(self, "list"))
             case Task.META.url_name, _:
                 context["title"] = "Просмотр задачи"
                 context["header"] = "Просмотр задачи"
                 objs.append(TaskTemplate(self, "detail"))
-                objs.append(SprintTemplate(self, "detail"))
-                objs.append(ProjTemplate(self, "detail"))
+                # objs.append(SprintTemplate(self, "detail"))
+                # objs.append(ProjTemplate(self, "detail"))
                 objs.append(TaskStepTemplate(self, "list"))
             case TaskStep.META.url_name, _:
                 context["title"] = "Просмотр шага"

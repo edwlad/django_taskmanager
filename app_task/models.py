@@ -111,6 +111,10 @@ class Sprint(models.Model):
         return f"{self.id}: {self.name}"
 
     def save(self, **kwargs) -> None:
+        # если закрыт проект то ничего не сохраняем
+        if self.proj and self.proj.date_end:
+            return
+
         # если планируемая дата меньше даты создания
         if self.date_max and self.date_max < self.date_beg:
             self.date_max = self.date_beg
@@ -212,6 +216,10 @@ class Task(models.Model):
         return f"{self.id}: {self.name}"
 
     def save(self, **kwargs) -> None:
+        # если закрыты спринт и/или проект то ничего не сохраняем
+        if self.sprint and self.sprint.date_end or self.proj and self.proj.date_end:
+            return
+
         # если планируемая дата меньше даты создания
         if self.date_max and self.date_max < self.date_beg:
             self.date_max = self.date_beg

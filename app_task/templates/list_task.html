@@ -1,4 +1,5 @@
 {% load poll_extras %}
+{% my_hp view.request.user "" as perms %}
 
 <div class="row">
     <div class="h2 align-self-center col-4 col-sm-3">
@@ -13,7 +14,7 @@
 <table class="table table-sm table-hover align-middle">
     <tbody>
     {% for item in data %}
-    {% comment %} {{ item|json_script:view.url_name|add:item.id }} {% endcomment %}
+    {% my_hp view.request.user item as perms %}
     <tr>
         <td width=1%>
             {% include "buttons.html" with btn_min="edit" model=view.url_name pk=item.id %}
@@ -22,28 +23,7 @@
             <a href={% url "detail" model=view.url_name pk=item.id %}
             class="btn btn-light w-100 border-0 text-start"
             title="Перейти к задаче">
-            {% my_s "Срок " item.days_plan.days|default:0 item.days_plan.days|my_ds:" день, дня, дней" as temp %}
-            {% if item.date_end %}
-                <span class="badge bg-success bg-opacity-75 p-1">
-                    <i class="bi-check2"> Выполнено</i>
-                </span>
-            {% elif item.days_plan.days > 6 %}
-                <span class="badge text-bg-primary">
-                    {{ temp }}
-                </span>
-            {% elif item.days_plan.days > 2 %}
-                <span class="badge text-bg-warning">
-                    {{ temp }}
-                </span>
-            {% elif item.days_plan.days %}
-                <span class="badge text-bg-danger">
-                    {{ temp }}
-                </span>
-            {% else %}
-                <span class="badge bg-secondary bg-opacity-75">
-                    Срок не задан
-                </span>
-            {% endif %}
+                {% include "badge.html" with item=item %}
                 {{ item.name }}
             </a>
         </td>

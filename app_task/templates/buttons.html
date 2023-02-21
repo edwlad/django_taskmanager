@@ -73,6 +73,13 @@
 {% endfor %}
 
 {% for btn in btn_min.split %}
+    {% if btn == "add" and perms.add %}
+        <a id="btn-{{model}}-m-add" href={% url "add" model=model %}{% my_g "" model=view.kwargs.model pk=view.kwargs.pk %}
+        class="btn btn-sm btn-outline-primary"
+        title="Добавить">
+            <i class="bi bi-plus-circle"></i>
+        </a>
+    {% endif %}
     {% if btn == "edit" and perms.edit %}
         <a id="btn-{{model}}-m-edit" href={% url "oper" oper="edit" model=model pk=pk %} 
         class="btn btn-sm btn-outline-success"

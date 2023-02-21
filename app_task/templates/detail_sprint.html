@@ -1,15 +1,18 @@
 {% load poll_extras %}
-{% if view.kwargs.oper == "edit" and view.kwargs.model == view.url_name %}
+
+{% my_hp view.request.user data.0 as perms %}
+{% my_hp view.request.user data.0.proj as perms_p %}
+
+{% if perms.edit and view.kwargs.oper == "edit" and view.kwargs.model == view.url_name %}
     {% firstof "edit" as oper %}
-{% elif view.kwargs.oper == "add" and view.kwargs.model == view.url_name %}
+{% elif perms.add and view.kwargs.oper == "add" and view.kwargs.model == view.url_name %}
     {% firstof "add" as oper %}
     {% my_e "({'id':0},)" as data %}
-{% elif view.kwargs.oper == "delete" and view.kwargs.model == view.url_name %}
+{% elif perms.delete and view.kwargs.oper == "delete" and view.kwargs.model == view.url_name %}
     {% firstof "delete" as oper %}
 {% else %}
     {% firstof "detail" as oper %}
 {% endif %}
-{% my_hp view.request.user data.0 as perms %}
 
 <h2>Спринт</h2>
 <form action="" method="post" class="row mb-3">
@@ -69,7 +72,7 @@
             {{view.fld.proj.verbose_name}}
         </label>
     </div>
-    <div class="col mb-1" title="{{view.fld.proj.help_text}}">
+    <div class="col d-flex align-items-center mb-1" title="{{view.fld.proj.help_text}}">
     {% if oper == "edit" or oper == "add" %}
         <select class="form-select form-select-sm"
         name="{{ view.fld.proj.name }}"
@@ -77,12 +80,6 @@
         title="Выбор проекта"
         required>
             <option value="" selected disabled>-----</option>
-        {% if oper == "edit" and item.proj_id and item.proj.date_end %}
-            <option value="{{ item.proj_id }}"
-            selected
-            >{{ item.proj.name }}
-            </option>
-        {% endif %}
         {% for pr in view.projs %}
             <option value="{{ pr.id }}"
             {% if view.proj_id == pr.id or item.proj_id == pr.id %}selected{% endif %}
@@ -94,11 +91,20 @@
         </select>
     {% else %}
         {% if item.proj %}
-            <a href={% url "detail" model=view.fld.proj.related_model.META.url_name pk=item.proj.id %}
-            class="btn btn-light w-100 border-0 text-start"
+            {% with model_p=item.proj.META.url_name pk_p=item.proj.id %}
+            <div>
+                {% include "buttons.html" with btn_min="add edit" model=model_p pk=pk_p perms=perms_p %}
+            </div>
+            <a href={% url "detail" model=model_p pk=pk_p %}
+            class="flex-grow-1 btn btn-light border-0 text-start mx-1"
             title="Перейти к проекту">
+                {% include "badge.html" with item=item.proj %}
                 {{ item.proj.name }}
             </a>
+            <div>
+                {% include "buttons.html" with btn_min="delete" model=model_p pk=pk_p perms=perms_p %}
+            </div>
+            {% endwith %}
         {% else %}
             <span class="pe-none btn border-0">Нет</span>
         {% endif %}

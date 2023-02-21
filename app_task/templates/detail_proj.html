@@ -1,15 +1,15 @@
 {% load poll_extras %}
-{% if view.kwargs.oper == "edit" and view.kwargs.model == view.url_name %}
+{% my_hp view.request.user data.0 as perms %}
+{% if perms.edit and view.kwargs.oper == "edit" and view.kwargs.model == view.url_name %}
     {% firstof "edit" as oper %}
-{% elif view.kwargs.oper == "add" and view.kwargs.model == view.url_name %}
+{% elif perms.add and view.kwargs.oper == "add" and view.kwargs.model == view.url_name %}
     {% firstof "add" as oper %}
     {% my_e "({'id':0},)" as data %}
-{% elif view.kwargs.oper == "delete" and view.kwargs.model == view.url_name %}
+{% elif perms.delete and view.kwargs.oper == "delete" and view.kwargs.model == view.url_name %}
     {% firstof "delete" as oper %}
 {% else %}
     {% firstof "detail" as oper %}
 {% endif %}
-{% my_hp view.request.user data.0 as perms %}
 
 <h2>Проект</h2>
 <form action="" method="post" class="row mb-3">
@@ -168,13 +168,9 @@
             Задачи будут отмечены как свободные, без проекта.
         </div>
     {% endif %} 
-        {% comment %} <div class="me-3">
-        {% if oper == "add" %}
+        <div class="me-3">
             {% include "buttons.html" with btn_max="back" %}
-        {% else %}
-            {% include "buttons.html" with btn_max="detail" model=view.kwargs.model pk=view.kwargs.pk %}
-        {% endif %}
-        </div> {% endcomment %}
+        </div>
         <input id="btn-proj-submit" 
         type="submit" 
         value=
