@@ -14,15 +14,26 @@
 </head>
 
 <body style="max-width: 992px;" class="container">
-    <nav>
-        <a href="/">Главная</a> | 
-        <a href="{% url "list" model="projs" %}">Проекты</a> | 
-        <a href="{% url "list" model="sprints" %}">Спринты</a> | 
-        <a href="{% url "list" model="tasks" %}">Задачи</a> | 
-        <a href="/api/">API</a> | 
-        <a href="/admin/">Администрирование</a>
-        <a href="/accounts/login/">вход</a>
-        <a href="/accounts/logout/">выход</a>
+    <nav class="d-flex">
+        <a href="/" class="mx-1">Главная</a> | 
+        <a href="{% url "list" model="projs" %}" class="mx-1">Проекты</a> | 
+        <a href="{% url "list" model="sprints" %}" class="mx-1">Спринты</a> | 
+        <a href="{% url "list" model="tasks" %}" class="mx-1">Задачи</a> | 
+        <a href="/api/" class="mx-1">API</a> | 
+        <a href="/admin/" class="mx-1">Администрирование</a>
+        <div class="flex-grow-1"></div>
+        {% if view.request.user.is_authenticated %}
+            <span class="mx-1">{{ view.request.user.username }}:</span>
+            <a href="{% url "login" %}" class="mx-1"
+            title="Смена пользователя">
+                Смена
+            </a>|
+            <a href="{% url "logout" %}" class="mx-1">
+                Выход
+            </a>
+        {% else %}
+            <a href="{% url "login" %}" class="mx-1">Вход</a>
+        {% endif %}
 
     </nav>
     <hr>

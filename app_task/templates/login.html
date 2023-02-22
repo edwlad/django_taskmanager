@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if user.is_authenticated %}Смена пользователя{% else %}Авторизация{% endif %}
+{% endblock title %}
+
+{% block header %}
+{% if user.is_authenticated %}Смена пользователя{% else %}Авторизация{% endif %}
+{% endblock header %}
+
+{% block content %}
+
+{% if form.errors %}
+    <p>Имя или пароль не верные. Попробуйте ещё раз.</p>
+{% endif %}
+
+{% if next %}
+    {% if user.is_authenticated %}
+    <p>У Вашего аккаунта нет доступа к странице.</p>
+    {% else %}
+    <p>Для просмотра страницы нужна авторизация.</p>
+    {% endif %}
+{% endif %}
+
+{% if user.is_authenticated %}
+    <p class="offset-1">
+        Сейчас авторизирован пользователь <b>{{ user.username }}</b>.<br>
+        Для смены прользователя введите данные в поля ниже.
+    </p>
+{% endif %}
+
+<form method="post" 
+action="{% url 'login' %}"
+class="row mb-3 align-items-center">
+    {% csrf_token %}
+    <div class="col-3 text-end">
+        <label class="fw-bold required" 
+        for="id_username"> Пользователь:
+        </label>
+    </div>
+    <div class="col">
+        <input class="form-control"
+        type="text" 
+        name="username"
+        value="{{ form.fields.username.inital }}"
+        maxlength="{{ form.fields.username.max_length }}" 
+        required
+        placeholder="Имя пользователя"
+        id="id_username">
+        {% comment %} {{ form.username }} {% endcomment %}
+    </div>
+
+    <div class="w-100 mb-1"></div>
+
+    <div class="col-3 text-end">
+        <label class="fw-bold required" 
+        for="id_password"> Пароль:
+        </label>
+    </div>
+    <div class="col">
+        <input class="form-control"
+        type="password" 
+        name="password"
+        value="{{ form.fields.password.inital }}"
+        maxlength="{{ form.fields.password.max_length }}" 
+        required
+        placeholder="Пароль"
+        id="id_password">
+    </div>
+
+    <div class="w-100 mb-2"></div>
+
+    <input type="submit" value="Авторизация"  class="btn btn-outline-primary col-3 offset-1">
+    <input type="hidden" name="next" value="{{ next }}">
+</form>
+
+{# Assumes you set up the password_reset view in your URLconf #}
+{% comment %} <p><a href="{% url 'password_reset' %}">Lost password?</a></p> {% endcomment %}
+
+{% endblock %}

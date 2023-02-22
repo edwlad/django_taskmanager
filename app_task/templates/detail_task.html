@@ -89,7 +89,7 @@
         </label>
     </div>
     <div class="col d-flex align-items-center mb-1" title="{{view.fld.proj.help_text}}">
-    {% if oper == "edit" or oper == "add" %}
+    {% if oper == "edit" and perms.edit_user or oper == "add" %}
         <select class="form-select form-select-sm"
         name="{{ view.fld.proj.name }}"
         id="id_{{ view.fld.proj.name }}"
@@ -136,7 +136,7 @@
         </label>
     </div>
     <div class="col d-flex align-items-center mb-1" title="{{view.fld.sprint.help_text}}">
-    {% if oper == "edit" or oper == "add" %}
+    {% if oper == "edit" and perms.edit_user or oper == "add" %}
         <select class="form-select form-select-sm"
         name="{{ view.fld.sprint.name }}"
         id="id_{{ view.fld.sprint.name }}"

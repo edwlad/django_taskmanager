@@ -134,6 +134,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # ============================================================
 # My Settings
 
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
 PAGINATE_BY = 5  # элементов на странице
 # на последней странице элементов <= orphans, то добавить их к предыдущей странице
 PAGINATE_ORPHANS = 2

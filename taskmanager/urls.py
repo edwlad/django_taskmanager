@@ -16,6 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, re_path, include
 from app_task.views import error, Index
+from django.contrib.auth.views import LoginView, LogoutView
 
 # from django.http.response import HttpResponseRedirect
 # from django.views.generic import TemplateView
@@ -31,7 +32,13 @@ urlpatterns = [
     path("api/", include("api_task.urls"), name="api"),
     path("api-auth/", include("rest_framework.urls"), name="api-auth"),
     path("admin/", admin.site.urls, name="admin"),
-    path("accounts/", include("django.contrib.auth.urls")),
+    # path("accounts/", include("django.contrib.auth.urls")),
+    path(
+        "login/",
+        LoginView.as_view(template_name="login.html", next_page="/"),
+        name="login",
+    ),
+    path("logout/", LogoutView.as_view(next_page="/"), name="logout"),
     path("<str:oper>/<str:model>/<int:pk>/", Index.as_view(), name="oper"),
     path(
         "add/<str:model>/",
