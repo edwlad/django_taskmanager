@@ -1,7 +1,7 @@
 from django import template
 from django.template.defaultfilters import stringfilter
-from django.contrib.auth.models import User
 from django.db.models import Model
+from app_task.views import Index
 
 import re
 
@@ -78,36 +78,12 @@ def my_gf(context, get_par: str, *args):
 
 
 @register.simple_tag(takes_context=True)
-def my_hp(context, user: User, obj: Model) -> bool:
+def my_hp(context, obj: Model) -> bool:
     """Права на работу с записью
-    user - объект текущего пользователя
     obj - объект текущей записи
     выход словарь разрешений
     """
-    if not isinstance(obj, Model):
-        obj = context.dicts[3]["view"].model
-    temp: str = f"{obj._meta.app_label}.{{}}_{obj._meta.verbose_name}"
-    out = {
-        "detail": user.has_perm(temp.format("view")),
-        "add": user.has_perm(temp.format("add")),
-        "delete": user.has_perm(temp.format("delete")),
-        "edit": user.has_perm(temp.format("change")),
-        "edit_user": user.has_perm(temp.format("change")),
-    }
-    a_id = hasattr(obj, "author_id") and obj.author_id
-    u_id = hasattr(obj, "user_id") and obj.user_id
-    p_de = hasattr(obj, "proj") and hasattr(obj.proj, "date_end")
-    s_de = hasattr(obj, "sprint") and hasattr(obj.sprint, "date_end")
-    if p_de and obj.proj.date_end:
-        out.update({"edit": False, "delete": False})
-    elif s_de and obj.sprint.date_end:
-        out.update({"edit": False, "delete": False})
-    elif user.is_superuser or a_id and user.id == a_id:
-        pass
-    elif u_id and user.id == u_id:
-        out.update({"delete": False, "edit_user": False})
-    elif a_id and user.id != a_id:
-        out.update({"edit": False, "delete": False})
+    out = Index.get_perms(None, context.dicts[1]["request"], obj)
     return out
 
 
@@ -115,6 +91,12 @@ def my_hp(context, user: User, obj: Model) -> bool:
 def my_e(context, *args):
     """Создание переменной из строки"""
     inp = "".join(map(str, args))
+    for e in reversed(context.dicts):
+        for k, v in e.items():
+            try:
+                eval(k)
+            except Exception:
+                locals()[k] = v
     return eval(inp)
 
 

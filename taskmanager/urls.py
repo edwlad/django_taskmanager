@@ -35,10 +35,10 @@ urlpatterns = [
     # path("accounts/", include("django.contrib.auth.urls")),
     path(
         "login/",
-        LoginView.as_view(template_name="login.html", next_page="/"),
+        LoginView.as_view(template_name="login.html"),
         name="login",
     ),
-    path("logout/", LogoutView.as_view(next_page="/"), name="logout"),
+    path("logout/", LogoutView.as_view(), name="logout"),
     path("<str:oper>/<str:model>/<int:pk>/", Index.as_view(), name="oper"),
     path(
         "add/<str:model>/",

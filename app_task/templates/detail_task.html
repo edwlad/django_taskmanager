@@ -1,8 +1,8 @@
 {% load poll_extras %}
 
-{% my_hp view.request.user data.0 as perms %}
-{% my_hp view.request.user data.0.proj as perms_p %}
-{% my_hp view.request.user data.0.sprint as perms_s %}
+{% my_hp data.0 as perms %}
+{% my_hp data.0.proj as perms_p %}
+{% my_hp data.0.sprint as perms_s %}
 
 {% if perms.edit and view.kwargs.oper == "edit" and view.kwargs.model == view.url_name %}
     {% firstof "edit" as oper %}
@@ -15,7 +15,7 @@
     {% firstof "detail" as oper %}
 {% endif %}
 
-<h2>Задача</h2>
+<h2 class="">Задача</h2>
 <form action="" method="post" class="row mb-3">
 {% for item in data %}
 {% csrf_token %}
@@ -89,7 +89,7 @@
         </label>
     </div>
     <div class="col d-flex align-items-center mb-1" title="{{view.fld.proj.help_text}}">
-    {% if oper == "edit" and perms.edit_user or oper == "add" %}
+    {% if oper == "edit" or oper == "add" %}
         <select class="form-select form-select-sm"
         name="{{ view.fld.proj.name }}"
         id="id_{{ view.fld.proj.name }}"
@@ -122,6 +122,9 @@
                 </div>
             {% endwith %}
         {% else %}
+            <div>
+                {% include "buttons.html" with btn_min="add" model=view.fld.proj.related_model.META.url_name perms=perms_p %}
+            </div>
             <span class="pe-none btn border-0">Нет</span>
         {% endif %}
     {% endif %}
@@ -136,7 +139,7 @@
         </label>
     </div>
     <div class="col d-flex align-items-center mb-1" title="{{view.fld.sprint.help_text}}">
-    {% if oper == "edit" and perms.edit_user or oper == "add" %}
+    {% if oper == "edit" or oper == "add" %}
         <select class="form-select form-select-sm"
         name="{{ view.fld.sprint.name }}"
         id="id_{{ view.fld.sprint.name }}"
@@ -168,7 +171,10 @@
                 </div>
             {% endwith %}
         {% else %}
-                <span class="pe-none btn border-0">Нет</span>
+            <div>
+                {% include "buttons.html" with btn_min="add" model=view.fld.sprint.related_model.META.url_name perms=perms_s %}
+            </div>
+            <span class="pe-none btn border-0">Нет</span>
         {% endif %}
     {% endif %}
     </div>
@@ -176,13 +182,13 @@
     <div class="w-100"></div>
 
     {# исполнитель - название #}
-    <div class="col text-center border-end border-top">
+    <div class="col-2 text-center border-end border-top">
         <label for="id_{{ view.fld.user.name }}">
             {{view.fld.user.verbose_name}}
         </label>
     </div>
     {# дата создания - название #}
-    <div class="col text-center border-end border-top">
+    <div class="col-2 text-center border-end border-top">
         {{view.fld.date_beg.verbose_name}}
     </div>
     {# дата завершения - название #}
@@ -196,13 +202,13 @@
         <label for="id_{{ view.fld.date_max.name }}">План</label>
     </div>
     {#  #}
-    <div class="col text-center border-top">Осталось дней</div>
+    <div class="col-2 text-center border-top">Срок</div>
 
     <div class="w-100"></div>
 
     {# исполнитель - данные #}
-    <div class="col text-center border-end" title="{{view.fld.user.help_text}}">
-    {% if oper == "edit" and perms.edit_user or oper == "add" %}
+    <div class="col-2 text-center border-end" title="{{view.fld.user.help_text}}">
+    {% if oper == "edit" or oper == "add" %}
         <select class="form-select form-select-sm"
         name="{{ view.fld.user.name }}"
         id="id_{{ view.fld.user.name }}"
@@ -222,7 +228,7 @@
     {% endif %}
     </div>
     {# дата создания - данные #}
-    <div class="col text-center border-end" title="{{view.fld.date_beg.help_text}}">
+    <div class="col-2 text-center border-end" title="{{view.fld.date_beg.help_text}}">
     {% if oper == "add" %}
         <div class="btn  btn-light border w-100 pe-none">
             {% now "d.m.Y" %}
@@ -262,12 +268,8 @@
     {% endif %}
     </div>
     {#  #}
-    <div class="col text-center">
-        {% if item.date_end %}
-        Завершено
-        {% else %}
-        {{ item.days_plan.days }}
-        {% endif %}
+    <div class="col-2 text-center fs-5">
+        {% include "badge.html" with item=item %}
     </div>
 
     <div class="w-100"></div>

@@ -106,17 +106,12 @@ def ProjTemplate(self: TemplateView, oper):
                 page_kwarg=model.META.url_page,
             )
         case "add":
-            if add_pk := model.objects.order_by("-id").first():
-                add_pk = add_pk.id + 1
-            else:
-                add_pk = 1
             obj = CreateView(
                 fields=["author", "name", "desc", "date_max"],
                 success_url=reverse_lazy(
-                    "detail",
+                    "list",
                     kwargs={
                         "model": model_url,
-                        "pk": add_pk,
                     },
                 ),
             )
@@ -232,17 +227,12 @@ def SprintTemplate(self: TemplateView, oper):
                 page_kwarg=model.META.url_page,
             )
         case "add":
-            if add_pk := model.objects.order_by("-id").first():
-                add_pk = add_pk.id + 1
-            else:
-                add_pk = 1
             obj = CreateView(
                 fields=["author", "proj", "name", "desc", "date_max"],
                 success_url=reverse_lazy(
-                    "detail",
+                    "list",
                     kwargs={
                         "model": model_url,
-                        "pk": add_pk,
                     },
                 ),
             )
@@ -268,7 +258,7 @@ def SprintTemplate(self: TemplateView, oper):
                     },
                 ),
             )
-        case _:
+        case "detail" | _:
             obj = ListView(
                 queryset=model.objects.filter(id=pk),
                 template_name="detail_sprint.html",
@@ -354,10 +344,6 @@ def TaskTemplate(self: TemplateView, oper):
                 page_kwarg=model.META.url_page,
             )
         case "add":
-            if add_pk := model.objects.order_by("-id").first():
-                add_pk = add_pk.id + 1
-            else:
-                add_pk = 1
             obj = CreateView(
                 fields=[
                     "author",
@@ -369,10 +355,9 @@ def TaskTemplate(self: TemplateView, oper):
                     "date_max",
                 ],
                 success_url=reverse_lazy(
-                    "detail",
+                    "list",
                     kwargs={
                         "model": model_url,
-                        "pk": add_pk,
                     },
                 ),
             )
@@ -406,7 +391,7 @@ def TaskTemplate(self: TemplateView, oper):
                     },
                 ),
             )
-        case _:
+        case "detail" | _:
             obj = ListView(
                 queryset=one_qs,
                 template_name="detail_task.html",
@@ -472,17 +457,88 @@ def TaskStepTemplate(self: TemplateView, oper):
 class Index(TemplateView):
     template_name = "index.html"
 
+    def get_perms(self, request: HttpRequest, obj_in: models.Model = None):
+        kw = request.resolver_match.kwargs
+        user = request.user
+
+        if isinstance(obj_in, models.Model):
+            obj = obj_in
+            has_obj = True
+        else:
+            match kw["model"]:
+                case Proj.META.url_name:
+                    model = Proj
+                case Sprint.META.url_name:
+                    model = Sprint
+                case Task.META.url_name:
+                    model = Task
+                case TaskStep.META.url_name:
+                    model = TaskStep
+                case _:
+                    return {
+                        "list": True,
+                        "detail": True,
+                    }
+            obj = model.objects.filter(id=kw["pk"]).first()
+            has_obj = isinstance(obj, models.Model)
+            if not has_obj:
+                obj = model
+
+        temp: str = f"{obj._meta.app_label}.{{}}_{obj._meta.verbose_name}"
+        out = {
+            "list": True,
+            "detail": True,
+            "is_author": False,  # автор
+            "is_user": False,  # исполнитель
+            "add": user.has_perm(temp.format("add")),
+            "delete": has_obj and user.has_perm(temp.format("delete")),
+            "edit": has_obj and user.has_perm(temp.format("change")),
+        }
+
+        a_id = hasattr(obj, "author") and hasattr(obj.author, "id") and obj.author.id
+        u_id = hasattr(obj, "user") and hasattr(obj.user, "id") and obj.user.id
+        p_de = (
+            hasattr(obj, "proj") and hasattr(obj.proj, "date_end") and obj.proj.date_end
+        )
+        s_de = (
+            hasattr(obj, "sprint")
+            and hasattr(obj.sprint, "date_end")
+            and obj.sprint.date_end
+        )
+        if p_de:
+            out.update({"edit": False, "delete": False})
+        elif s_de:
+            out.update({"edit": False, "delete": False})
+        elif user.is_superuser:
+            pass
+        elif a_id and user.id == a_id:
+            out.update({"is_author": True})
+        elif u_id and user.id == u_id:
+            out.update({"is_user": True, "delete": False, "edit": False})
+        elif a_id:
+            out.update({"edit": False, "delete": False})
+        return out
+
     def get(self, request: HttpRequest, *args, **kwargs):
-        if not request.user.is_authenticated and self.kwargs["oper"] not in (
-            "detail",
-            "list",
-        ):
-            return HttpResponseRedirect(reverse("index"))
+        perms = self.get_perms(request)
+        if not perms.get(self.kwargs["oper"], False):
+            return HttpResponseRedirect(
+                reverse(
+                    "detail",
+                    kwargs={"model": self.kwargs["model"], "pk": self.kwargs["pk"]},
+                )
+            )
         return super().get(request, *args, **kwargs)
 
     def post(self, request: HttpRequest, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return HttpResponseRedirect(reverse("index"))
+        perms = self.get_perms(request)
+        if not perms.get(self.kwargs["oper"], False):
+            return HttpResponseRedirect(
+                reverse(
+                    "detail",
+                    kwargs={"model": self.kwargs["model"], "pk": self.kwargs["pk"]},
+                )
+            )
 
         if not self.request.POST.get("author", None):
             self.request.POST._mutable = True

@@ -1,5 +1,5 @@
 {% load poll_extras %}
-{% my_hp view.request.user "" as perms %}
+{% my_hp "" as perms %}
 
 <div class="row">
     <div class="h2 align-self-center col-4 col-sm-3">
@@ -13,7 +13,7 @@
 <table class="table table-sm table-hover align-middle">
     <tbody>
     {% for item in data %}
-    {% my_hp view.request.user item as perms %}
+    {% my_hp item as perms %}
     <tr>
         <td width=1%>
             {% include "buttons.html" with btn_min="edit" model=view.url_name pk=item.id %}

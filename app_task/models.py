@@ -190,27 +190,29 @@ class Task(models.Model):
         to="Proj",
         blank=True,
         null=True,
-        on_delete=models.SET_NULL,
+        # on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         related_name="proj_tasks",
     )
     sprint = models.ForeignKey(
         help_text="Спринт",
         verbose_name="Спринт",
         to="Sprint",
-        on_delete=models.SET_NULL,
+        # on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         blank=True,
         null=True,
         related_name="sprint_tasks",
     )
-    # parent = models.ForeignKey(
-    #     help_text="Предыдущиая задача",
-    #     verbose_name="Зависит от",
-    #     to="self",
-    #     on_delete=models.SET_NULL,
-    #     blank=True,
-    #     null=True,
-    #     related_name="parent_next",
-    # )
+    parent = models.ForeignKey(
+        help_text="Предыдущиая задача",
+        verbose_name="Зависит от",
+        to="self",
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="parent_nexts",
+    )
 
     def __str__(self) -> str:
         return f"{self.id}: {self.name}"

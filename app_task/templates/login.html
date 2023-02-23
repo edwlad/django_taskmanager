@@ -71,7 +71,7 @@ class="row mb-3 align-items-center">
     <div class="w-100 mb-2"></div>
 
     <input type="submit" value="Авторизация"  class="btn btn-outline-primary col-3 offset-1">
-    <input type="hidden" name="next" value="{{ next }}">
+    <input type="hidden" name="next" value="{{ request.META.HTTP_REFERER }}">
 </form>
 
 {# Assumes you set up the password_reset view in your URLconf #}

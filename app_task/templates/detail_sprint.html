@@ -1,7 +1,7 @@
 {% load poll_extras %}
 
-{% my_hp view.request.user data.0 as perms %}
-{% my_hp view.request.user data.0.proj as perms_p %}
+{% my_hp data.0 as perms %}
+{% my_hp data.0.proj as perms_p %}
 
 {% if perms.edit and view.kwargs.oper == "edit" and view.kwargs.model == view.url_name %}
     {% firstof "edit" as oper %}
@@ -106,6 +106,9 @@
             </div>
             {% endwith %}
         {% else %}
+            <div>
+                {% include "buttons.html" with btn_min="add" model=view.fld.proj.related_model.META.url_name perms=perms_p %}
+            </div>
             <span class="pe-none btn border-0">Нет</span>
         {% endif %}
     {% endif %}
@@ -114,11 +117,11 @@
     <div class="w-100"></div>
 
     {# автор - название #}
-    <div class="col text-center border-end border-top">
+    <div class="col-2 text-center border-end border-top">
         {{view.fld.author.verbose_name}}
     </div>
     {# дата создания - название #}
-    <div class="col text-center border-end border-top">
+    <div class="col-2 text-center border-end border-top">
         {{view.fld.date_beg.verbose_name}}
     </div>
     {# дата завершения - название #}
@@ -132,12 +135,12 @@
         <label for="id_{{ view.fld.date_max.name }}">План</label>
     </div>
     {# Осталось дней - название #}
-    <div class="col text-center border-top">Осталось дней</div>
+    <div class="col-2 text-center border-top">Срок</div>
 
     <div class="w-100"></div>
 
     {# автор - значение #}
-    <div class="col text-center border-end" title="{{view.fld.author.help_text}}">
+    <div class="col-2 text-center border-end" title="{{view.fld.author.help_text}}">
     {% if oper == "add" %}
         <div class="btn btn-light border w-100 pe-none">
             {{ view.request.user.username|default:"-" }}
@@ -147,7 +150,7 @@
     {% endif %}
     </div>
     {# дата создания - данные #}
-    <div class="col text-center border-end" title="{{view.fld.date_beg.help_text}}">
+    <div class="col-2 text-center border-end" title="{{view.fld.date_beg.help_text}}">
     {% if oper == "add" %}
         <div class="btn  btn-light border w-100 pe-none">
             {% now "d.m.Y" %}
@@ -198,12 +201,8 @@
     {% endif %}
     </div>
     {# Осталось дней - данные #}
-    <div class="col text-center">
-    {% if item.date_end %}
-        Завершено
-    {% else %}
-        {{ item.days_plan.days }}
-    {% endif %}
+    <div class="col-2 text-center fs-5">
+        {% include "badge.html" with item=item %}
     </div>
 
     <div class="w-100 mb-1"></div>
@@ -212,8 +211,7 @@
     <div class="col d-flex justify-content-end align-items-center mb-1 mt-2">
     {% if oper == "delete" %}
         <div class="me-2 text-end">
-            Задачи будут освобождены от спринта,<br>
-            но остануться в проеке.
+            Будут удалены все задачи спринта
         </div>
     {% endif %} 
         <div class="me-3">
