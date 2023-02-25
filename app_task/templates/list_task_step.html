@@ -1,7 +1,63 @@
-<div class="h2">
-    История выполнения задачи<br>
-    {% include "paginate.html" %}
+{% load poll_extras %}
+{% my_hp view.task as perms %}
+
+{% firstof "list" as oper %}
+{% if not view.task.date_end and view.kwargs.oper == "add" and view.kwargs.model == view.url_name %}
+    {% if perms.is_author or perms.is_user or view.request.user.is_superuser %}
+        {% firstof "add" as oper %}
+    {% endif %}
+{% endif %}
+
+<div class="row">
+    <div class="align-self-center col-2">
+    {% if not view.task.date_end %}
+        {% if perms.is_author or perms.is_user or view.request.user.is_superuser %}
+            {% include "buttons.html" with btn_max="add" model=view.url_name pk=view.kwargs.pk %}
+        {% else %}
+            &nbsp;
+        {% endif %}
+    {% else %}
+        &nbsp;
+    {% endif %}
+    </div>
+
+    <div class="h2 align-self-center col">
+        История выполнения задачи<br>
+        {% include "paginate.html" %}
+    </div>
 </div>
+
+{% if oper == "add" %}
+<form action="" method="post" class="mb-3">
+    {% csrf_token %}
+    <div class="btn btn-light border pe-none text-start fw-bold mb-1">
+        {% now "d.m.Y" %} - 
+        {{ view.request.user.username }}
+    </div>
+
+     <div>
+        <textarea class="form-control"
+        rows="3"
+        type="text" 
+        name="{{ view.fld.desc.name }}"
+        required
+        placeholder="{{view.fld.desc.help_text}}"
+        id="id_{{ view.fld.desc.name }}"></textarea>
+    </div>
+
+    <div class="col d-flex justify-content-end align-items-center mb-1 mt-2">
+        <div class="me-3">
+            {% include "buttons.html" with btn_max="back" %}
+        </div>
+        <input id="btn-task-submit"
+        type="submit" 
+        value="Создать"
+        class="btn btn-primary"
+        >
+    </div>
+
+</form>
+{% endif %}
 
 <table class="table table-sm table-hover align-middle">
     <tbody>
@@ -9,10 +65,10 @@
     <tr>
         <td>
             <span class="fw-bold">
-                {{ item.date_end|date:"d.m.Y" }} - {{ item.user.username }}
+                {{ item.date_end|date:"d.m.Y" }} - {{ item.author.username }}
             </span>
             <br>
-            {{ item.desc }}
+            <span style="white-space: pre-line;">{{ item.desc }}</span>
         </td>
     </tr>
     {% empty %}

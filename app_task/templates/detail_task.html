@@ -17,8 +17,8 @@
 
 <h2 class="">Задача</h2>
 <form action="" method="post" class="row mb-3">
-{% for item in data %}
 {% csrf_token %}
+{% for item in data %}
     {# Автор задачи #}
     <div class="col-2 text-end mb-1">
         {{view.fld.author.verbose_name}}
@@ -239,7 +239,7 @@
     </div>
     {# дата завершения - данные #}
     <div class="col-3 text-center border-end" title="{{view.fld.date_end.help_text}}">
-    {% if oper == "edit" %}
+    {% if oper == "edit"%}
         <input class="form-control"
         type="date" 
         name="{{ view.fld.date_end.name }}"

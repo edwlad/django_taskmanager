@@ -74,7 +74,7 @@ def ProjTemplate(self: TemplateView, oper):
         proj_id = int(par.get("pk", 0))
 
     # смотрим с какой страницы обращение
-    list_qs = model.objects.all()
+    list_qs = model.objects
     if model_url == Sprint.META.url_name:
         qs = Sprint.objects.filter(id=pk).exclude(proj_id=None).first()
         pk = qs.proj_id if qs else 0
@@ -106,8 +106,12 @@ def ProjTemplate(self: TemplateView, oper):
                 page_kwarg=model.META.url_page,
             )
         case "add":
+            self.request.POST._mutable = True
+            self.request.POST["author"] = self.request.user.id
+            self.request.POST["uweb"] = self.request.user.id
+            self.request.POST._mutable = False
             obj = CreateView(
-                fields=["author", "name", "desc", "date_max"],
+                fields=["uweb", "author", "name", "desc", "date_max"],
                 success_url=reverse_lazy(
                     "list",
                     kwargs={
@@ -116,8 +120,11 @@ def ProjTemplate(self: TemplateView, oper):
                 ),
             )
         case "edit":
+            self.request.POST._mutable = True
+            self.request.POST["uweb"] = self.request.user.id
+            self.request.POST._mutable = False
             obj = UpdateView(
-                fields=["name", "desc", "date_end", "date_max"],
+                fields=["uweb", "name", "desc", "date_end", "date_max"],
                 queryset=one_qs,
                 success_url=reverse(
                     "detail",
@@ -195,7 +202,7 @@ def SprintTemplate(self: TemplateView, oper):
         proj_id = int(par.get("pk", 0))
 
     # смотрим с какой страницы обращение
-    list_qs = model.objects.all()
+    list_qs = model.objects
     if model_url == Proj.META.url_name:
         list_qs = list_qs.filter(proj_id=pk)
     elif model_url == Task.META.url_name:
@@ -227,8 +234,12 @@ def SprintTemplate(self: TemplateView, oper):
                 page_kwarg=model.META.url_page,
             )
         case "add":
+            self.request.POST._mutable = True
+            self.request.POST["author"] = self.request.user.id
+            self.request.POST["uweb"] = self.request.user.id
+            self.request.POST._mutable = False
             obj = CreateView(
-                fields=["author", "proj", "name", "desc", "date_max"],
+                fields=["uweb", "author", "proj", "name", "desc", "date_max"],
                 success_url=reverse_lazy(
                     "list",
                     kwargs={
@@ -237,9 +248,12 @@ def SprintTemplate(self: TemplateView, oper):
                 ),
             )
         case "edit":
+            self.request.POST._mutable = True
+            self.request.POST["uweb"] = self.request.user.id
+            self.request.POST._mutable = False
             obj = UpdateView(
                 queryset=one_qs,
-                fields=["name", "desc", "date_end", "date_max", "proj"],
+                fields=["uweb", "name", "desc", "date_end", "date_max", "proj"],
                 success_url=reverse_lazy(
                     "detail",
                     kwargs={
@@ -295,8 +309,15 @@ def TaskTemplate(self: TemplateView, oper):
     url_filt = model.META.url_filt
 
     # если есть данные в GET о модели и ключе, то собираем их
+    task_step_id = 0
+    if par.get("model", "") == TaskStep.META.url_name:
+        task_step_id = int(par.get("pk", 0))
+
     task_id = 0
-    if par.get("model", "") == Task.META.url_name:
+    if task_step_id > 0:
+        qs = TaskStep.objects.filter(id=task_step_id).first()
+        task_id = qs.task_id if qs else 0
+    if task_id <= 0 and par.get("model", "") == Task.META.url_name:
         task_id = int(par.get("pk", 0))
 
     sprint_id = 0
@@ -317,8 +338,11 @@ def TaskTemplate(self: TemplateView, oper):
         proj_id = int(par.get("pk", 0))
 
     # смотрим с какой страницы обращение
-    list_qs = model.objects.all()
-    if model_url == Sprint.META.url_name:
+    list_qs = model.objects
+    if model_url == TaskStep.META.url_name:
+        pk = task_id
+        list_qs = list_qs.filter(id=pk)
+    elif model_url == Sprint.META.url_name:
         list_qs = list_qs.filter(sprint_id=pk)
     elif model_url == Proj.META.url_name:
         list_qs = list_qs.filter(proj_id=pk)
@@ -344,8 +368,13 @@ def TaskTemplate(self: TemplateView, oper):
                 page_kwarg=model.META.url_page,
             )
         case "add":
+            self.request.POST._mutable = True
+            self.request.POST["author"] = self.request.user.id
+            self.request.POST["uweb"] = self.request.user.id
+            self.request.POST._mutable = False
             obj = CreateView(
                 fields=[
+                    "uweb",
                     "author",
                     "user",
                     "proj",
@@ -362,9 +391,14 @@ def TaskTemplate(self: TemplateView, oper):
                 ),
             )
         case "edit":
+            self.request.POST._mutable = True
+            self.request.POST["uweb"] = self.request.user.id
+            self.request.POST._mutable = False
             obj = UpdateView(
+                # template_name="detail_task.html",
                 queryset=one_qs,
                 fields=[
+                    "uweb",
                     "user",
                     "name",
                     "desc",
@@ -421,15 +455,54 @@ def TaskTemplate(self: TemplateView, oper):
 def TaskStepTemplate(self: TemplateView, oper):
     model = TaskStep
     par = self.request.GET.dict()
-    # model_url = self.kwargs.get("model")
+    model_url = self.kwargs.get("model")
     pk = self.kwargs.get("pk")
     url_name = model.META.url_name
     url_filt = model.META.url_filt
 
-    match oper:
-        case "list":
-            list_qs = model.objects.filter(task_id=pk)
+    # если есть данные в GET о модели и ключе, то собираем их
+    task_step_id = 0
+    if par.get("model", "") == TaskStep.META.url_name:
+        task_step_id = int(par.get("pk", 0))
 
+    task_id = 0
+    if task_step_id > 0:
+        qs = TaskStep.objects.filter(id=task_step_id).first()
+        task_id = qs.task_id if qs else 0
+    if task_id <= 0 and par.get("model", "") == Task.META.url_name:
+        task_id = int(par.get("pk", 0))
+
+    # смотрим с какой страницы обращение
+    if task_id <= 0 and model_url == Task.META.url_name:
+        task_id = pk
+    if task_id <= 0 and model_url == TaskStep.META.url_name:
+        qs = TaskStep.objects.filter(id=pk).first()
+        task_id = qs.task_id if qs else 0
+    # one_qs = model.objects.filter(id=pk)
+    list_qs = model.objects.filter(task_id=task_id)
+    task = Task.objects.filter(id=task_id).first()
+
+    match oper, bool(task):
+        case "add", True:
+            self.request.POST._mutable = True
+            self.request.POST["author"] = self.request.user.id
+            self.request.POST["task"] = task_id
+            self.request.POST._mutable = False
+            obj = CreateView(
+                fields=[
+                    "desc",
+                    "author",
+                    "task",
+                ],
+                success_url=reverse_lazy(
+                    "detail",
+                    kwargs={
+                        "model": Task.META.url_name,
+                        "pk": task_id,
+                    },
+                ),
+            )
+        case _, _:
             obj = ListView(
                 queryset=list_qs,
                 template_name="list_task_step.html",
@@ -438,8 +511,6 @@ def TaskStepTemplate(self: TemplateView, oper):
                 paginate_orphans=PAGINATE_ORPHANS,
                 page_kwarg=model.META.url_page,
             )
-        case _:
-            pass
 
     obj.kwargs = self.kwargs
     obj.model = model
@@ -447,7 +518,8 @@ def TaskStepTemplate(self: TemplateView, oper):
     obj.context_object_name = "data"
     obj.url_name = url_name
     obj.url_filt = url_filt
-    obj.fields = {v.name: v for v in obj.model._meta.get_fields()}
+    obj.task = task
+    obj.fld = {v.name: v for v in obj.model._meta.get_fields()}
     obj.get_par = "&".join(map("=".join, par.items()))
     obj.ser = TaskStepSerializer
     # obj.api = {v.data["id"]: v.data for v in map(TaskStepSerializer, obj.queryset)}
@@ -484,7 +556,9 @@ class Index(TemplateView):
             if not has_obj:
                 obj = model
 
-        temp: str = f"{obj._meta.app_label}.{{}}_{obj._meta.verbose_name}"
+        temp: str = (
+            f"{obj._meta.app_label}.{{}}_{obj._meta.verbose_name.replace(' ', '')}"
+        )
         out = {
             "list": True,
             "detail": True,
@@ -514,7 +588,7 @@ class Index(TemplateView):
         elif a_id and user.id == a_id:
             out.update({"is_author": True})
         elif u_id and user.id == u_id:
-            out.update({"is_user": True, "delete": False, "edit": False})
+            out.update({"is_user": True, "edit": False, "delete": False})
         elif a_id:
             out.update({"edit": False, "delete": False})
         return out
@@ -522,28 +596,13 @@ class Index(TemplateView):
     def get(self, request: HttpRequest, *args, **kwargs):
         perms = self.get_perms(request)
         if not perms.get(self.kwargs["oper"], False):
-            return HttpResponseRedirect(
-                reverse(
-                    "detail",
-                    kwargs={"model": self.kwargs["model"], "pk": self.kwargs["pk"]},
-                )
-            )
+            return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/"))
         return super().get(request, *args, **kwargs)
 
     def post(self, request: HttpRequest, *args, **kwargs):
         perms = self.get_perms(request)
         if not perms.get(self.kwargs["oper"], False):
-            return HttpResponseRedirect(
-                reverse(
-                    "detail",
-                    kwargs={"model": self.kwargs["model"], "pk": self.kwargs["pk"]},
-                )
-            )
-
-        if not self.request.POST.get("author", None):
-            self.request.POST._mutable = True
-            self.request.POST["author"] = self.request.user.id
-            self.request.POST._mutable = False
+            return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/"))
 
         match self.kwargs.get("model"):
             case Proj.META.url_name:
@@ -552,6 +611,8 @@ class Index(TemplateView):
                 obj = SprintTemplate(self, self.kwargs.get("oper"))
             case Task.META.url_name:
                 obj = TaskTemplate(self, self.kwargs.get("oper"))
+            case TaskStep.META.url_name:
+                obj = TaskStepTemplate(self, self.kwargs.get("oper"))
             case _:
                 return HttpResponseRedirect(reverse("index"))
 
@@ -594,8 +655,10 @@ class Index(TemplateView):
                 # objs.append(ProjTemplate(self, "detail"))
                 objs.append(TaskStepTemplate(self, "list"))
             case TaskStep.META.url_name, _:
-                context["title"] = "Просмотр шага"
-                context["header"] = "Просмотр шага"
+                context["title"] = "Просмотр задачи"
+                context["header"] = "Просмотр задачи"
+                objs.append(TaskTemplate(self, "detail"))
+                objs.append(TaskStepTemplate(self, "list"))
             case _:
                 pass
 

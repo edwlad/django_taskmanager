@@ -37,6 +37,14 @@ class Proj(models.Model):
         null=True,
         related_name="author_projs",
     )
+    uweb = models.ForeignKey(
+        help_text="Последний прользовател редактировавший проект",
+        verbose_name="Редактор",
+        to=get_user_model(),
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+    )
 
     def __str__(self) -> str:
         return f"{self.id}: {self.name}"
@@ -98,6 +106,14 @@ class Sprint(models.Model):
         blank=True,
         null=True,
         related_name="author_sprints",
+    )
+    uweb = models.ForeignKey(
+        help_text="Последний прользовател редактировавший спринт",
+        verbose_name="Редактор",
+        to=get_user_model(),
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
     )
     proj = models.ForeignKey(
         help_text="Проект",
@@ -184,6 +200,14 @@ class Task(models.Model):
         null=True,
         related_name="user_tasks",
     )
+    uweb = models.ForeignKey(
+        help_text="Последний прользовател редактировавший задачу",
+        verbose_name="Редактор",
+        to=get_user_model(),
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+    )
     proj = models.ForeignKey(
         help_text="Проект",
         verbose_name="Проект",
@@ -234,7 +258,29 @@ class Task(models.Model):
         if self.date_end and self.date_end < self.date_end_task:
             self.date_end = self.date_end_task
 
-        return super().save(**kwargs)
+        old = Task.objects.filter(id=self.id).first()
+
+        super().save(**kwargs)
+
+        obj = TaskStep()
+        obj.task_id = self.id
+        obj.author = self.uweb
+        if old is None:
+            obj.desc = "Создание задачи"
+        else:
+            if self.date_end is None:
+                obj.desc = "Изменения в задаче:\n"
+            else:
+                obj.desc = "Закрытие задачи\n"
+
+            for v in self._meta.get_fields():
+                v1 = getattr(self, v.name)
+                v2 = getattr(old, v.name)
+                if v1 != v2:
+                    obj.desc += f"{v.verbose_name}: {v2} => {v1};\n"
+        obj.save(parrent="task")
+
+        return
 
     class META:
         url_name = "tasks"
@@ -251,14 +297,14 @@ class TaskStep(models.Model):
     date_end = models.DateField(
         help_text="Дата завершения шага", verbose_name="Завершён", default=date.today
     )
-    user = models.ForeignKey(
+    author = models.ForeignKey(
         help_text="Исполнитель шага",
         verbose_name="Исполнитель",
         to=get_user_model(),
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
-        related_name="user_steps",
+        related_name="author_steps",
     )
     task = models.ForeignKey(
         help_text="Задача",
@@ -270,6 +316,12 @@ class TaskStep(models.Model):
 
     def __str__(self) -> str:
         return f"{self.id}: {self.desс[:30]}"
+
+    def save(self, parrent="", **kwargs) -> None:
+        # если закрыта задача то ничего не сохраняем
+        if not parrent and self.task and self.task.date_end:
+            return
+        return super().save(**kwargs)
 
     class META:
         url_name = "task_steps"

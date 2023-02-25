@@ -148,6 +148,12 @@ def my_ds(value: int, par):
 
 
 @register.filter
+def my_ha(value, par: object):
+    """Проверка наличия атрибута"""
+    return hasattr(par, value)
+
+
+@register.filter
 def my_in_dict(value, par: dict):
     """Проверка наличия ключа в словаре"""
     return value in par
