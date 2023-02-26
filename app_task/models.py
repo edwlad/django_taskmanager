@@ -105,6 +105,7 @@ class Proj(models.Model):
         url_id = "projs_id"
         url_page = "projs_p"
         url_filt = "projs_f"
+        url_user = "projs_u"
 
 
 class Sprint(models.Model):
@@ -220,6 +221,7 @@ class Sprint(models.Model):
         url_id = "sprints_id"
         url_page = "sprints_p"
         url_filt = "sprints_f"
+        url_user = "sprints_u"
 
 
 class Task(models.Model):
@@ -358,6 +360,7 @@ class Task(models.Model):
         url_id = "tasks_id"
         url_page = "tasks_p"
         url_filt = "tasks_f"
+        url_user = "tasks_u"
 
 
 class TaskStep(models.Model):

@@ -50,6 +50,7 @@ def ProjTemplate(self: TemplateView, oper):
     pk = self.kwargs.get("pk")
     url_name = model.META.url_name
     url_filt = model.META.url_filt
+    url_user = model.META.url_user
 
     # если есть данные в GET о модели и ключе, то собираем их
     task_id = 0
@@ -88,6 +89,10 @@ def ProjTemplate(self: TemplateView, oper):
 
     match oper:
         case "list":
+            # фильтры
+            if fnd := par.get("name_f", ""):
+                list_qs = list_qs.filter(name__icontains=fnd)
+
             match par.get(url_filt, ""):
                 case "on":
                     list_qs = list_qs.exclude(date_end=None)
@@ -96,6 +101,13 @@ def ProjTemplate(self: TemplateView, oper):
                 case _:
                     par[url_filt] = "off"
                     list_qs = list_qs.filter(date_end=None)
+
+            match par.get(url_user, ""):
+                case "all":
+                    pass
+                case _:
+                    par[url_user] = "aut"
+                    list_qs = list_qs.filter(author_id=self.request.user.id)
 
             obj = ListView(
                 queryset=list_qs,
@@ -167,6 +179,7 @@ def ProjTemplate(self: TemplateView, oper):
     )
     obj.url_filt = url_filt
     obj.url_name = url_name
+    obj.url_user = url_user
     obj.fld = {v.name: v for v in obj.model._meta.get_fields()}
     obj.get_par = "&".join(map("=".join, par.items()))
     obj.ser = ProjSerializer
@@ -181,6 +194,7 @@ def SprintTemplate(self: TemplateView, oper):
     pk = self.kwargs.get("pk")
     url_name = model.META.url_name
     url_filt = model.META.url_filt
+    url_user = model.META.url_user
 
     # если есть данные в GET о модели и ключе, то собираем их
     task_id = 0
@@ -219,6 +233,10 @@ def SprintTemplate(self: TemplateView, oper):
 
     match oper:
         case "list":
+            # фильтры
+            if fnd := par.get("name_f", ""):
+                list_qs = list_qs.filter(name__icontains=fnd)
+
             match par.get(url_filt, ""):
                 case "on":
                     list_qs = list_qs.exclude(date_end=None)
@@ -227,6 +245,13 @@ def SprintTemplate(self: TemplateView, oper):
                 case _:
                     par[url_filt] = "off"
                     list_qs = list_qs.filter(date_end=None)
+
+            match par.get(url_user, ""):
+                case "all":
+                    pass
+                case _:
+                    par[url_user] = "aut"
+                    list_qs = list_qs.filter(author_id=self.request.user.id)
 
             obj = ListView(
                 queryset=list_qs,
@@ -293,6 +318,7 @@ def SprintTemplate(self: TemplateView, oper):
     obj.context_object_name = "data"
     obj.url_filt = url_filt
     obj.url_name = url_name
+    obj.url_user = url_user
     obj.fld = {v.name: v for v in obj.model._meta.get_fields()}
     obj.task_id = task_id
     obj.sprint_id = sprint_id
@@ -316,6 +342,7 @@ def TaskTemplate(self: TemplateView, oper):
     pk = self.kwargs.get("pk")
     url_name = model.META.url_name
     url_filt = model.META.url_filt
+    url_user = model.META.url_user
 
     # если есть данные в GET о модели и ключе, то собираем их
     task_step_id = 0
@@ -359,6 +386,10 @@ def TaskTemplate(self: TemplateView, oper):
 
     match oper:
         case "list":
+            # фильтры
+            if fnd := par.get("name_f", ""):
+                list_qs = list_qs.filter(name__icontains=fnd)
+
             match par.get(url_filt, ""):
                 case "on":
                     list_qs = list_qs.exclude(date_end=None)
@@ -367,6 +398,15 @@ def TaskTemplate(self: TemplateView, oper):
                 case _:
                     par[url_filt] = "off"
                     list_qs = list_qs.filter(date_end=None)
+
+            match par.get(url_user, ""):
+                case "aut":
+                    list_qs = list_qs.filter(author_id=self.request.user.id)
+                case "all":
+                    pass
+                case _:
+                    par[url_user] = "usr"
+                    list_qs = list_qs.filter(user_id=self.request.user.id)
 
             obj = ListView(
                 queryset=list_qs,
@@ -473,6 +513,7 @@ def TaskTemplate(self: TemplateView, oper):
     obj.request = self.request
     obj.context_object_name = "data"
     obj.url_filt = url_filt
+    obj.url_user = url_user
     obj.url_name = url_name
     obj.fld = {v.name: v for v in obj.model._meta.get_fields()}
     obj.task_id = task_id
@@ -660,6 +701,12 @@ class Index(TemplateView):
         objs = []
 
         match self.kwargs.get("model"), self.kwargs.get("pk"):
+            case "finds", _:
+                context["title"] = "Поиск"
+                context["header"] = "Поиск в названиях проектов, спринтов и задач"
+                objs.append(ProjTemplate(self, "list"))
+                objs.append(SprintTemplate(self, "list"))
+                objs.append(TaskTemplate(self, "list"))
             case Proj.META.url_name, 0:
                 context["title"] = "Все проекты"
                 context["header"] = "Все проекты"

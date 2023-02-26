@@ -3,11 +3,13 @@
 
 <div class="row">
     <div class="h2 align-self-center col-4 col-sm-3">
-        Проекты<br>
+        {% include "buttons.html" with btn_max="add" model=view.url_name pk=view.kwargs.pk %}
+        Проекты
+        <div class="w-100 my-1"></div>
         {% include "paginate.html" %}
     </div>
     <div class="align-self-center col">
-        {% include "buttons.html" with btn_max="items add" model=view.url_name %}
+        {% include "buttons.html" with btn_max="items users2"%}
     </div>
 </div>
 <table class="table table-sm table-hover align-middle">

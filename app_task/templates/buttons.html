@@ -18,19 +18,43 @@
         onClick="javascript:history.go(1);"
         >
     {% endif %}
+    {% if btn == "users" or btn == "users2" %}
+    <div class="btn-group">
+        <a id="btn-{{model}}-u-all" href="{% my_g get_par view.url_user "all" view.page_kwarg "1" %}"
+        class="btn btn-sm btn-outline-secondary {% if view.url_user|add:"=all" in get_par  %}active{% endif %}"
+        title="Без отбора по автору и/или исполнителю">
+            Без отбора
+        </a>
+        <a id="btn-{{model}}-u-aut" href="{% my_g get_par view.url_user "aut" view.page_kwarg "1" %}"
+        class="btn btn-sm btn-outline-secondary {% if view.url_user|add:"=aut" in get_par  %}active{% endif %}"
+        title="Автор - текущий пользователь">
+            Автор
+        </a>
+        {% if btn == "users" %}
+        <a id="btn-{{model}}-u-usr" href="{% my_g get_par view.url_user "usr" view.page_kwarg "1" %}"
+        class="btn btn-sm btn-outline-secondary {% if view.url_user|add:"=usr" in get_par  %}active{% endif %}"
+        title="Исполнитель - текущий пользователь">
+            Исполнитель
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
     {% if btn == "items" %}
     <div class="btn-group">
         <a id="btn-{{model}}-f-all" href="{% my_g get_par view.url_filt "all" view.page_kwarg "1" %}"
-        class="btn btn-sm btn-outline-secondary {% if view.url_filt|add:"=all" in get_par  %}active{% endif %}">
-            Показать всё
+        class="btn btn-sm btn-outline-secondary {% if view.url_filt|add:"=all" in get_par  %}active{% endif %}"
+        title="Всё: выполненные и не выполненные">
+            Весь список
         </a>
         <a id="btn-{{model}}-f-on" href="{% my_g get_par view.url_filt "on" view.page_kwarg "1" %}"
-        class="btn btn-sm btn-outline-secondary {% if view.url_filt|add:"=on" in get_par %}active{% endif %}">
-            Выполненные
+        class="btn btn-sm btn-outline-secondary {% if view.url_filt|add:"=on" in get_par %}active{% endif %}"
+        title="Только выполненные">
+            Выполнено
         </a>
         <a id="btn-{{model}}-f-off" href="{% my_g get_par view.url_filt "off" view.page_kwarg "1" %}"
-        class="btn btn-sm btn-outline-secondary {% if view.url_filt|add:"=off" in get_par %}active{% endif %}">
-            Не выполненные
+        class="btn btn-sm btn-outline-secondary {% if view.url_filt|add:"=off" in get_par %}active{% endif %}"
+        title="Только не выполненные, в работе">
+            В работе
         </a>
     </div>
     {% endif %}

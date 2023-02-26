@@ -4,6 +4,40 @@
 
 {% block content %}
 
+{% if model == "finds" %}
+<form action="" method="get" class="row mb-3 align-items-center">
+    {% for key, val in request.GET.items %}
+        {% if key != "name_f" %}
+        <input type="hidden" name="{{ key }}" value="{{ val }}">
+        {% endif %}
+    {% endfor %}
+
+    <label for="id_finds_name_f"
+    class="col-2 text-end mx-1">
+        Текст для поиска
+    </label>
+
+    <input id="id_finds_name_f"
+    class="col form-control mx-1"
+    type="text" 
+    name="name_f" 
+    value="{{ request.GET.name_f }}"
+    maxlength=50
+    placeholder="введите текст для поиска">
+
+    <input id="btn-finds-submit"
+    type="submit" 
+    value="Поиск"
+    class="col-1 btn btn-outline-primary mx-1">
+
+</form>
+<script>
+    el = document.getElementById("id_finds_name_f");
+    el.focus();
+    el.selectionStart = el.selectionEnd = el.value.length;
+</script>
+{% endif %}
+
 {% for detail in details %}
     {{ detail.rendered_content }}
 {% endfor %}

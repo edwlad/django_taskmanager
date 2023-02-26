@@ -3,7 +3,7 @@
 {% my_g view.get_par as get_par %}
 
 {% if is_paginated and page_obj.paginator.num_pages > 1 %}
-<ul class="pagination pagination-sm">
+<ul class="pagination pagination-sm mb-0">
     <li class="page-item">
         <a class="page-link"
         href="{% my_g get_par view.page_kwarg 1 %}"
