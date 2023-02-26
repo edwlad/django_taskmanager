@@ -1,0 +1,4 @@
+<script>
+    {% comment %} window.location.href = "{% firstof request.META.HTTP_REFERER "/" %}"; {% endcomment %}
+    window.location.href = "{% url "detail" model=view.kwargs.model pk=view.kwargs.pk %}";
+</script>

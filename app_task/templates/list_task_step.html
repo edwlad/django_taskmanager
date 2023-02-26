@@ -30,10 +30,10 @@
 {% if oper == "add" %}
 <form action="" method="post" class="mb-3">
     {% csrf_token %}
-    <div class="btn btn-light border pe-none text-start fw-bold mb-1">
-        {% now "d.m.Y" %} - 
+    {% comment %} <div class="btn btn-light border pe-none text-start fw-bold mb-1">
+        {% now "d.m.Y H:i:s" %} - 
         {{ view.request.user.username }}
-    </div>
+    </div> {% endcomment %}
 
      <div>
         <textarea class="form-control"
@@ -65,7 +65,7 @@
     <tr>
         <td>
             <span class="fw-bold">
-                {{ item.date_end|date:"d.m.Y" }} - {{ item.author.username }}
+                {{ item.date_end|date:"d.m.Y H:i:s" }} - {{ item.author.username }}
             </span>
             <br>
             <span style="white-space: pre-line;">{{ item.desc }}</span>

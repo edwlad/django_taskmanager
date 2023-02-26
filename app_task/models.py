@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
-from datetime import date  # noqa
+from datetime import date, datetime  # noqa
 from .managers import TaskManager, SprintManager, ProjManager
 
 
@@ -38,7 +38,7 @@ class Proj(models.Model):
         related_name="author_projs",
     )
     uweb = models.ForeignKey(
-        help_text="Последний прользовател редактировавший проект",
+        help_text="Последний прользователь редактировавший проект",
         verbose_name="Редактор",
         to=get_user_model(),
         on_delete=models.SET_NULL,
@@ -65,7 +65,40 @@ class Proj(models.Model):
         if self.date_end and self.date_end < self.date_end_proj:
             self.date_end = self.date_end_proj
 
-        return super().save(**kwargs)
+        # проверка - есть ли изменения
+        desc = ""
+        old = type(self).objects.filter(id=self.id).first()
+        if old is None:
+            desc = "Создание проекта"
+        else:
+            for v in self._meta.get_fields():
+                if v.name in ("uweb", "id"):
+                    continue
+                v1 = getattr(self, v.name)
+                v2 = getattr(old, v.name)
+                if v1 != v2:
+                    desc += f"{v.verbose_name}: {v2} => {v1};\n"
+
+        # если есть изменения сохраняем и создаём запись в истории
+        if desc:
+            super().save(**kwargs)
+
+            # выбор задач проекта
+            qs = Task.objects.filter(proj_id=self.id)
+
+            for v in qs:
+                obj = TaskStep()
+                obj.author = self.uweb
+                if old and self.date_end and old.date_end is None:
+                    obj.desc = "Закрытие проекта\n" + desc
+                elif old:
+                    obj.desc = "Изменения в проекте:\n" + desc
+                else:
+                    obj.desc = desc
+
+                obj.save(parrent=v)
+
+        return
 
     class META:
         url_name = "projs"
@@ -108,7 +141,7 @@ class Sprint(models.Model):
         related_name="author_sprints",
     )
     uweb = models.ForeignKey(
-        help_text="Последний прользовател редактировавший спринт",
+        help_text="Последний прользователь редактировавший спринт",
         verbose_name="Редактор",
         to=get_user_model(),
         on_delete=models.SET_NULL,
@@ -143,12 +176,43 @@ class Sprint(models.Model):
         if self.date_end and self.date_end < self.date_end_sprint:
             self.date_end = self.date_end_sprint
 
-        super().save(**kwargs)
+        # проверка - есть ли изменения
+        desc = ""
+        old = type(self).objects.filter(id=self.id).first()
+        if old is None:
+            desc = "Создание спринта"
+        else:
+            for v in self._meta.get_fields():
+                if v.name in ("uweb", "id"):
+                    continue
+                v1 = getattr(self, v.name)
+                v2 = getattr(old, v.name)
+                if v1 != v2:
+                    desc += f"{v.verbose_name}: {v2} => {v1};\n"
 
-        # если есть задачи где проект не совпадает с проектом спринта
-        # то меняем проект у задач
-        qs = Task.objects.filter(sprint_id=self.id).exclude(proj_id=self.proj_id)
-        qs.update(proj_id=self.proj_id)
+        # если есть изменения сохраняем и создаём запись в истории
+        if desc:
+            super().save(**kwargs)
+
+            # выбор задач спринта
+            qs = Task.objects.filter(sprint_id=self.id)
+
+            # если есть задачи где проект не совпадает с проектом спринта
+            # то меняем проект у задач
+            qs.exclude(proj_id=self.proj_id).update(proj_id=self.proj_id)
+
+            for v in qs:
+                obj = TaskStep()
+                obj.author = self.uweb
+                if old and self.date_end and old.date_end is None:
+                    obj.desc = "Закрытие спринта\n" + desc
+                elif old:
+                    obj.desc = "Изменения в спринте:\n" + desc
+                else:
+                    obj.desc = desc
+
+                obj.save(parrent=v)
+
         return
 
     class META:
@@ -201,7 +265,7 @@ class Task(models.Model):
         related_name="user_tasks",
     )
     uweb = models.ForeignKey(
-        help_text="Последний прользовател редактировавший задачу",
+        help_text="Последний прользователь редактировавший задачу",
         verbose_name="Редактор",
         to=get_user_model(),
         on_delete=models.SET_NULL,
@@ -212,8 +276,8 @@ class Task(models.Model):
         help_text="Проект",
         verbose_name="Проект",
         to="Proj",
-        blank=True,
-        null=True,
+        # blank=True,
+        # null=True,
         # on_delete=models.SET_NULL,
         on_delete=models.CASCADE,
         related_name="proj_tasks",
@@ -229,7 +293,7 @@ class Task(models.Model):
         related_name="sprint_tasks",
     )
     parent = models.ForeignKey(
-        help_text="Предыдущиая задача",
+        help_text="Предыдущая задача",
         verbose_name="Зависит от",
         to="self",
         on_delete=models.SET_NULL,
@@ -258,27 +322,34 @@ class Task(models.Model):
         if self.date_end and self.date_end < self.date_end_task:
             self.date_end = self.date_end_task
 
-        old = Task.objects.filter(id=self.id).first()
-
-        super().save(**kwargs)
-
-        obj = TaskStep()
-        obj.task_id = self.id
-        obj.author = self.uweb
+        # проверка - есть ли изменения
+        desc = ""
+        old = type(self).objects.filter(id=self.id).first()
         if old is None:
-            obj.desc = "Создание задачи"
+            desc = "Создание задачи"
         else:
-            if self.date_end is None:
-                obj.desc = "Изменения в задаче:\n"
-            else:
-                obj.desc = "Закрытие задачи\n"
-
             for v in self._meta.get_fields():
+                if v.name in ("uweb", "id"):
+                    continue
                 v1 = getattr(self, v.name)
                 v2 = getattr(old, v.name)
                 if v1 != v2:
-                    obj.desc += f"{v.verbose_name}: {v2} => {v1};\n"
-        obj.save(parrent="task")
+                    desc += f"{v.verbose_name}: {v2} => {v1};\n"
+
+        # если есть изменения сохраняем и создаём запись в истории
+        if desc:
+            super().save(**kwargs)
+
+            obj = TaskStep()
+            obj.author = self.uweb
+            if old and self.date_end and old.date_end is None:
+                obj.desc = "Закрытие задачи\n" + desc
+            elif old:
+                obj.desc = "Изменения в задаче:\n" + desc
+            else:
+                obj.desc = desc
+
+            obj.save(parrent=self)
 
         return
 
@@ -294,8 +365,8 @@ class TaskStep(models.Model):
         help_text="Выполненая работа по задаче",
         verbose_name="Что сделано",
     )
-    date_end = models.DateField(
-        help_text="Дата завершения шага", verbose_name="Завершён", default=date.today
+    date_end = models.DateTimeField(
+        help_text="Дата завершения шага", verbose_name="Завершён", default=datetime.now
     )
     author = models.ForeignKey(
         help_text="Исполнитель шага",
@@ -317,10 +388,15 @@ class TaskStep(models.Model):
     def __str__(self) -> str:
         return f"{self.id}: {self.desс[:30]}"
 
-    def save(self, parrent="", **kwargs) -> None:
-        # если закрыта задача то ничего не сохраняем
-        if not parrent and self.task and self.task.date_end:
+    def save(self, parrent=None, **kwargs) -> None:
+        if not isinstance(parrent, Task):
+            parrent = Task.objects.filter(id=self.task_id).first()
+
+        # если задача закрыта то не записываем
+        if not parrent or parrent.date_end:
             return
+
+        self.task_id = parrent.id
         return super().save(**kwargs)
 
     class META:

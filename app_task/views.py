@@ -111,6 +111,7 @@ def ProjTemplate(self: TemplateView, oper):
             self.request.POST["uweb"] = self.request.user.id
             self.request.POST._mutable = False
             obj = CreateView(
+                template_name="redirect.html",
                 fields=["uweb", "author", "name", "desc", "date_max"],
                 success_url=reverse_lazy(
                     "list",
@@ -124,6 +125,7 @@ def ProjTemplate(self: TemplateView, oper):
             self.request.POST["uweb"] = self.request.user.id
             self.request.POST._mutable = False
             obj = UpdateView(
+                template_name="redirect.html",
                 fields=["uweb", "name", "desc", "date_end", "date_max"],
                 queryset=one_qs,
                 success_url=reverse(
@@ -136,6 +138,7 @@ def ProjTemplate(self: TemplateView, oper):
             )
         case "delete":
             obj = DeleteView(
+                template_name="redirect.html",
                 queryset=one_qs,
                 success_url=reverse(
                     "list",
@@ -239,11 +242,13 @@ def SprintTemplate(self: TemplateView, oper):
             self.request.POST["uweb"] = self.request.user.id
             self.request.POST._mutable = False
             obj = CreateView(
+                template_name="redirect.html",
                 fields=["uweb", "author", "proj", "name", "desc", "date_max"],
                 success_url=reverse_lazy(
-                    "list",
+                    "detail",
                     kwargs={
-                        "model": model_url,
+                        "model": Proj.META.url_name,
+                        "pk": self.request.POST["proj"],
                     },
                 ),
             )
@@ -252,6 +257,7 @@ def SprintTemplate(self: TemplateView, oper):
             self.request.POST["uweb"] = self.request.user.id
             self.request.POST._mutable = False
             obj = UpdateView(
+                template_name="redirect.html",
                 queryset=one_qs,
                 fields=["uweb", "name", "desc", "date_end", "date_max", "proj"],
                 success_url=reverse_lazy(
@@ -263,12 +269,15 @@ def SprintTemplate(self: TemplateView, oper):
                 ),
             )
         case "delete":
+            proj_pk = one_qs.first().proj_id
             obj = DeleteView(
+                template_name="redirect.html",
                 queryset=one_qs,
-                success_url=reverse(
-                    "list",
+                success_url=reverse_lazy(
+                    "detail",
                     kwargs={
-                        "model": model_url,
+                        "model": Proj.META.url_name,
+                        "pk": proj_pk,
                     },
                 ),
             )
@@ -372,7 +381,17 @@ def TaskTemplate(self: TemplateView, oper):
             self.request.POST["author"] = self.request.user.id
             self.request.POST["uweb"] = self.request.user.id
             self.request.POST._mutable = False
+
+            if add_pk := self.request.POST["sprint"]:
+                add_model = Sprint.META.url_name
+            elif add_pk := self.request.POST["proj"]:
+                add_model = Proj.META.url_name
+            else:
+                add_model = Task.META.url_name
+                add_pk = 0
+
             obj = CreateView(
+                template_name="redirect.html",
                 fields=[
                     "uweb",
                     "author",
@@ -384,29 +403,36 @@ def TaskTemplate(self: TemplateView, oper):
                     "date_max",
                 ],
                 success_url=reverse_lazy(
-                    "list",
+                    "detail",
                     kwargs={
-                        "model": model_url,
+                        "model": add_model,
+                        "pk": add_pk,
                     },
                 ),
             )
         case "edit":
+            edit_fld = (
+                "uweb",
+                "user",
+                "name",
+                "desc",
+                "date_end",
+                "date_max",
+                "proj",
+                "sprint",
+            )
             self.request.POST._mutable = True
             self.request.POST["uweb"] = self.request.user.id
+            # если не хватает данных добавляем из текущей записи
+            curr = one_qs.first()
+            for v in edit_fld:
+                if v not in self.request.POST:
+                    self.request.POST[v] = getattr(curr, v, None)
             self.request.POST._mutable = False
             obj = UpdateView(
-                # template_name="detail_task.html",
+                template_name="redirect.html",
                 queryset=one_qs,
-                fields=[
-                    "uweb",
-                    "user",
-                    "name",
-                    "desc",
-                    "date_end",
-                    "date_max",
-                    "proj",
-                    "sprint",
-                ],
+                fields=edit_fld,
                 success_url=reverse_lazy(
                     "detail",
                     kwargs={
@@ -416,12 +442,23 @@ def TaskTemplate(self: TemplateView, oper):
                 ),
             )
         case "delete":
+            one_qs.first().proj_id
+            if del_pk := one_qs.first().sprint_id:
+                del_model = Sprint.META.url_name
+            elif del_pk := one_qs.first().proj_id:
+                del_model = Proj.META.url_name
+            else:
+                del_model = Task.META.url_name
+                del_pk = 0
+
             obj = DeleteView(
+                template_name="redirect.html",
                 queryset=one_qs,
                 success_url=reverse(
-                    "list",
+                    "detail",
                     kwargs={
-                        "model": model_url,
+                        "model": del_model,
+                        "pk": del_pk,
                     },
                 ),
             )
@@ -506,7 +543,7 @@ def TaskStepTemplate(self: TemplateView, oper):
             obj = ListView(
                 queryset=list_qs,
                 template_name="list_task_step.html",
-                ordering=("-date_end", "-id"),
+                ordering="-date_end",
                 paginate_by=PAGINATE_BY,
                 paginate_orphans=PAGINATE_ORPHANS,
                 page_kwarg=model.META.url_page,
@@ -588,7 +625,7 @@ class Index(TemplateView):
         elif a_id and user.id == a_id:
             out.update({"is_author": True})
         elif u_id and user.id == u_id:
-            out.update({"is_user": True, "edit": False, "delete": False})
+            out.update({"is_user": True, "delete": False})
         elif a_id:
             out.update({"edit": False, "delete": False})
         return out

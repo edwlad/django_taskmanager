@@ -5,7 +5,11 @@
 {% my_hp data.0.sprint as perms_s %}
 
 {% if perms.edit and view.kwargs.oper == "edit" and view.kwargs.model == view.url_name %}
-    {% firstof "edit" as oper %}
+    {% if perms.is_user %}
+        {% firstof "edit_u" as oper %}
+    {% else %}
+        {% firstof "edit" as oper %}
+    {% endif %}
 {% elif perms.add and view.kwargs.oper == "add" and view.kwargs.model == view.url_name %}
     {% firstof "add" as oper %}
     {% my_e "({'id':0},)" as data %}
@@ -95,7 +99,7 @@
         id="id_{{ view.fld.proj.name }}"
         title="Выбор проекта"
         >
-            <option value="" selected>-----</option>
+            <option value="" selected disabled>-----</option>
         {% for pr in view.projs %}
             <option value="{{ pr.id }}"
             {% if view.proj_id == pr.id or item.proj_id == pr.id %}selected{% endif %}
@@ -239,7 +243,7 @@
     </div>
     {# дата завершения - данные #}
     <div class="col-3 text-center border-end" title="{{view.fld.date_end.help_text}}">
-    {% if oper == "edit"%}
+    {% if oper == "edit" or oper == "edit_u" %}
         <input class="form-control"
         type="date" 
         name="{{ view.fld.date_end.name }}"
@@ -274,7 +278,7 @@
 
     <div class="w-100"></div>
 
-    {% if oper == "edit" or oper == "add" or oper == "delete"%}
+    {% if oper == "edit" or oper == "edit_u" or oper == "add" or oper == "delete"%}
     <div class="col d-flex justify-content-end align-items-center mb-1 mt-2">
         <div class="me-3">
             {% include "buttons.html" with btn_max="back" %}
@@ -282,12 +286,12 @@
         <input id="btn-task-submit"
         type="submit" 
         value=
-        {% if oper == "edit" %}"Сохранить"
+        {% if oper == "edit" or oper == "edit_u" %}"Сохранить"
         {% elif oper == "delete" %}"Да, удалить"
         {% else %}"Создать"
         {% endif %} 
         class="btn 
-            {% if oper == "edit" %}btn-success
+            {% if oper == "edit" or oper == "edit_u" %}btn-success
             {% elif oper == "delete" %}btn-danger
             {% else %}btn-primary
             {% endif %}"
