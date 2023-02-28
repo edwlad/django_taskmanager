@@ -15,12 +15,7 @@ from django.views.generic import (
     DeleteView,
 )
 from .models import Proj, Sprint, Task, TaskStep
-from api_task.serializers import (
-    ProjSerializer,
-    SprintSerializer,
-    TaskSerializer,
-    TaskStepSerializer,
-)
+import app_task.functions as functions
 
 PAGINATE_BY = settings.PAGINATE_BY
 PAGINATE_ORPHANS = settings.PAGINATE_ORPHANS
@@ -48,6 +43,7 @@ def ProjTemplate(self: TemplateView, oper):
     par = self.request.GET.dict()
     model_url = self.kwargs.get("model")
     pk = self.kwargs.get("pk")
+    user = self.request.user
     url_name = model.META.url_name
     url_filt = model.META.url_filt
     url_user = model.META.url_user
@@ -102,12 +98,12 @@ def ProjTemplate(self: TemplateView, oper):
                     par[url_filt] = "off"
                     list_qs = list_qs.filter(date_end=None)
 
-            match par.get(url_user, ""):
-                case "all":
+            match user.is_authenticated, par.get(url_user, ""):
+                case (False, _) | (_, "all"):
                     pass
                 case _:
                     par[url_user] = "aut"
-                    list_qs = list_qs.filter(author_id=self.request.user.id)
+                    list_qs = list_qs.filter(author_id=user.id)
 
             obj = ListView(
                 queryset=list_qs,
@@ -119,8 +115,8 @@ def ProjTemplate(self: TemplateView, oper):
             )
         case "add":
             self.request.POST._mutable = True
-            self.request.POST["author"] = self.request.user.id
-            self.request.POST["uweb"] = self.request.user.id
+            self.request.POST["author"] = user.id
+            self.request.POST["uweb"] = user.id
             self.request.POST._mutable = False
             obj = CreateView(
                 template_name="redirect.html",
@@ -134,7 +130,7 @@ def ProjTemplate(self: TemplateView, oper):
             )
         case "edit":
             self.request.POST._mutable = True
-            self.request.POST["uweb"] = self.request.user.id
+            self.request.POST["uweb"] = user.id
             self.request.POST._mutable = False
             obj = UpdateView(
                 template_name="redirect.html",
@@ -182,8 +178,6 @@ def ProjTemplate(self: TemplateView, oper):
     obj.url_user = url_user
     obj.fld = {v.name: v for v in obj.model._meta.get_fields()}
     obj.get_par = "&".join(map("=".join, par.items()))
-    obj.ser = ProjSerializer
-    # obj.api = {v.data["id"]: v.data for v in map(ProjSerializer, obj.queryset)}
     return obj
 
 
@@ -192,6 +186,7 @@ def SprintTemplate(self: TemplateView, oper):
     par = self.request.GET.dict()
     model_url = self.kwargs.get("model")
     pk = self.kwargs.get("pk")
+    user = self.request.user
     url_name = model.META.url_name
     url_filt = model.META.url_filt
     url_user = model.META.url_user
@@ -246,12 +241,12 @@ def SprintTemplate(self: TemplateView, oper):
                     par[url_filt] = "off"
                     list_qs = list_qs.filter(date_end=None)
 
-            match par.get(url_user, ""):
-                case "all":
+            match user.is_authenticated, par.get(url_user, ""):
+                case (False, _) | (_, "all"):
                     pass
                 case _:
                     par[url_user] = "aut"
-                    list_qs = list_qs.filter(author_id=self.request.user.id)
+                    list_qs = list_qs.filter(author_id=user.id)
 
             obj = ListView(
                 queryset=list_qs,
@@ -263,8 +258,8 @@ def SprintTemplate(self: TemplateView, oper):
             )
         case "add":
             self.request.POST._mutable = True
-            self.request.POST["author"] = self.request.user.id
-            self.request.POST["uweb"] = self.request.user.id
+            self.request.POST["author"] = user.id
+            self.request.POST["uweb"] = user.id
             self.request.POST._mutable = False
             obj = CreateView(
                 template_name="redirect.html",
@@ -279,7 +274,7 @@ def SprintTemplate(self: TemplateView, oper):
             )
         case "edit":
             self.request.POST._mutable = True
-            self.request.POST["uweb"] = self.request.user.id
+            self.request.POST["uweb"] = user.id
             self.request.POST._mutable = False
             obj = UpdateView(
                 template_name="redirect.html",
@@ -330,8 +325,6 @@ def SprintTemplate(self: TemplateView, oper):
         and one_qs.exists()
         and one_qs[0].sprint_tasks.filter(date_end=None).exists()
     )
-    obj.ser = SprintSerializer
-    # obj.api = {v.data["id"]: v.data for v in map(SprintSerializer, obj.queryset)}
     return obj
 
 
@@ -340,6 +333,7 @@ def TaskTemplate(self: TemplateView, oper):
     par = self.request.GET.dict()
     model_url = self.kwargs.get("model")
     pk = self.kwargs.get("pk")
+    user = self.request.user
     url_name = model.META.url_name
     url_filt = model.META.url_filt
     url_user = model.META.url_user
@@ -399,14 +393,14 @@ def TaskTemplate(self: TemplateView, oper):
                     par[url_filt] = "off"
                     list_qs = list_qs.filter(date_end=None)
 
-            match par.get(url_user, ""):
-                case "aut":
-                    list_qs = list_qs.filter(author_id=self.request.user.id)
-                case "all":
+            match user.is_authenticated, par.get(url_user, ""):
+                case (False, _) | (_, "all"):
                     pass
+                case _, "aut":
+                    list_qs = list_qs.filter(author_id=user.id)
                 case _:
                     par[url_user] = "usr"
-                    list_qs = list_qs.filter(user_id=self.request.user.id)
+                    list_qs = list_qs.filter(user_id=user.id)
 
             obj = ListView(
                 queryset=list_qs,
@@ -418,8 +412,8 @@ def TaskTemplate(self: TemplateView, oper):
             )
         case "add":
             self.request.POST._mutable = True
-            self.request.POST["author"] = self.request.user.id
-            self.request.POST["uweb"] = self.request.user.id
+            self.request.POST["author"] = user.id
+            self.request.POST["uweb"] = user.id
             self.request.POST._mutable = False
 
             if add_pk := self.request.POST["sprint"]:
@@ -462,7 +456,7 @@ def TaskTemplate(self: TemplateView, oper):
                 "sprint",
             )
             self.request.POST._mutable = True
-            self.request.POST["uweb"] = self.request.user.id
+            self.request.POST["uweb"] = user.id
             # если не хватает данных добавляем из текущей записи
             curr = one_qs.first()
             for v in edit_fld:
@@ -525,8 +519,6 @@ def TaskTemplate(self: TemplateView, oper):
     obj.par = par
     obj.get_par = "&".join(map("=".join, par.items()))
     obj.is_no_end = False
-    obj.ser = TaskSerializer
-    # obj.api = {v.data["id"]: v.data for v in map(TaskSerializer, obj.queryset)}
     return obj
 
 
@@ -535,6 +527,7 @@ def TaskStepTemplate(self: TemplateView, oper):
     par = self.request.GET.dict()
     model_url = self.kwargs.get("model")
     pk = self.kwargs.get("pk")
+    user = self.request.user
     url_name = model.META.url_name
     url_filt = model.META.url_filt
 
@@ -563,7 +556,7 @@ def TaskStepTemplate(self: TemplateView, oper):
     match oper, bool(task):
         case "add", True:
             self.request.POST._mutable = True
-            self.request.POST["author"] = self.request.user.id
+            self.request.POST["author"] = user.id
             self.request.POST["task"] = task_id
             self.request.POST._mutable = False
             obj = CreateView(
@@ -599,86 +592,20 @@ def TaskStepTemplate(self: TemplateView, oper):
     obj.task = task
     obj.fld = {v.name: v for v in obj.model._meta.get_fields()}
     obj.get_par = "&".join(map("=".join, par.items()))
-    obj.ser = TaskStepSerializer
-    # obj.api = {v.data["id"]: v.data for v in map(TaskStepSerializer, obj.queryset)}
     return obj
 
 
 class Index(TemplateView):
     template_name = "index.html"
 
-    def get_perms(self, request: HttpRequest, obj_in: models.Model = None):
-        kw = request.resolver_match.kwargs
-        user = request.user
-
-        if isinstance(obj_in, models.Model):
-            obj = obj_in
-            has_obj = True
-        else:
-            match kw["model"]:
-                case Proj.META.url_name:
-                    model = Proj
-                case Sprint.META.url_name:
-                    model = Sprint
-                case Task.META.url_name:
-                    model = Task
-                case TaskStep.META.url_name:
-                    model = TaskStep
-                case _:
-                    return {
-                        "list": True,
-                        "detail": True,
-                    }
-            obj = model.objects.filter(id=kw["pk"]).first()
-            has_obj = isinstance(obj, models.Model)
-            if not has_obj:
-                obj = model
-
-        temp: str = (
-            f"{obj._meta.app_label}.{{}}_{obj._meta.verbose_name.replace(' ', '')}"
-        )
-        out = {
-            "list": True,
-            "detail": True,
-            "is_author": False,  # автор
-            "is_user": False,  # исполнитель
-            "add": user.has_perm(temp.format("add")),
-            "delete": has_obj and user.has_perm(temp.format("delete")),
-            "edit": has_obj and user.has_perm(temp.format("change")),
-        }
-
-        a_id = hasattr(obj, "author") and hasattr(obj.author, "id") and obj.author.id
-        u_id = hasattr(obj, "user") and hasattr(obj.user, "id") and obj.user.id
-        p_de = (
-            hasattr(obj, "proj") and hasattr(obj.proj, "date_end") and obj.proj.date_end
-        )
-        s_de = (
-            hasattr(obj, "sprint")
-            and hasattr(obj.sprint, "date_end")
-            and obj.sprint.date_end
-        )
-        if p_de:
-            out.update({"edit": False, "delete": False})
-        elif s_de:
-            out.update({"edit": False, "delete": False})
-        elif user.is_superuser:
-            pass
-        elif a_id and user.id == a_id:
-            out.update({"is_author": True})
-        elif u_id and user.id == u_id:
-            out.update({"is_user": True, "delete": False})
-        elif a_id:
-            out.update({"edit": False, "delete": False})
-        return out
-
     def get(self, request: HttpRequest, *args, **kwargs):
-        perms = self.get_perms(request)
+        perms = functions.get_perms(request)
         if not perms.get(self.kwargs["oper"], False):
             return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/"))
         return super().get(request, *args, **kwargs)
 
     def post(self, request: HttpRequest, *args, **kwargs):
-        perms = self.get_perms(request)
+        perms = functions.get_perms(request)
         if not perms.get(self.kwargs["oper"], False):
             return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/"))
 

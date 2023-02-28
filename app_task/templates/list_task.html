@@ -2,14 +2,20 @@
 {% my_hp "" as perms %}
 
 <div class="row">
+    {# заголовок #}
     <div class="h2 align-self-center col-4 col-sm-3">
         {% include "buttons.html" with btn_max="add" model=view.url_name pk=view.kwargs.pk %}
         Задачи
         <div class="w-100 my-1"></div>
         {% include "paginate.html" %}
     </div>
+    {# кнопки фильтров #}
     <div class="align-self-center col">
-        {% include "buttons.html" with btn_max="items users"%}
+        {% if view.request.user.is_authenticated %}
+        {% include "buttons.html" with btn_max="items users" %}
+        {% else %}
+        {% include "buttons.html" with btn_max="items" %}
+        {% endif %}
     </div>
 </div>
 

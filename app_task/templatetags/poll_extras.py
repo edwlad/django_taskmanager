@@ -1,8 +1,7 @@
 from django import template
 from django.template.defaultfilters import stringfilter
 from django.db.models import Model
-from app_task.views import Index
-
+from app_task.functions import get_perms
 import re
 
 # from django.contrib.auth import get_user_model
@@ -83,7 +82,7 @@ def my_hp(context, obj: Model) -> bool:
     obj - объект текущей записи
     выход словарь разрешений
     """
-    out = Index.get_perms(None, context.dicts[1]["request"], obj)
+    out = get_perms(context.dicts[1]["request"], obj)
     return out
 
 

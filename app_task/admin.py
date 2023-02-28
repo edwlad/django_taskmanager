@@ -1,30 +1,33 @@
 from django.contrib import admin
 from .models import Proj, Sprint, Task, TaskStep
 from django.db import models
-from datetime import date
+from datetime import date  # noqa
 
 
 @admin.action(description="Отметить как выполненное")
 def make_on_end(modeladmin, request, queryset: models.QuerySet):
-    queryset.update(date_end=date.today())
+    pass
+    # queryset.update(date_end=date.today())
 
 
 @admin.action(description="Отменить выполнение")
 def make_off_end(modeladmin, request, queryset: models.QuerySet):
-    queryset.update(date_end=None)
+    pass
+    # queryset.update(date_end=None)
 
 
 @admin.action(description="Изменить статус выполнения")
 def make_not_end(modeladmin, request, queryset: models.QuerySet):
+    pass
     # for item in queryset:
     #     item.chk_end = not item.chk_end
     #     item.save()
-    queryset.update(
-        date_end=models.Case(
-            models.When(date_end=None, then=date.today()),
-            default=None,
-        ),
-    )
+    # queryset.update(
+    #     date_end=models.Case(
+    #         models.When(date_end=None, then=date.today()),
+    #         default=None,
+    #     ),
+    # )
 
 
 @admin.register(Proj)
