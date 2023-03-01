@@ -5,8 +5,8 @@ from django.db import models  # noqa
 from django.urls import reverse, reverse_lazy  # noqa
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.contrib import messages
 
+# from django.contrib import messages
 # from django.contrib.messages.views import SuccessMessageMixin
 
 from django.views.generic import (
@@ -456,9 +456,7 @@ def TaskTemplate(self: TemplateView, oper):
                 for v in ("user", "name", "desc", "proj", "sprint"):
                     self.request.POST[v] = getattr(curr, v, None)
             self.request.POST._mutable = False
-            messages.info(self.request, "MESSSAGE")
             obj = UpdateView(
-                success_message="%(name)s was created successfully",
                 template_name="redirect.html",
                 queryset=one_qs,
                 fields=(
