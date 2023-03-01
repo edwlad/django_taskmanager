@@ -31,7 +31,7 @@ def get_perms(request: HttpRequest, obj_in: Model = None):
         if not has_obj:
             obj = model
 
-    temp: str = f"{obj._meta.app_label}.{{}}_{obj._meta.verbose_name.replace(' ', '')}"
+    temp: str = "{}.{{}}_{}".format(*obj._meta.label_lower.split("."))
     out = {
         "list": True,
         "detail": True,
