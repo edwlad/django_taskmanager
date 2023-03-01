@@ -5,6 +5,9 @@ from django.db import models  # noqa
 from django.urls import reverse, reverse_lazy  # noqa
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib import messages
+
+# from django.contrib.messages.views import SuccessMessageMixin
 
 from django.views.generic import (
     TemplateView,
@@ -445,28 +448,29 @@ def TaskTemplate(self: TemplateView, oper):
                 ),
             )
         case "edit":
-            edit_fld = (
-                "uweb",
-                "user",
-                "name",
-                "desc",
-                "date_end",
-                "date_max",
-                "proj",
-                "sprint",
-            )
             self.request.POST._mutable = True
             self.request.POST["uweb"] = user.id
-            # если не хватает данных добавляем из текущей записи
+            # если юзер исполнитель, то меняем некоторые поля на текущие
             curr = one_qs.first()
-            for v in edit_fld:
-                if v not in self.request.POST:
+            if curr.author_id != user.id and curr.user_id == user.id:
+                for v in ("user", "name", "desc", "proj", "sprint"):
                     self.request.POST[v] = getattr(curr, v, None)
             self.request.POST._mutable = False
+            messages.info(self.request, "MESSSAGE")
             obj = UpdateView(
+                success_message="%(name)s was created successfully",
                 template_name="redirect.html",
                 queryset=one_qs,
-                fields=edit_fld,
+                fields=(
+                    "uweb",
+                    "user",
+                    "date_end",
+                    "date_max",
+                    "name",
+                    "desc",
+                    "proj",
+                    "sprint",
+                ),
                 success_url=reverse_lazy(
                     "detail",
                     kwargs={

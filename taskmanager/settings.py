@@ -148,3 +148,11 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 10,
 }
+# теги для видов сообщений
+MESSAGE_TAGS = {
+    10: "alert-dark",  # DEBUG - встроеный
+    20: "alert-info",  # INFO - встроеный
+    25: "alert-success",  # SUCCESS - встроеный
+    30: "alert-warning",  # WARNING - встроеный
+    40: "alert-danger",  # ERROR - встроеный
+}

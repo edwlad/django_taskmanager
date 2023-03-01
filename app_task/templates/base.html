@@ -7,14 +7,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Base page{% endblock title %}</title>
-    <link rel="stylesheet" type="text/css" href="{% static 'bootstrap.min.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'bootstrap-icons.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}"/>
-    {% comment %} <script async src="{% static 'my_js.js' %}" ></script> {% endcomment %}
+    <link rel="stylesheet" type="text/css" href="{% static "bootstrap.min.css" %}">
+    <link rel="stylesheet" type="text/css" href="{% static "bootstrap-icons.css" %}">
+    <link rel="stylesheet" type="text/css" href="{% static "style.css" %}"/>
+    <script src="{% static "bootstrap.min.js" %}"></script>
+    {% comment %} <script src="{% static "bootstrap.bundle.min.js" %}"></script> {% endcomment %}
+    {% comment %} <script async src="{% static "my_js.js" %}" ></script> {% endcomment %}
 </head>
 
 <body style="max-width: 992px;" class="container">
-    <nav class="d-flex">
+    <nav class="d-flex my-3">
         <a href="/" class="mx-1">Главная</a> | 
         <a href="{% url "list" model="projs" %}" class="mx-1">Проекты</a> | 
         <a href="{% url "list" model="sprints" %}" class="mx-1">Спринты</a> | 
@@ -37,9 +39,21 @@
         {% endif %}
 
     </nav>
+
     <hr>
+
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-dismissible {{ message.tags }} fade show">
+            <div>{{ message }}</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    {% endif %}
+
     <h1>{% block header %}Base page{% endblock header %}</h1>
     {% block content %}{% endblock content %}
+    <div style="height: 50px;" class="">&nbsp;</div>
 </body>
 
 </html>

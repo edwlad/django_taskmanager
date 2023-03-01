@@ -365,7 +365,7 @@ class Task(models.Model):
 
 class TaskStep(models.Model):
     desc = models.TextField(
-        help_text="Выполненая работа по задаче",
+        help_text="Выполненная работа по задаче",
         verbose_name="Что сделано",
     )
     date_end = models.DateTimeField(
