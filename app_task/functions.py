@@ -1,11 +1,17 @@
 from django.http.response import HttpResponseRedirect, HttpResponse  # noqa
 from django.http.request import HttpRequest  # noqa
+from rest_framework.request import Request
 from django.db.models import Model  # noqa
 from .models import Proj, Sprint, Task, TaskStep
 
 
-def get_perms(request: HttpRequest, obj_in: Model = None):
-    kw = request.resolver_match.kwargs
+def get_perms(request: HttpRequest | Request, obj_in: Model = None):
+    kw = {}
+    if isinstance(request, HttpRequest):
+        kw = getattr(request.resolver_match, "kwargs", {})
+    elif isinstance(request, Request):
+        kw = request.parser_context.get("kwargs", {})
+        kw["model"] = request.parser_context["view"].basename
     user = request.user
 
     if isinstance(obj_in, Model):
@@ -31,7 +37,7 @@ def get_perms(request: HttpRequest, obj_in: Model = None):
         if not has_obj:
             obj = model
 
-    temp: str = "{}.{{}}_{}".format(*obj._meta.label_lower.split("."))
+    temp: str = f"{obj._meta.app_label}.{{}}_{obj._meta.model_name}"
     out = {
         "list": True,
         "detail": True,

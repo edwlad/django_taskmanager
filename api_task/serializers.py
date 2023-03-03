@@ -58,24 +58,19 @@ class SprintSerializer(serializers.ModelSerializer):
 
 
 class TaskSerializer(serializers.ModelSerializer):
-    author = serializers.SlugRelatedField(slug_field="username", read_only=True)
-    user = serializers.SlugRelatedField(slug_field="username", read_only=True)
+    # partial = True
     date_plan = serializers.DateField(read_only=True)
     days_plan = serializers.DurationField(read_only=True)
     date_end_task = serializers.DateField(read_only=True)
 
+    def update(self, instance, validated_data):
+        return super().update(instance, validated_data)
+
     class Meta:
         model = Task
         # depth = 1
-        fields = ("id", "author_id", "user_id", "name", "desc", "date_end", "date_max")
-        read_only_fields = (
-            "author",
-            "user",
-            "date_beg",
-            "date_plan",
-            "days_plan",
-            "date_end_task",
-        )
+        fields = ("id", "author", "user", "name", "desc", "date_end", "date_max")
+        read_only_fields = ("date_beg", "date_plan", "days_plan", "date_end_task")
         fields += read_only_fields
 
 
