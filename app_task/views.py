@@ -6,7 +6,8 @@ from django.urls import reverse, reverse_lazy  # noqa
 from django.conf import settings
 from django.contrib.auth import get_user_model
 
-# from django.contrib import messages
+from django.contrib import messages
+
 # from django.contrib.messages.views import SuccessMessageMixin
 
 from django.views.generic import (
@@ -187,6 +188,7 @@ def ProjTemplate(self: TemplateView, oper):
 def SprintTemplate(self: TemplateView, oper):
     model = Sprint
     par = self.request.GET.dict()
+    oper_url = self.kwargs.get("oper")
     model_url = self.kwargs.get("model")
     pk = self.kwargs.get("pk")
     user = self.request.user
@@ -306,9 +308,11 @@ def SprintTemplate(self: TemplateView, oper):
             )
         case "detail" | _:
             obj = ListView(
-                queryset=model.objects.filter(id=pk),
+                queryset=one_qs,
                 template_name="detail_sprint.html",
             )
+            if oper_url == "edit" or oper_url == "add":
+                obj.projs = Proj.objects.filter(date_end=None)
 
     obj.kwargs = self.kwargs
     obj.model = model
@@ -321,7 +325,6 @@ def SprintTemplate(self: TemplateView, oper):
     obj.task_id = task_id
     obj.sprint_id = sprint_id
     obj.proj_id = proj_id
-    obj.projs = Proj.objects.filter(date_end=None)
     obj.get_par = "&".join(map("=".join, par.items()))
     obj.is_no_end = (
         self.kwargs["oper"] == "edit"
@@ -334,6 +337,7 @@ def SprintTemplate(self: TemplateView, oper):
 def TaskTemplate(self: TemplateView, oper):
     model = Task
     par = self.request.GET.dict()
+    oper_url = self.kwargs.get("oper")
     model_url = self.kwargs.get("model")
     pk = self.kwargs.get("pk")
     user = self.request.user
@@ -379,6 +383,10 @@ def TaskTemplate(self: TemplateView, oper):
         list_qs = list_qs.filter(sprint_id=pk)
     elif model_url == Proj.META.url_name:
         list_qs = list_qs.filter(proj_id=pk)
+    if pk <= 0 and task_id > 0:
+        qs = Task.objects.filter(id=task_id).first()
+        pk = qs.id if qs else 0
+
     one_qs = model.objects.filter(id=pk)
 
     match oper:
@@ -503,6 +511,13 @@ def TaskTemplate(self: TemplateView, oper):
                 queryset=one_qs,
                 template_name="detail_task.html",
             )
+            if oper_url == "edit" or oper_url == "add":
+                obj.projs = Proj.objects.filter(date_end=None)
+                obj.sprints = Sprint.objects.filter(date_end=None)
+                if temp := one_qs.first():
+                    obj.sprints = obj.sprints.filter(proj=temp.proj_id)
+                else:
+                    obj.sprints = obj.sprints.filter(proj=0)
 
     obj.kwargs = self.kwargs
     obj.model = model
@@ -515,8 +530,6 @@ def TaskTemplate(self: TemplateView, oper):
     obj.task_id = task_id
     obj.sprint_id = sprint_id
     obj.proj_id = proj_id
-    obj.projs = Proj.objects.filter(date_end=None)
-    obj.sprints = Sprint.objects.filter(date_end=None)
     obj.users = get_user_model().objects.all()
     obj.par = par
     obj.get_par = "&".join(map("=".join, par.items()))
@@ -603,13 +616,20 @@ class Index(TemplateView):
     def get(self, request: HttpRequest, *args, **kwargs):
         perms = functions.get_perms(request)
         if not perms.get(self.kwargs["oper"], False):
-            return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/"))
+            messages.warning(
+                request, f"Нет прав для выполнения операции {self.kwargs['oper']}"
+            )
+            return HttpResponseRedirect(reverse("index"))
         return super().get(request, *args, **kwargs)
 
     def post(self, request: HttpRequest, *args, **kwargs):
         perms = functions.get_perms(request)
         if not perms.get(self.kwargs["oper"], False):
-            return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/"))
+            messages.warning(
+                request,
+                f"Нет прав для выполнения операции {self.kwargs.get('oper', '')}",
+            )
+            return HttpResponseRedirect(reverse("index"))
 
         match self.kwargs.get("model"):
             case Proj.META.url_name:
@@ -621,6 +641,9 @@ class Index(TemplateView):
             case TaskStep.META.url_name:
                 obj = TaskStepTemplate(self, self.kwargs.get("oper"))
             case _:
+                messages.warning(
+                    request, f"Не найдена модель {self.kwargs.get('model', '')}"
+                )
                 return HttpResponseRedirect(reverse("index"))
 
         return obj.post(self, request, *args, **kwargs)
@@ -673,7 +696,9 @@ class Index(TemplateView):
                 objs.append(TaskTemplate(self, "detail"))
                 objs.append(TaskStepTemplate(self, "list"))
             case _:
-                pass
+                messages.warning(
+                    self.request, f"Не найдена модель {self.kwargs.get('model', '')}"
+                )
 
         try:
             context["details"] = [v.get(self.request) for v in objs]

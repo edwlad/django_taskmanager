@@ -98,12 +98,15 @@
         name="{{ view.fld.proj.name }}"
         id="id_{{ view.fld.proj.name }}"
         title="Выбор проекта"
-        >
+        onchange="find_sprints(
+            el=document.getElementById('id_{{ view.fld.sprint.name }}'), 
+            proj_id=this.value
+        )">
             <option value="" selected disabled>-----</option>
         {% for pr in view.projs %}
             <option value="{{ pr.id }}"
             {% if view.proj_id == pr.id or item.proj_id == pr.id %}selected{% endif %}
-            >{{ pr.name }}
+            >{{ pr.id }}: {{ pr.name }}
             </option>
         {% empty %}
             <option disabled>Все проекты завершены</option>
@@ -119,7 +122,7 @@
                 class="flex-grow-1 btn btn-light border-0 text-start mx-1"
                 title="Перейти к проекту">
                     {% include "badge.html" with item=item.proj %}
-                    {{ item.proj.name }}
+                    {{ item.proj_id }}: {{ item.proj.name }}
                 </a>
                 <div>
                     {% include "buttons.html" with btn_min="delete" model=model_p pk=pk_p perms=perms_p %}
@@ -152,7 +155,7 @@
         {% for sp in view.sprints %}
             <option value="{{ sp.id }}"
             {% if view.sprint_id == sp.id or item.sprint_id == sp.id %}selected{% endif %}
-            >{{ sp.name }}
+            >{{ sp.id }}: {{ sp.name }}
             </option>
         {% empty %}
             <option disabled>Все спринты завершены</option>
@@ -168,7 +171,7 @@
                 class="btn flex-grow-1 btn-light border-0 text-start mx-1"
                 title="Перейти к спринту">
                     {% include "badge.html" with item=item.sprint %}
-                    {{ item.sprint.name }}
+                    {{ item.sprint_id }}: {{ item.sprint.name }}
                 </a>
                 <div>
                 {% include "buttons.html" with btn_min="delete" model=model_s pk=pk_s perms=perms_s %}
