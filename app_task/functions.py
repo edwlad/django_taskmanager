@@ -5,7 +5,7 @@ from django.db.models import Model  # noqa
 from .models import Proj, Sprint, Task, TaskStep
 
 
-def get_perms(request: HttpRequest | Request, obj_in: Model = None):
+def get_perms(request: HttpRequest | Request, obj: Model = None):
     kw = {}
     if isinstance(request, HttpRequest):
         kw = getattr(request.resolver_match, "kwargs", {})
@@ -14,8 +14,7 @@ def get_perms(request: HttpRequest | Request, obj_in: Model = None):
         kw["model"] = request.parser_context["view"].basename
     user = request.user
 
-    if isinstance(obj_in, Model):
-        obj = obj_in
+    if isinstance(obj, Model):
         has_obj = True
     else:
         match kw["model"]:
@@ -68,4 +67,5 @@ def get_perms(request: HttpRequest | Request, obj_in: Model = None):
         out.update({"is_user": True, "delete": False})
     elif a_id:
         out.update({"edit": False, "delete": False})
+
     return out

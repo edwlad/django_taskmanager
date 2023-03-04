@@ -9,7 +9,8 @@ class NonModelSerializer(serializers.Serializer):
 
 
 class ProjSerializer(serializers.ModelSerializer):
-    author = serializers.SlugRelatedField(slug_field="username", read_only=True)
+    # author = serializers.SlugRelatedField(slug_field="username", read_only=True)
+    author = serializers.StringRelatedField(read_only=True)
     date_plan = serializers.DateField(read_only=True)
     days_plan = serializers.DurationField(read_only=True)
     date_end_proj = serializers.DateField(read_only=True)
@@ -23,21 +24,28 @@ class ProjSerializer(serializers.ModelSerializer):
     class Meta:
         model = Proj
         # depth = 1
-        fields = ("id", "author_id", "name", "desc", "date_end", "date_max")
-        read_only_fields = (
-            "author",
+        # fields = tuple(v.name for v in model._meta.get_fields())
+        fields = (
+            "id",
+            "author_id",
+            "name",
+            "desc",
             "date_beg",
+            "date_end",
+            "date_max",
+            "author",
             "date_plan",
             "days_plan",
             "date_end_proj",
             # "proj_sprints",
             # "proj_tasks",
         )
-        fields += read_only_fields
+        read_only_fields = fields
 
 
 class SprintSerializer(serializers.ModelSerializer):
-    author = serializers.SlugRelatedField(slug_field="username", read_only=True)
+    proj = serializers.StringRelatedField(read_only=True)
+    author = serializers.StringRelatedField(read_only=True)
     date_plan = serializers.DateField(read_only=True)
     days_plan = serializers.DurationField(read_only=True)
     date_end_sprint = serializers.DateField(read_only=True)
@@ -45,20 +53,33 @@ class SprintSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sprint
         # depth = 1
-        fields = ("id", "author_id", "name", "desc", "date_end", "date_max")
-        read_only_fields = (
-            "author",
+        # fields = tuple(v.name for v in model._meta.get_fields())
+        fields = (
+            "id",
+            "proj_id",
+            "author_id",
+            "name",
+            "desc",
             "date_beg",
+            "date_end",
+            "date_max",
+            "proj",
+            "author",
             "date_plan",
             "days_plan",
             "date_end_sprint",
             # "sprint_tasks",
         )
-        fields += read_only_fields
+        read_only_fields = fields
 
 
 class TaskSerializer(serializers.ModelSerializer):
     # partial = True
+    proj = serializers.StringRelatedField(read_only=True)
+    sprint = serializers.StringRelatedField(read_only=True)
+    parent = serializers.StringRelatedField(read_only=True)
+    author = serializers.StringRelatedField(read_only=True)
+    user = serializers.StringRelatedField(read_only=True)
     date_plan = serializers.DateField(read_only=True)
     days_plan = serializers.DurationField(read_only=True)
     date_end_task = serializers.DateField(read_only=True)
@@ -69,13 +90,45 @@ class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         # depth = 1
-        fields = ("id", "author", "user", "name", "desc", "date_end", "date_max")
-        read_only_fields = ("date_beg", "date_plan", "days_plan", "date_end_task")
-        fields += read_only_fields
+        # fields = tuple(v.name for v in model._meta.get_fields())
+        fields = (
+            "id",
+            "proj_id",
+            "sprint_id",
+            "parent_id",
+            "author_id",
+            "user_id",
+            "name",
+            "desc",
+            "date_beg",
+            "date_end",
+            "date_max",
+            "proj",
+            "sprint",
+            "parent",
+            "author",
+            "user",
+            "date_plan",
+            "days_plan",
+            "date_end_task",
+        )
+        read_only_fields = fields
 
 
 class TaskStepSerializer(serializers.ModelSerializer):
+    author = serializers.StringRelatedField(read_only=True)
+    task = serializers.StringRelatedField(read_only=True)
+
     class Meta:
         model = TaskStep
-        fields = tuple(v.attname for v in Task._meta.fields)
+        # fields = tuple(v.name for v in model._meta.get_fields())
+        fields = (
+            "id",
+            "author_id",
+            "task_id",
+            "date_end",
+            "desc",
+            "author",
+            "task",
+        )
         read_only_fields = fields
