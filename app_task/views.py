@@ -23,6 +23,7 @@ import app_task.functions as functions
 
 PAGINATE_BY = settings.PAGINATE_BY
 PAGINATE_ORPHANS = settings.PAGINATE_ORPHANS
+MY_OPER = settings.MY_OPER
 
 
 def error(req: HttpRequest, *args, **kwargs) -> HttpResponse:
@@ -102,12 +103,10 @@ def ProjTemplate(self: TemplateView, oper):
                     par[url_filt] = "off"
                     list_qs = list_qs.filter(date_end=None)
 
-            match user.is_authenticated, par.get(url_user, ""):
-                case (False, _) | (_, "all"):
-                    pass
-                case _:
-                    par[url_user] = "aut"
-                    list_qs = list_qs.filter(author_id=user.id)
+            if user.is_authenticated and par.get(url_user, "") == "aut":
+                list_qs = list_qs.filter(author_id=user.id)
+            else:
+                par[url_user] = "all"
 
             obj = ListView(
                 queryset=list_qs,
@@ -246,12 +245,10 @@ def SprintTemplate(self: TemplateView, oper):
                     par[url_filt] = "off"
                     list_qs = list_qs.filter(date_end=None)
 
-            match user.is_authenticated, par.get(url_user, ""):
-                case (False, _) | (_, "all"):
-                    pass
-                case _:
-                    par[url_user] = "aut"
-                    list_qs = list_qs.filter(author_id=user.id)
+            if user.is_authenticated and par.get(url_user, "") == "aut":
+                list_qs = list_qs.filter(author_id=user.id)
+            else:
+                par[url_user] = "all"
 
             obj = ListView(
                 queryset=list_qs,
@@ -405,13 +402,12 @@ def TaskTemplate(self: TemplateView, oper):
                     list_qs = list_qs.filter(date_end=None)
 
             match user.is_authenticated, par.get(url_user, ""):
-                case (False, _) | (_, "all"):
-                    pass
-                case _, "aut":
+                case True, "usr":
+                    list_qs = list_qs.filter(user_id=user.id)
+                case True, "aut":
                     list_qs = list_qs.filter(author_id=user.id)
                 case _:
-                    par[url_user] = "usr"
-                    list_qs = list_qs.filter(user_id=user.id)
+                    par[url_user] = "all"
 
             obj = ListView(
                 queryset=list_qs,
@@ -615,19 +611,21 @@ class Index(TemplateView):
 
     def get(self, request: HttpRequest, *args, **kwargs):
         perms = functions.get_perms(request)
-        if not perms.get(self.kwargs["oper"], False):
+        oper = self.kwargs.get("oper", "")
+        if not perms.get(oper, False):
             messages.warning(
-                request, f"Нет прав для выполнения операции {self.kwargs['oper']}"
+                request, f"Нет прав для выполнения операции {MY_OPER.get(oper, '')}"
             )
             return HttpResponseRedirect(reverse("index"))
         return super().get(request, *args, **kwargs)
 
     def post(self, request: HttpRequest, *args, **kwargs):
         perms = functions.get_perms(request)
-        if not perms.get(self.kwargs["oper"], False):
+        oper = self.kwargs.get("oper", "")
+        if not perms.get(oper, False):
             messages.warning(
                 request,
-                f"Нет прав для выполнения операции {self.kwargs.get('oper', '')}",
+                f"Нет прав для выполнения операции {MY_OPER.get(oper, '')}.",
             )
             return HttpResponseRedirect(reverse("index"))
 
@@ -646,7 +644,7 @@ class Index(TemplateView):
                 )
                 return HttpResponseRedirect(reverse("index"))
         out = obj.post(self, request, *args, **kwargs)
-        messages.info(request, f"Операция {self.kwargs.get('oper', '')} выполнена.")
+        messages.info(request, f"Операция {MY_OPER.get(oper, '')} выполнена.")
         return out
 
     def get_context_data(self, **kwargs):

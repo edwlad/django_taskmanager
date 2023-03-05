@@ -353,7 +353,7 @@ class Task(models.Model):
             else:
                 obj.desc = desc
 
-            obj.save(parrent=self)
+            obj.save(parrent=self, forse=True)
 
         return
 
@@ -393,12 +393,12 @@ class TaskStep(models.Model):
     def __str__(self) -> str:
         return f"{self.id}: {self.desс[:30]}"
 
-    def save(self, parrent=None, **kwargs) -> None:
+    def save(self, parrent=None, forse=False, **kwargs) -> None:
         if not isinstance(parrent, Task):
             parrent = Task.objects.filter(id=self.task_id).first()
 
         # если задача закрыта то не записываем
-        if not parrent or parrent.date_end:
+        if not forse and (not parrent or parrent.date_end):
             return
 
         self.task_id = parrent.id

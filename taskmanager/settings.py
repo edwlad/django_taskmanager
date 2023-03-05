@@ -128,7 +128,7 @@ TIME_ZONE = "Etc/GMT-7"
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
@@ -165,4 +165,12 @@ MESSAGE_TAGS = {
     25: "alert-success",  # SUCCESS - встроеный
     30: "alert-warning",  # WARNING - встроеный
     40: "alert-danger",  # ERROR - встроеный
+}
+# расшифровка операций
+MY_OPER = {
+    "list": "Список",
+    "detail": "Просмотр",
+    "add": "Добавление",
+    "edit": "Редактирование",
+    "delete": "Удаление",
 }
