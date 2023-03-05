@@ -122,6 +122,10 @@
         name="{{ view.fld.date_end.name }}"
         value="{{ item.date_end|date:"Y-m-d" }}"
         id="id_{{ view.fld.date_end.name }}">
+        {% endif %}
+    {% else %}
+        {{ item.date_end|date:"d.m.Y" }}<br>
+    {% endif %}
         <p style="font-size: 0.8rem;"
         class="lh-1 m-0 text-start"
         title="Список последних дат">
@@ -130,10 +134,6 @@
             <br>&nbsp;Спринты {{ item.date_end_sprint|date:"d.m.Y" }}
             <br>&nbsp;Задачи {{ item.date_end_task|date:"d.m.Y" }}
         </p>
-        {% endif %}
-    {% else %}
-        {{ item.date_end|date:"d.m.Y" }}<br>
-    {% endif %}
     </div>
     {# Планируемая дата - данные #}
     <div class="col-3 text-center border-end" title="{{view.fld.date_max.help_text}}">

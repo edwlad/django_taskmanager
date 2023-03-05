@@ -1,6 +1,6 @@
 async function find_sprints(el, proj_id=0){
     // console.log("Поиск спринтов", el.innerHTML, proj_id);
-    if (el = null){return;}
+    if (el == null){return;}
 
     let out = document.createElement("div");
     out.innerHTML = "<option value='' selected>-----</option>";
@@ -19,7 +19,7 @@ async function find_sprints(el, proj_id=0){
         }
     }
 
-    // console.log("Завершено");
+    // console.log("Завершено", out);
     el.innerHTML = out.innerHTML;
 
 }

@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from datetime import date, datetime  # noqa
-from .managers import TaskManager, SprintManager, ProjManager
+from app_task.managers import TaskManager, SprintManager, ProjManager
 
 # from django.contrib import messages
 

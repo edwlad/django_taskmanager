@@ -59,32 +59,32 @@ def ProjTemplate(self: TemplateView, oper):
 
     sprint_id = 0
     if task_id > 0:
-        qs = Task.objects.filter(pk=task_id).exclude(sprint_id=None).first()
-        sprint_id = qs.sprint_id if qs else 0
+        qs = Task.objects.filter(pk=task_id).exclude(sprint_id=None)
+        sprint_id = qs.first().sprint_id if qs.exists() else 0
     if sprint_id <= 0 and par.get("model", "") == Sprint.META.url_name:
         sprint_id = int(par.get("pk", 0))
 
     proj_id = 0
     if task_id > 0:
-        qs = Task.objects.filter(pk=task_id).exclude(proj_id=None).first()
-        proj_id = qs.proj_id if qs else 0
+        qs = Task.objects.filter(pk=task_id).exclude(proj_id=None)
+        proj_id = qs.first().proj_id if qs.exists() else 0
     if proj_id <= 0 and sprint_id > 0:
-        qs = Sprint.objects.filter(pk=sprint_id).exclude(proj_id=None).first()
-        proj_id = qs.proj_id if qs else 0
+        qs = Sprint.objects.filter(pk=sprint_id).exclude(proj_id=None)
+        proj_id = qs.first().proj_id if qs.exists() else 0
     if proj_id <= 0 and par.get("model", "") == Proj.META.url_name:
         proj_id = int(par.get("pk", 0))
 
     # смотрим с какой страницы обращение
     list_qs = model.objects
     if model_url == Sprint.META.url_name:
-        qs = Sprint.objects.filter(id=pk).exclude(proj_id=None).first()
-        pk = qs.proj_id if qs else 0
+        qs = Sprint.objects.filter(id=pk).exclude(proj_id=None)
+        pk = qs.first().proj_id if qs.exists() else 0
     elif model_url == Task.META.url_name:
-        qs = Task.objects.filter(id=pk).exclude(proj_id=None).first()
-        pk = qs.proj_id if qs else 0
+        qs = Task.objects.filter(id=pk).exclude(proj_id=None)
+        pk = qs.first().proj_id if qs.exists() else 0
     if pk <= 0 and proj_id > 0:
-        qs = Proj.objects.filter(id=proj_id).first()
-        pk = qs.id if qs else 0
+        qs = Proj.objects.filter(id=proj_id)
+        pk = qs.first().id if qs.exists() else 0
     one_qs = model.objects.filter(id=pk)
 
     match oper:
@@ -375,7 +375,7 @@ def TaskTemplate(self: TemplateView, oper):
         proj_id = int(par.get("pk", 0))
 
     # смотрим с какой страницы обращение
-    list_qs = model.objects
+    list_qs = model.objects.all()
     if model_url == TaskStep.META.url_name:
         pk = task_id
         list_qs = list_qs.filter(id=pk)
@@ -517,7 +517,7 @@ def TaskTemplate(self: TemplateView, oper):
                 if temp := one_qs.first():
                     obj.sprints = obj.sprints.filter(proj=temp.proj_id)
                 else:
-                    obj.sprints = obj.sprints.filter(proj=0)
+                    obj.sprints = obj.sprints.filter(proj=proj_id)
 
     obj.kwargs = self.kwargs
     obj.model = model
@@ -645,8 +645,9 @@ class Index(TemplateView):
                     request, f"Не найдена модель {self.kwargs.get('model', '')}"
                 )
                 return HttpResponseRedirect(reverse("index"))
-
-        return obj.post(self, request, *args, **kwargs)
+        out = obj.post(self, request, *args, **kwargs)
+        messages.info(request, f"Операция {self.kwargs.get('oper', '')} выполнена.")
+        return out
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
