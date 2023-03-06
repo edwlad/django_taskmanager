@@ -3,6 +3,7 @@
 {% my_hp data.0 as perms %}
 {% my_hp data.0.proj as perms_p %}
 {% my_hp data.0.sprint as perms_s %}
+{% my_hp data.0.parent as perms_pr %}
 
 {% if perms.edit and view.kwargs.oper == "edit" and view.kwargs.model == view.url_name %}
     {% if perms.is_user %}
@@ -99,9 +100,10 @@
         id="id_{{ view.fld.proj.name }}"
         title="Выбор проекта"
         onchange="find_sprints(
-            el=document.getElementById('id_{{ view.fld.sprint.name }}'), 
-            proj_id=this.value
-        )">
+            el = document.getElementById('id_{{ view.fld.sprint.name }}'), 
+            el_parent = document.getElementById('id_{{ view.fld.parent.name }}'), 
+            proj_id = this.value
+        );">
             <option value="" selected disabled>-----</option>
         {% for pr in view.projs %}
             <option value="{{ pr.id }}"
@@ -109,7 +111,7 @@
             >{{ pr.id }}: {{ pr.name }}
             </option>
         {% empty %}
-            <option disabled>Все проекты завершены</option>
+            <option disabled>Проекты не найдены</option>
         {% endfor %}
         </select>
     {% else %}
@@ -150,7 +152,12 @@
         <select class="form-select form-select-sm"
         name="{{ view.fld.sprint.name }}"
         id="id_{{ view.fld.sprint.name }}"
-        title="Выбор спринта">
+        title="Выбор спринта"
+        onchange="find_tasks(
+            el = document.getElementById('id_{{ view.fld.parent.name }}'),
+            task_id = {% if oper == "add" %}0{% else %}{{ item.id }}{% endif %},
+            sprint_id = this.value
+        );">
             <option value="" selected>-----</option>
         {% for sp in view.sprints %}
             <option value="{{ sp.id }}"
@@ -158,7 +165,7 @@
             >{{ sp.id }}: {{ sp.name }}
             </option>
         {% empty %}
-            <option disabled>Все спринты завершены</option>
+            <option disabled>Спринты не найдены</option>
         {% endfor %}
         </select>
     {% else %}
@@ -188,6 +195,54 @@
 
     <div class="w-100"></div>
 
+    {# Зависимость задачи #}
+    <div class="col-2 text-end mb-1">
+        <label for="id_{{ view.fld.parent.name }}">
+        {{view.fld.parent.verbose_name}}
+        </label>
+    </div>
+    <div class="col d-flex align-items-center mb-1" title="{{view.fld.parent.help_text}}">
+    {% if oper == "edit" or oper == "add" %}
+        <select class="form-select form-select-sm"
+        name="{{ view.fld.parent.name }}"
+        id="id_{{ view.fld.parent.name }}"
+        title="Выбор предыдущей задачи">
+            <option value="" selected>-----</option>
+        {% for pr in view.parent %}
+            <option value="{{ pr.id }}"
+            {% if view.parent_id == pr.id or item.parent_id == pr.id %}selected{% endif %}
+            >{{ pr.id }}: {{ pr.name }}
+            </option>
+        {% empty %}
+            <option disabled>Задачи не найдены</option>
+        {% endfor %}
+        </select>
+    {% else %}
+        {% if item.parent %}
+            {% with model_pr=item.parent.META.url_name pk_pr=item.parent.id %}
+                <div>
+                {% include "buttons.html" with btn_min="add edit" model=model_pr pk=pk_pr perms=perms_pr %}
+                </div>
+                <a href={% url "detail" model=model_pr pk=pk_pr %}
+                class="btn flex-grow-1 btn-light border-0 text-start mx-1"
+                title="Перейти к задаче">
+                    {% include "badge.html" with item=item.parent %}
+                    {{ item.parent_id }}: {{ item.parent.name }}
+                </a>
+                <div>
+                {% include "buttons.html" with btn_min="delete" model=model_pr pk=pk_pr perms=perms_pr %}
+                </div>
+            {% endwith %}
+        {% else %}
+            <div>
+                {% include "buttons.html" with btn_min="add" model=view.fld.parent.related_model.META.url_name perms=perms_pr %}
+            </div>
+            <span class="pe-none btn border-0">Нет</span>
+        {% endif %}
+    {% endif %}
+    </div>
+
+    <div class="w-100"></div>
     {# исполнитель - название #}
     <div class="col-2 text-center border-end border-top">
         <label for="id_{{ view.fld.user.name }}">

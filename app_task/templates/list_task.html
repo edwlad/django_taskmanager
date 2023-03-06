@@ -22,6 +22,9 @@
 <table class="table table-sm table-hover align-middle">
     <tbody>
     {% for item in data %}
+
+
+    {# основная задача #}
     {% my_hp item as perms %}
     <tr>
         <td width=1%>
@@ -29,7 +32,7 @@
         </td>
         <td>
             <a href={% url "detail" model=view.url_name pk=item.id %}
-            class="btn btn-light w-100 border-0 text-start"
+            class="btn w-100 btn-light border-0 text-start"
             title="Перейти к задаче">
                 {% include "badge.html" with item=item %}
                 {{ item.name }}
@@ -39,6 +42,30 @@
             {% include "buttons.html" with btn_min="delete" model=view.url_name pk=item.id %}
         </td>
     </tr>
+
+    {# если есть родительская задача #}
+    {% if item.parent %}
+    {% my_hp item.parent as perms %}
+    <tr>
+        <td width=1%>
+            {% include "buttons.html" with btn_min="edit" model=view.url_name pk=item.parent.id %}
+        </td>
+        <td class="d-flex">
+            <i class="bi bi-arrow-return-right fs-5"></i>
+            <a href={% url "detail" model=view.url_name pk=item.parent.id %}
+            class="btn btn-light border-0 text-start flex-grow-1"
+            title="Перейти к задаче">
+                <b>{{ view.fld.parent.verbose_name }}</b>
+                {% include "badge.html" with item=item.parent %}
+                {{ item.parent.name }}
+            </a>
+        </td>
+        <td width=1%>
+            {% include "buttons.html" with btn_min="delete" model=view.url_name pk=item.parent.id %}
+        </td>
+    </tr>
+    {% endif %}
+
     {% empty %}
         <span class="pe-none btn border-0">Нет задач</span>
     {% endfor %}

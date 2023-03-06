@@ -7,6 +7,9 @@ from django.conf import settings
 from datetime import date, timedelta
 from random import randint, choice, sample
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import User, Permission
+
+# from django.contrib.contenttypes.models import ContentType  # noqa
 
 DEBUG = settings.DEBUG
 # TIME_ZONE = settings.TIME_ZONE
@@ -81,12 +84,25 @@ def get_perms(request: HttpRequest | Request, obj: Model = None):
 def gen_data(cnt=0, clear=False, close=0):
     if not DEBUG:
         return
+
     qs_proj = Proj.objects.all()
     qs_sprint = Sprint.objects.all()
     qs_task = Task.objects.all()
-    users = get_user_model().objects.all()
+    user_model: User = get_user_model()
     beg = date.today() - timedelta(90)  # день начала назначения дат
     step = 180  # максимальный шаг в днях
+
+    users = user_model.objects.filter(username__startswith="user")
+    if not users.exists():
+        print("Создание пользователей")
+        qp = Permission.objects.filter(content_type__app_label="app_task")
+        for i in range(5):
+            p = "U-321rew"
+            user = user_model.objects.create_user(f"user{i}", "", p)
+            user.first_name = p
+            user.save()
+            user.user_permissions.set([v.id for v in qp])
+        users = user_model.objects.filter(username__startswith="user")
 
     if clear:
         qs_proj.delete()

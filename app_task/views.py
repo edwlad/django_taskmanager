@@ -439,6 +439,7 @@ def TaskTemplate(self: TemplateView, oper):
                     "user",
                     "proj",
                     "sprint",
+                    "parent",
                     "name",
                     "desc",
                     "date_max",
@@ -457,7 +458,7 @@ def TaskTemplate(self: TemplateView, oper):
             # если юзер исполнитель, то меняем некоторые поля на текущие
             curr = one_qs.first()
             if curr.author_id != user.id and curr.user_id == user.id:
-                for v in ("user", "name", "desc", "proj", "sprint"):
+                for v in ("user", "name", "desc", "proj", "sprint", "parent"):
                     self.request.POST[v] = getattr(curr, v, None)
             self.request.POST._mutable = False
             obj = UpdateView(
@@ -472,6 +473,7 @@ def TaskTemplate(self: TemplateView, oper):
                     "desc",
                     "proj",
                     "sprint",
+                    "parent",
                 ),
                 success_url=reverse_lazy(
                     "detail",
@@ -510,10 +512,23 @@ def TaskTemplate(self: TemplateView, oper):
             if oper_url == "edit" or oper_url == "add":
                 obj.projs = Proj.objects.filter(date_end=None)
                 obj.sprints = Sprint.objects.filter(date_end=None)
-                if temp := one_qs.first():
-                    obj.sprints = obj.sprints.filter(proj=temp.proj_id)
+                one_task = one_qs.first()
+                if one_task:
+                    obj.sprints = obj.sprints.filter(proj=one_task.proj_id)
+                    obj.parent = Task.objects.filter(
+                        # date_end=None,
+                        parent=None,
+                        sprint_id=one_task.sprint_id if one_task.sprint_id else 0,
+                    )
+                    if oper_url == "edit":
+                        obj.parent = obj.parent.exclude(id=one_task.id)
                 else:
                     obj.sprints = obj.sprints.filter(proj=proj_id)
+                    obj.parent = Task.objects.filter(
+                        # date_end=None,
+                        parent=None,
+                        sprint_id=sprint_id,
+                    )
 
     obj.kwargs = self.kwargs
     obj.model = model

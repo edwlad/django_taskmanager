@@ -98,7 +98,7 @@ class Proj(models.Model):
                 else:
                     obj.desc = desc
 
-                obj.save(parrent=v)
+                obj.save(cur_task=v)
 
         return
 
@@ -214,7 +214,7 @@ class Sprint(models.Model):
                 else:
                     obj.desc = desc
 
-                obj.save(parrent=v)
+                obj.save(cur_task=v)
 
         return
 
@@ -326,6 +326,17 @@ class Task(models.Model):
         if self.date_end and self.date_end < self.date_end_task:
             self.date_end = self.date_end_task
 
+        # если есть предыдущая задача
+        if self.parent:
+            if (
+                not self.sprint  # если нет спринта
+                or self.parent_id == self.id  # если ссылаетя сама на себя
+                or self.parent.parent  # если у предыдущей задачи есть родитель
+                # если предыдущая задача не в списке задач спринта
+                or not self.sprint.sprint_tasks.filter(id=self.parent.id).exists()
+            ):
+                self.parent = None
+
         # проверка - есть ли изменения
         desc = ""
         old = type(self).objects.filter(id=self.id).first()
@@ -353,7 +364,7 @@ class Task(models.Model):
             else:
                 obj.desc = desc
 
-            obj.save(parrent=self, forse=True)
+            obj.save(cur_task=self, forse=True)
 
         return
 
@@ -393,15 +404,15 @@ class TaskStep(models.Model):
     def __str__(self) -> str:
         return f"{self.id}: {self.desс[:30]}"
 
-    def save(self, parrent=None, forse=False, **kwargs) -> None:
-        if not isinstance(parrent, Task):
-            parrent = Task.objects.filter(id=self.task_id).first()
+    def save(self, cur_task=None, forse=False, **kwargs) -> None:
+        if not isinstance(cur_task, Task):
+            cur_task = Task.objects.filter(id=self.task_id).first()
 
         # если задача закрыта то не записываем
-        if not forse and (not parrent or parrent.date_end):
+        if not forse and (not cur_task or cur_task.date_end):
             return
 
-        self.task_id = parrent.id
+        self.task_id = cur_task.id
         return super().save(**kwargs)
 
     class META:
