@@ -87,7 +87,7 @@
         {% for pr in view.projs %}
             <option value="{{ pr.id }}"
             {% if view.proj_id == pr.id or item.proj_id == pr.id %}selected{% endif %}
-            >{{ pr.id }}: {{ pr.name }}
+            >{{ pr }}
             </option>
         {% empty %}
             <option disabled>Все проекты завершены</option>
@@ -103,7 +103,7 @@
             class="flex-grow-1 btn btn-light border-0 text-start mx-1"
             title="Перейти к проекту">
                 {% include "badge.html" with item=item.proj %}
-                {{ item.proj_id }}: {{ item.proj.name }}
+                {{ item.proj }}
             </a>
             <div>
                 {% include "buttons.html" with btn_min="delete" model=model_p pk=pk_p perms=perms_p %}

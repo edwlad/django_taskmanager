@@ -49,7 +49,7 @@ class Proj(models.Model):
     )
 
     def __str__(self) -> str:
-        return f"{self.id}: {self.name}"
+        return f"({self.id}) {self.name}"
 
     def save(self, **kwargs) -> None:
         # если планируемая дата меньше даты создания
@@ -160,7 +160,7 @@ class Sprint(models.Model):
     )
 
     def __str__(self) -> str:
-        return f"{self.id}: {self.name}"
+        return f"({self.id}) {self.name}"
 
     def save(self, **kwargs) -> None:
         # если закрыт проект то ничего не сохраняем
@@ -307,7 +307,7 @@ class Task(models.Model):
     )
 
     def __str__(self) -> str:
-        return f"{self.id}: {self.name}"
+        return f"({self.id}) {self.name}"
 
     def save(self, **kwargs) -> None:
         # если закрыты спринт и/или проект то ничего не сохраняем
@@ -329,14 +329,17 @@ class Task(models.Model):
         # если есть предыдущая задача
         if self.parent:
             if (
-                not self.sprint  # если нет спринта
-                or self.parent_id == self.id  # если ссылаетя сама на себя
+                self.parent_id == self.id  # если ссылаетя сама на себя
                 or self.parent.parent  # если у предыдущей задачи есть родитель
-                # если предыдущая задача не в списке задач спринта
-                or not self.sprint.sprint_tasks.filter(id=self.parent.id).exists()
                 or self.parent_nexts.all().exists()  # если у текущей задачи есть дети
+                # если есть спринт и спринты не совпадают
+                # or (self.sprint and self.sprint_id != self.parent.sprint_id)
+                # or self.proj_id != self.parent.proj_id  # если проекты не совпадают
             ):
                 self.parent = None
+            else:
+                self.proj = self.parent.proj
+                self.sprint = self.parent.sprint
 
         # проверка - есть ли изменения
         desc = ""
@@ -350,7 +353,7 @@ class Task(models.Model):
                 v1 = getattr(self, v.name)
                 v2 = getattr(old, v.name)
                 if v1 != v2:
-                    desc += f"{v.verbose_name}: {v2} => {v1};\n"
+                    desc += f"{v.verbose_name.upper()}: {v2} => {v1};\n"
 
         # если есть изменения сохраняем и создаём запись в истории
         if desc:
@@ -366,6 +369,21 @@ class Task(models.Model):
                 obj.desc = desc
 
             obj.save(cur_task=self, forse=True)
+
+            # если есть зависимые задачи то правим проект и спринт
+            # и записываем в историю
+            if nexts := list(self.parent_nexts.all()):
+                for task in nexts:
+                    obj = TaskStep()
+                    obj.author = self.uweb
+                    obj.desc = f'Изменения в "родительской" задаче: {self}:\n' + desc
+                    obj.save(cur_task=task)
+
+                    if task.sprint != self.sprint or task.proj != self.proj:
+                        task.uweb = self.uweb
+                        task.sprint = self.sprint
+                        task.proj = self.proj
+                        task.save()
 
         return
 

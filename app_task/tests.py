@@ -1,28 +1,35 @@
 from django.test import TestCase
 from app_task.models import Proj, Sprint, Task, TaskStep  # noqa
 import app_task.functions as functions
-from django.db.models import F, Q, Case, When  # noqa
+from django.db.models import QuerySet, F, Q, Case, When  # noqa
+from django.test import Client  # noqa
+from django.views.generic import ListView
+
+
+def find_template(response, template_name):
+    for template in response.context:
+        if template.template_name == template_name:
+            return template
+    return
 
 
 class BaseCorrectTestCase(TestCase):
     """Проверка корректности данных в базе при случайной генерации"""
 
-    CNT = 200
+    CNT = 100
     CLOSE = 60
     CLEAR = True
     PARENT = True
 
     @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
+    def setUpTestData(cls):
         functions.gen_data(
             cnt=cls.CNT, close=cls.CLOSE, clear=cls.CLEAR, parent=cls.PARENT
         )
-        return
 
-    # @classmethod
-    # def tearDownClass(self) -> None:
-    #     return super().tearDownClass()
+    @classmethod
+    def tearDownClass(cls):
+        return super().tearDown(cls)
 
     def test_proj(self):
         qs = Proj.objects.all()
@@ -85,26 +92,29 @@ class BaseCorrectTestCase(TestCase):
             qs.filter(task_steps=None).exists(),
             "не для всех задач появилась запись в истории",
         )
-
         self.assertFalse(
-            qs.exclude(parent=None).filter(sprint_id=None).exists(),
-            "есть предыдущая задача, но нет спринта у текущей задачи",
+            qs.exclude(
+                Q(parent=None) | Q(sprint=None) | Q(parent__sprint_id=F("sprint_id"))
+            ).exists(),
+            "есть предыдущая задача и спринт, но спринты не совпадают",
+        )
+        self.assertFalse(
+            qs.filter(sprint=None)
+            .exclude(Q(parent=None) | Q(parent__sprint_id=None))
+            .exists(),
+            "есть предыдущая задача и нет спринта, но спринты не совпадают",
+        )
+        self.assertFalse(
+            qs.exclude(Q(parent=None) | Q(parent__proj_id=F("proj_id"))).exists(),
+            "есть предыдущая задача, но проекты не совпадают",
         )
         self.assertFalse(
             qs.exclude(parent=None).filter(parent_id=F("id")).exists(),
             "есть предыдущая задача, но задача ссылаетя сама на себя",
         )
-        # self.assertFalse(
-        #     qs.exclude(Q(parent=None) | Q(parent_nexts=None)).exists(),
-        #     "есть предыдущая задача, но у текущей задачи есть дети",
-        # )
         self.assertFalse(
             qs.exclude(Q(parent=None) | Q(parent__parent=None)).exists(),
             "есть предыдущая задача, но у предыдущей задачи есть родитель",
-        )
-        self.assertFalse(
-            qs.exclude(Q(parent=None) | Q(parent__sprint_id=F("sprint_id"))).exists(),
-            "предыдущая задача не в списке задач спринта текущей задачи",
         )
 
     def test_task_step(self):
@@ -117,36 +127,108 @@ class BaseCorrectTestCase(TestCase):
 class BaseModifyTestCase(TestCase):
     """Проверка изменений данных в базе"""
 
-    CNT = 0
-    CLOSE = 0
+    CNT = 10
+    CLOSE = 70
     CLEAR = True
     PARENT = True
 
-    def setUp(self):
-        super().setUp()
+    @classmethod
+    def setUpTestData(cls):
         functions.gen_data(
-            cnt=self.CNT, close=self.CLOSE, clear=self.CLEAR, parent=self.PARENT
+            cnt=cls.CNT, close=cls.CLOSE, clear=cls.CLEAR, parent=cls.PARENT
         )
+
+    @classmethod
+    def tearDownClass(cls):
+        return super().tearDown(cls)
+
+    def setUp(self):
+        self.client = Client()
         return
 
     # def tearDown(self):
     #     return super().tearDown()
 
     def test_proj(self):
-        # qs = Proj.objects.all()
+        model = Proj
+        url_name = model.META.url_name
+        list_template = "list_proj.html"
+        # detail_template = "detail_proj.html"
+
+        # список проектов
+        response = self.client.get(f"/{url_name}/")
+        self.assertEqual(response.status_code, 200, "код статуса не 200")
+        self.assertIsNotNone(
+            template := find_template(response, list_template),
+            f"не найден шаблон списка проектов {list_template}",
+        )
+        view: ListView = template.dicts[3]["view"]
+        self.assertIs(view.model, model, "модель не проект")
+        self.assertFalse(
+            view.queryset.exclude(date_end=None).exists(),
+            "в отбор попал закрытый проект",
+        )
+
+        # создание проекта неавторизированым пользователем
+
+        # создание проекта авторизированым пользователем
+
+        # редактирование проекта авторизированым пользователем
+
+        # удаление проекта авторизированым пользователем
+
+        self.assertFalse(False, "")
         return
 
     def test_sprint(self):
-        # qs = Sprint.objects.all()
-        self.assertFalse(False, "изменился спринт при закрытом проекте")
+        model = Sprint
+        url_name = model.META.url_name
+        list_template = "list_sprint.html"
+        # detail_template = "detail_sprint.html"
+
+        # список спринтов
+        response = self.client.get(f"/{url_name}/")
+        self.assertEqual(response.status_code, 200, "код статуса не 200")
+        self.assertIsNotNone(
+            template := find_template(response, list_template),
+            f"не найден шаблон списка спринтов {list_template}",
+        )
+        view: ListView = template.dicts[3]["view"]
+        self.assertIs(view.model, model, "модель не спринт")
+        self.assertFalse(
+            view.queryset.exclude(date_end=None).exists(),
+            "в отбор попал закрытый спринт",
+        )
+
+        self.assertFalse(False, "")
+        return
 
     def test_task(self):
-        # qs = Task.objects.all()
-        self.assertFalse(
-            False, "если закрыты спринт и/или проект то ничего не сохраняем"
+        model = Task
+        url_name = model.META.url_name
+        list_template = "list_task.html"
+        # detail_template = "detail_sprint.html"
+
+        # список спринтов
+        response = self.client.get(f"/{url_name}/")
+        self.assertEqual(response.status_code, 200, "код статуса не 200")
+        self.assertIsNotNone(
+            template := find_template(response, list_template),
+            f"не найден шаблон списка задач {list_template}",
         )
+        view: ListView = template.dicts[3]["view"]
+        self.assertIs(view.model, model, "модель не задача")
+        self.assertFalse(
+            view.queryset.exclude(date_end=None).exists(),
+            "в отбор попала закрытая задача",
+        )
+
+        self.assertFalse(False, "")
+        return
 
     def test_task_step(self):
         # qs = TaskStep.objects.all()
         self.assertFalse(False, "не появились записи при изменении задачи")
         self.assertFalse(False, "если задача закрыта то не записываем")
+        self.assertFalse(False, "")
+        return

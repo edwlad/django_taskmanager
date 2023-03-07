@@ -112,7 +112,7 @@
         {% for pr in view.projs %}
             <option value="{{ pr.id }}"
             {% if view.proj_id == pr.id or item.proj_id == pr.id %}selected{% endif %}
-            >{{ pr.id }}: {{ pr.name }}
+            >{{ pr }}
             </option>
         {% empty %}
             <option disabled>Проекты не найдены</option>
@@ -128,7 +128,7 @@
                 class="flex-grow-1 btn btn-light border-0 text-start mx-1"
                 title="Перейти к проекту">
                     {% include "badge.html" with item=item.proj %}
-                    {{ item.proj_id }}: {{ item.proj.name }}
+                    {{ item.proj }}
                 </a>
                 <div>
                     {% include "buttons.html" with btn_min="delete" model=model_p pk=pk_p perms=perms_p %}
@@ -166,7 +166,7 @@
         {% for sp in view.sprints %}
             <option value="{{ sp.id }}"
             {% if view.sprint_id == sp.id or item.sprint_id == sp.id %}selected{% endif %}
-            >{{ sp.id }}: {{ sp.name }}
+            >{{ sp }}
             </option>
         {% empty %}
             <option disabled>Спринты не найдены</option>
@@ -182,7 +182,7 @@
                 class="btn flex-grow-1 btn-light border-0 text-start mx-1"
                 title="Перейти к спринту">
                     {% include "badge.html" with item=item.sprint %}
-                    {{ item.sprint_id }}: {{ item.sprint.name }}
+                    {{ item.sprint }}
                 </a>
                 <div>
                 {% include "buttons.html" with btn_min="delete" model=model_s pk=pk_s perms=perms_s %}
@@ -212,10 +212,10 @@
         id="id_{{ view.fld.parent.name }}"
         title="Выбор предыдущей задачи">
             <option value="" selected>-----</option>
-        {% for pr in view.parent %}
-            <option value="{{ pr.id }}"
-            {% if view.parent_id == pr.id or item.parent_id == pr.id %}selected{% endif %}
-            >{{ pr.id }}: {{ pr.name }}
+        {% for prt in view.parent %}
+            <option value="{{ prt.id }}"
+            {% if view.parent_id == prt.id or item.parent_id == prt.id %}selected{% endif %}
+            >{{ prt }}
             </option>
         {% empty %}
             <option disabled>Задачи не найдены</option>
@@ -231,7 +231,7 @@
                 class="btn flex-grow-1 btn-light border-0 text-start mx-1"
                 title="Перейти к задаче">
                     {% include "badge.html" with item=item.parent %}
-                    {{ item.parent_id }}: {{ item.parent.name }}
+                    {{ item.parent }}
                 </a>
                 <div>
                 {% include "buttons.html" with btn_min="delete" model=model_pr pk=pk_pr perms=perms_pr %}
@@ -360,12 +360,48 @@
             {% endif %}"
         >
     </div>
+
     <div class="w-100"></div>
+
     {% endif %}
 
     <div class="col">
         {% include "buttons.html" with btn_max="back detail edit delete" model=view.url_name pk=item.id %}
     </div>
+
+    <div class="w-100 my-2"></div>
+
+    {# зависимые задачи #}
+    {% if item.parent_nexts.exists %}
+    <hr>
+    <div class="h2 col">Зависимые задачи</div>
+
+    <div class="w-100"></div>
+    
+    <div class="col d-flex align-items-center mb-1">
+        {% for next in item.parent_nexts.all %}
+        {% my_hp next as perms_nt %}
+        {% with model_nt=next.META.url_name pk_nt=next.id %}
+            <div>
+                {% include "buttons.html" with btn_min="add edit" model=model_nt pk=pk_nt perms=perms_nt %}
+            </div>
+            <a href={% url "detail" model=model_nt pk=pk_nt %}
+            class="btn flex-grow-1 btn-light border-0 text-start mx-1"
+            title="Перейти к задаче">
+                {% include "badge.html" with item=next %}
+                {{ next }}
+            </a>
+            <div>
+                {% include "buttons.html" with btn_min="delete" model=model_nt pk=pk_nt perms=perms_nt %}
+            </div>
+        {% endwith %}
+        {% endfor %}
+    </div>
+
+    <div class="w-100"></div>
+    
+    {% endif %}
+
 {% empty %}
     <div class="col">
         Нет задачи
@@ -375,4 +411,3 @@
 </form>
 
 <hr>
-

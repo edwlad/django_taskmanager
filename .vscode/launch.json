@@ -60,16 +60,54 @@
             "justMyCode": false
         },
         {
-            "name": "test",
+            "name": "Full Test",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}\\manage.py",
             "args": [
+                "--cov",
+                "--skip-covered",
+                "--skip-empty",
+                // "--show-missing",
                 "test",
                 "--noinput",
-                // "--verbosity",
-                // "-v",
                 // "--keepdb",
+            ],
+            "django": true,
+            "justMyCode": false
+        },
+        {
+            "name": "Test correct BaseCreate",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}\\manage.py",
+            "args": [
+                "--cov",
+                "--skip-covered",
+                "--skip-empty",
+                // "--show-missing",
+                "test",
+                "--noinput",
+                // "--keepdb",
+                "app_task.tests.BaseCorrectTestCase",
+            ],
+            "django": true,
+            "justMyCode": false
+        },
+        {
+            "name": "Test correct BaseModify",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}\\manage.py",
+            "args": [
+                "--cov",
+                "--skip-covered",
+                "--skip-empty",
+                // "--show-missing",
+                "test",
+                "--noinput",
+                // "--keepdb",
+                "app_task.tests.BaseModifyTestCase",
             ],
             "django": true,
             "justMyCode": false

@@ -35,7 +35,7 @@
             class="btn w-100 btn-light border-0 text-start"
             title="Перейти к задаче">
                 {% include "badge.html" with item=item %}
-                {{ item.name }}
+                {{ item }}
             </a>
         </td>
         <td width=1%>
@@ -57,7 +57,7 @@
             title="Перейти к задаче">
                 <b>{{ view.fld.parent.verbose_name }}</b>
                 {% include "badge.html" with item=item.parent %}
-                {{ item.parent.name }}
+                {{ item.parent }}
             </a>
         </td>
         <td width=1%>

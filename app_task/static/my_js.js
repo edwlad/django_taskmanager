@@ -12,7 +12,7 @@ async function find_sprints(el, el_parent, proj_id = 0) {
         let data = await resp.json();
         // console.log(data);
         data.results.forEach((el) => {
-            out.innerHTML += `<option value="${el.id}">${el.id}: ${el.name}</option>`;
+            out.innerHTML += `<option value="${el.id}">(${el.id}) ${el.name}</option>`;
         })
         if (data.next) {
             resp = await fetch(data.next);
@@ -42,7 +42,7 @@ async function find_tasks(el, task_id = 0, sprint_id = 0) {
         // console.log(data);
         data.results.forEach((el) => {
             if (el.id != task_id) {
-                out.innerHTML += `<option value="${el.id}">${el.id}: ${el.name}</option>`;
+                out.innerHTML += `<option value="${el.id}">(${el.id}) ${el.name}</option>`;
             }
         })
         if (data.next) {

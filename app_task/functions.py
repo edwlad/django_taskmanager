@@ -170,11 +170,11 @@ def gen_data(cnt=0, close=0, clear=False, parent=False):
 
     if parent:
         cou = close % 100
-        print(f"Создание в не более {cou}% проектов зависимых задач")
+        print(f"Создание в {cou}% проектов зависимых задач")
         qs_proj = objs_proj.all()
         for proj in sample(tuple(qs_proj), int(cou / 100 * len(qs_proj))):
             tasks_id = tuple(v.id for v in proj.proj_tasks.all())
-            for id in tasks_id:
+            for id in sample(tasks_id, int(0.2 * len(tasks_id))):  # tasks_id:
                 task = objs_task.filter(id=id).get()
                 task.parent = objs_task.filter(id=choice(tasks_id)).get()
                 task.save()
