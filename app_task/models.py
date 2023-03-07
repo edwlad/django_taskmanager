@@ -334,6 +334,7 @@ class Task(models.Model):
                 or self.parent.parent  # если у предыдущей задачи есть родитель
                 # если предыдущая задача не в списке задач спринта
                 or not self.sprint.sprint_tasks.filter(id=self.parent.id).exists()
+                or self.parent_nexts.all().exists()  # если у текущей задачи есть дети
             ):
                 self.parent = None
 

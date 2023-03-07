@@ -81,14 +81,14 @@ def get_perms(request: HttpRequest | Request, obj: Model = None):
     return out
 
 
-def gen_data(cnt=0, clear=False, close=0):
+def gen_data(cnt=0, close=0, clear=False, parent=False):
     # if not DEBUG:
     #     return
 
     print()  # перевод строки
-    qs_proj = Proj.objects.all()
-    qs_sprint = Sprint.objects.all()
-    qs_task = Task.objects.all()
+    objs_proj = Proj.objects
+    objs_sprint = Sprint.objects
+    objs_task = Task.objects
     user_model: User = get_user_model()
     beg = date.today() - timedelta(90)  # день начала назначения дат
     step = 180  # максимальный шаг в днях
@@ -108,13 +108,14 @@ def gen_data(cnt=0, clear=False, close=0):
     if clear:
         print("Удаление старых данных")
         for user in users:
-            qs_proj.filter(author=user).delete()
+            objs_proj.filter(author=user).delete()
 
-    print(f"Создание {cnt} проектов")
-    qs_proj = qs_proj.all()
+    cou = cnt
+    print(f"Создание {cou} проектов")
+    qs_proj = objs_proj.all()
     full = len(qs_proj)
     # генерация проектов
-    for i in range(full + 1, int(cnt) + full + 1):
+    for i in range(full + 1, int(cou) + full + 1):
         author = choice(users)
         obj = Proj()
         obj.name = f"Проект №{i}"
@@ -126,11 +127,12 @@ def gen_data(cnt=0, clear=False, close=0):
             obj.date_max = beg + timedelta(randint(0, step))
         obj.save()
 
-    print(f"Создание {cnt * 2} спринтов")
-    qs_proj = qs_proj.all()
-    qs_sprint = qs_sprint.all()
+    cou = cnt * 2
+    print(f"Создание {cou} спринтов")
+    qs_proj = objs_proj.all()
+    qs_sprint = objs_sprint.all()
     full = len(qs_sprint)
-    for i in range(full + 1, int(cnt * 2) + full + 1):
+    for i in range(full + 1, int(cou) + full + 1):
         author = choice(users)
         obj = Sprint()
         obj.name = f"Спринт №{i}"
@@ -143,12 +145,13 @@ def gen_data(cnt=0, clear=False, close=0):
             obj.date_max = beg + timedelta(randint(0, step))
         obj.save()
 
-    print(f"Создание {cnt * 5} задач")
-    qs_proj = qs_proj.all()
-    qs_sprint = qs_sprint.all()
-    qs_task = qs_task.all()
+    cou = cnt * 10
+    print(f"Создание {cou} задач")
+    qs_proj = objs_proj.all()
+    qs_sprint = objs_sprint.all()
+    qs_task = objs_task.all()
     full = len(qs_task)
-    for i in range(full + 1, int(cnt * 5) + full + 1):
+    for i in range(full + 1, int(cou) + full + 1):
         author = choice(users)
         user = choice(users)
         obj = Task()
@@ -159,36 +162,51 @@ def gen_data(cnt=0, clear=False, close=0):
         obj.user = user
         obj.date_beg = beg + timedelta(randint(0, step))
         obj.proj = choice(qs_proj)
-        if randint(0, 2):
+        if randint(0, 5):
             obj.sprint = choice(qs_sprint)
         if randint(0, 2):
             obj.date_max = beg + timedelta(randint(0, step))
         obj.save()
 
-    if close:
-        qs_proj = qs_proj.all()
-        qs_sprint = qs_sprint.all()
-        qs_task = qs_task.all()
-
-        print(f"Закрытие {close % 100}% спринтов")
-        for sprint in sample(tuple(qs_sprint), int(close % 100 / 100 * len(qs_sprint))):
-            # закрываем все задачи спринта
-            for task in sprint.sprint_tasks.all():
-                task.date_end = beg + timedelta(randint(0, step))
+    if parent:
+        cou = close % 100
+        print(f"Создание в не более {cou}% проектов зависимых задач")
+        qs_proj = objs_proj.all()
+        for proj in sample(tuple(qs_proj), int(cou / 100 * len(qs_proj))):
+            tasks_id = tuple(v.id for v in proj.proj_tasks.all())
+            for id in tasks_id:
+                task = objs_task.filter(id=id).get()
+                task.parent = objs_task.filter(id=choice(tasks_id)).get()
                 task.save()
+
+    if close:
+        qs_sprint = objs_sprint.all()
+        qs_task = objs_task.all()
+        cou = close % 100
+        print(f"Закрытие не более {cou}% спринтов")
+        for sprint in sample(tuple(qs_sprint), int(cou / 100 * len(qs_sprint))):
+            if randint(0, 3):
+                # закрываем все задачи спринта
+                for task in sprint.sprint_tasks.all():
+                    task.date_end = beg + timedelta(randint(0, step))
+                    task.save()
             # получить по новой спринт
-            sprint = qs_sprint.filter(id=sprint.id).get()
+            sprint = objs_sprint.filter(id=sprint.id).get()
             sprint.date_end = beg + timedelta(randint(0, step))
             sprint.save()
 
-        print(f"Попытка закрыть {close % 100}% проектов")
-        for proj in sample(tuple(qs_proj), int(close % 100 / 100 * len(qs_proj))):
-            # закрываем все задачи проекта без спринта
-            for task in proj.proj_tasks.filter(sprint_id=None).all():
-                task.date_end = beg + timedelta(randint(0, step))
-                task.save()
+        qs_proj = objs_proj.all()
+        qs_task = objs_task.all()
+        cou = close % 100
+        print(f"Закрытие не более {cou}% проектов")
+        for proj in sample(tuple(qs_proj), int(cou / 100 * len(qs_proj))):
+            if randint(0, 3):
+                # закрываем все задачи проекта без спринта
+                for task in proj.proj_tasks.filter(sprint_id=None).all():
+                    task.date_end = beg + timedelta(randint(0, step))
+                    task.save()
             # получить по новой проект
-            proj = qs_proj.filter(id=proj.id).get()
+            proj = objs_proj.filter(id=proj.id).get()
             proj.date_end = beg + timedelta(randint(0, step))
             proj.save()
 

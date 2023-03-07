@@ -4,17 +4,20 @@ import app_task.functions as functions
 from django.db.models import F, Q, Case, When  # noqa
 
 
-class IsBaseCorrectTestCase(TestCase):
+class BaseCorrectTestCase(TestCase):
     """Проверка корректности данных в базе при случайной генерации"""
 
-    CNT = 100
-    CLEAR = True
+    CNT = 200
     CLOSE = 60
+    CLEAR = True
+    PARENT = True
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        functions.gen_data(cnt=cls.CNT, clear=cls.CLEAR, close=cls.CLOSE)
+        functions.gen_data(
+            cnt=cls.CNT, close=cls.CLOSE, clear=cls.CLEAR, parent=cls.PARENT
+        )
         return
 
     # @classmethod
@@ -83,7 +86,26 @@ class IsBaseCorrectTestCase(TestCase):
             "не для всех задач появилась запись в истории",
         )
 
-        # self.assertFalse(False, "если есть предыдущая задача")
+        self.assertFalse(
+            qs.exclude(parent=None).filter(sprint_id=None).exists(),
+            "есть предыдущая задача, но нет спринта у текущей задачи",
+        )
+        self.assertFalse(
+            qs.exclude(parent=None).filter(parent_id=F("id")).exists(),
+            "есть предыдущая задача, но задача ссылаетя сама на себя",
+        )
+        # self.assertFalse(
+        #     qs.exclude(Q(parent=None) | Q(parent_nexts=None)).exists(),
+        #     "есть предыдущая задача, но у текущей задачи есть дети",
+        # )
+        self.assertFalse(
+            qs.exclude(Q(parent=None) | Q(parent__parent=None)).exists(),
+            "есть предыдущая задача, но у предыдущей задачи есть родитель",
+        )
+        self.assertFalse(
+            qs.exclude(Q(parent=None) | Q(parent__sprint_id=F("sprint_id"))).exists(),
+            "предыдущая задача не в списке задач спринта текущей задачи",
+        )
 
     def test_task_step(self):
         qs = TaskStep.objects.all()
@@ -92,16 +114,19 @@ class IsBaseCorrectTestCase(TestCase):
         self.assertFalse(qs.filter(task_id=None).exists(), "нет задачи для записи")
 
 
-class IsBaseModifyTestCase(TestCase):
+class BaseModifyTestCase(TestCase):
     """Проверка изменений данных в базе"""
 
-    CNT = 4
+    CNT = 0
+    CLOSE = 0
     CLEAR = True
-    CLOSE = 50
+    PARENT = True
 
     def setUp(self):
         super().setUp()
-        functions.gen_data(cnt=self.CNT, clear=self.CLEAR, close=self.CLOSE)
+        functions.gen_data(
+            cnt=self.CNT, close=self.CLOSE, clear=self.CLEAR, parent=self.PARENT
+        )
         return
 
     # def tearDown(self):

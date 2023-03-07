@@ -12,7 +12,11 @@
     {% firstof "detail" as oper %}
 {% endif %}
 
-<h2>Проект</h2>
+<div class="h2 align-self-center">
+    Проект
+    {% include "buttons.html" with btn_max="add" model=view.url_name pk=data.0.id %}
+</div>
+
 <form action="" method="post" class="row mb-3">
 {% csrf_token %}
 {% for item in data %}
@@ -182,7 +186,7 @@
     {% endif %}
 
     <div class="col">
-        {% include "buttons.html" with btn_max="back detail add edit delete" model=view.url_name pk=item.id %}
+        {% include "buttons.html" with btn_max="back detail edit delete" model=view.url_name pk=item.id %}
     </div>
 {% empty %}
     <div class="col">
