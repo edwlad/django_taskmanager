@@ -225,7 +225,7 @@
         {% if item.parent %}
             {% with model_pr=item.parent.META.url_name pk_pr=item.parent.id %}
                 <div>
-                {% include "buttons.html" with btn_min="add edit" model=model_pr pk=pk_pr perms=perms_pr %}
+                {% include "buttons.html" with btn_min="edit" model=model_pr pk=pk_pr perms=perms_pr %}
                 </div>
                 <a href={% url "detail" model=model_pr pk=pk_pr %}
                 class="btn flex-grow-1 btn-light border-0 text-start mx-1"
@@ -238,9 +238,6 @@
                 </div>
             {% endwith %}
         {% else %}
-            <div>
-                {% include "buttons.html" with btn_min="add" model=view.fld.parent.related_model.META.url_name perms=perms_pr %}
-            </div>
             <span class="pe-none btn border-0">Нет</span>
         {% endif %}
     {% endif %}
@@ -383,7 +380,7 @@
         {% my_hp next as perms_nt %}
         {% with model_nt=next.META.url_name pk_nt=next.id %}
             <div>
-                {% include "buttons.html" with btn_min="add edit" model=model_nt pk=pk_nt perms=perms_nt %}
+                {% include "buttons.html" with btn_min="edit" model=model_nt pk=pk_nt perms=perms_nt %}
             </div>
             <a href={% url "detail" model=model_nt pk=pk_nt %}
             class="btn flex-grow-1 btn-light border-0 text-start mx-1"

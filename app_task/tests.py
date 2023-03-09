@@ -14,7 +14,7 @@ def find_template(response, template_name):
     return
 
 
-class BaseCorrectTestCase(TestCase):
+class Base1CorrectTestCase(TestCase):
     """Проверка корректности данных в базе при случайной генерации"""
 
     EMAIL_BACKEND = getattr(settings, "EMAIL_BACKEND", "")
@@ -22,7 +22,8 @@ class BaseCorrectTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         settings.EMAIL_BACKEND = "django.core.mail.backends.dummy.EmailBackend"
-        functions.gen_data(cnt=100, close=60, parent=True)
+        if not Proj.objects.exists():
+            functions.gen_data(cnt=50, close=60, parent=True)
 
     @classmethod
     def tearDownClass(cls):
@@ -121,7 +122,7 @@ class BaseCorrectTestCase(TestCase):
         self.assertFalse(qs.filter(task_id=None).exists(), "нет задачи для записи")
 
 
-class BaseModifyTestCase(TestCase):
+class Base2ModifyTestCase(TestCase):
     """Проверка изменений данных в базе"""
 
     EMAIL_BACKEND = getattr(settings, "EMAIL_BACKEND", "")
@@ -129,7 +130,8 @@ class BaseModifyTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         settings.EMAIL_BACKEND = "django.core.mail.backends.dummy.EmailBackend"
-        functions.gen_data(cnt=10, close=70, clear=True)
+        if not Proj.objects.exists():
+            functions.gen_data(cnt=10, close=70)
 
     @classmethod
     def tearDownClass(cls):
@@ -201,9 +203,9 @@ class BaseModifyTestCase(TestCase):
         model = Task
         url_name = model.META.url_name
         list_template = "list_task.html"
-        # detail_template = "detail_sprint.html"
+        # detail_template = "detail_task.html"
 
-        # список спринтов
+        # список задач
         response = self.client.get(f"/{url_name}/")
         self.assertEqual(response.status_code, 200, "код статуса не 200")
         self.assertIsNotNone(

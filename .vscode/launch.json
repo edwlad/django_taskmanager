@@ -89,7 +89,7 @@
                 "test",
                 "--noinput",
                 // "--keepdb",
-                "app_task.tests.BaseCorrectTestCase",
+                "app_task.tests.Base1CorrectTestCase",
             ],
             "django": true,
             "justMyCode": false
@@ -107,7 +107,7 @@
                 "test",
                 "--noinput",
                 // "--keepdb",
-                "app_task.tests.BaseModifyTestCase",
+                "app_task.tests.Base2ModifyTestCase",
             ],
             "django": true,
             "justMyCode": false

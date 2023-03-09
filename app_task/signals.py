@@ -1,7 +1,6 @@
 from django.db.models.signals import post_save, post_delete
 from app_task.models import Proj, Sprint, Task
 from django.core.mail import send_mass_mail
-from django.conf import settings  # noqa
 
 
 def send_email_message(sender, **kwargs):

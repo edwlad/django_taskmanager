@@ -8,6 +8,8 @@ from datetime import date, timedelta
 from random import randint, choice, sample
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User, Permission
+import logging
+
 
 # from django.contrib.contenttypes.models import ContentType  # noqa
 
@@ -84,8 +86,8 @@ def get_perms(request: HttpRequest | Request, obj: Model = None):
 def gen_data(cnt=0, close=0, clear=False, parent=False, clear_user=False):
     old_email_backend = getattr(settings, "EMAIL_BACKEND", "")
     settings.EMAIL_BACKEND = "django.core.mail.backends.dummy.EmailBackend"
+    log = logging.getLogger("more")
 
-    print()  # перевод строки
     objs_proj = Proj.objects
     objs_sprint = Sprint.objects
     objs_task = Task.objects
@@ -96,17 +98,18 @@ def gen_data(cnt=0, close=0, clear=False, parent=False, clear_user=False):
 
     users = user_model.objects.filter(username__startswith=user_start)
 
-    if clear:
-        print("Удаление старых данных")
+    if clear or clear_user:
+        log.info("Удаление старых данных")
         for user in users:
             objs_proj.filter(author=user).delete()
 
-    if users and clear_user:
-        print("Удаление пользователей")
+    if clear_user:
+        log.info("Удаление пользователей")
         users.delete()
         users = user_model.objects.filter(username__startswith=user_start)
+
     if not users.exists():
-        print("Создание 5 пользователей")
+        log.info("Создание 5 пользователей")
         qp = Permission.objects.filter(content_type__app_label="app_task")
         for i in range(5):
             username = f"{user_start}{i}"
@@ -119,7 +122,7 @@ def gen_data(cnt=0, close=0, clear=False, parent=False, clear_user=False):
         users = user_model.objects.filter(username__startswith=user_start)
 
     cou = cnt
-    print(f"Создание {cou} проектов")
+    log.info(f"Создание {cou} проектов")
     qs_proj = objs_proj.all()
     full = len(qs_proj)
     # генерация проектов
@@ -136,7 +139,7 @@ def gen_data(cnt=0, close=0, clear=False, parent=False, clear_user=False):
         obj.save()
 
     cou = cnt * 2
-    print(f"Создание {cou} спринтов")
+    log.info(f"Создание {cou} спринтов")
     qs_proj = objs_proj.all()
     qs_sprint = objs_sprint.all()
     full = len(qs_sprint)
@@ -154,7 +157,7 @@ def gen_data(cnt=0, close=0, clear=False, parent=False, clear_user=False):
         obj.save()
 
     cou = cnt * 10
-    print(f"Создание {cou} задач")
+    log.info(f"Создание {cou} задач")
     qs_proj = objs_proj.all()
     qs_sprint = objs_sprint.all()
     qs_task = objs_task.all()
@@ -178,7 +181,7 @@ def gen_data(cnt=0, close=0, clear=False, parent=False, clear_user=False):
 
     if parent:
         cou = close % 100
-        print(f"Создание в {cou}% проектов зависимых задач")
+        log.info(f"Создание в {cou}% проектов зависимых задач")
         qs_proj = objs_proj.all()
         for proj in sample(tuple(qs_proj), int(cou / 100 * len(qs_proj))):
             tasks_id = tuple(v.id for v in proj.proj_tasks.all())
@@ -191,7 +194,7 @@ def gen_data(cnt=0, close=0, clear=False, parent=False, clear_user=False):
         qs_sprint = objs_sprint.all()
         qs_task = objs_task.all()
         cou = close % 100
-        print(f"Закрытие не более {cou}% спринтов")
+        log.info(f"Закрытие не более {cou}% спринтов")
         for sprint in sample(tuple(qs_sprint), int(cou / 100 * len(qs_sprint))):
             if randint(0, 3):
                 # закрываем все задачи спринта
@@ -206,7 +209,7 @@ def gen_data(cnt=0, close=0, clear=False, parent=False, clear_user=False):
         qs_proj = objs_proj.all()
         qs_task = objs_task.all()
         cou = close % 100
-        print(f"Закрытие не более {cou}% проектов")
+        log.info(f"Закрытие не более {cou}% проектов")
         for proj in sample(tuple(qs_proj), int(cou / 100 * len(qs_proj))):
             if randint(0, 3):
                 # закрываем все задачи проекта без спринта
@@ -218,7 +221,7 @@ def gen_data(cnt=0, close=0, clear=False, parent=False, clear_user=False):
             proj.date_end = beg + timedelta(randint(0, step))
             proj.save()
 
-    print("Генерация данных выполнена")
+    log.info("Генерация данных выполнена")
 
     settings.EMAIL_BACKEND = old_email_backend
 

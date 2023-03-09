@@ -144,6 +144,63 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # ============================================================
 # My Settings
 
+# настройки логирования
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "filters": {
+        "require_debug_true": {
+            "()": "django.utils.log.RequireDebugTrue",
+        },
+        # "full": {
+        #     "()": "django.utils.log.CallbackFilter",
+        #     "callback": lambda rec: True,
+        # },
+    },
+    "formatters": {
+        "verbose": {
+            "format": "%(levelname)-8s %(asctime)s"
+            " [%(filename)s:%(lineno)d] %(message)s",
+            "datefmt": "%Y-%m-%d %H:%M:%S",
+        },
+        "brief": {
+            "format": "%(levelname)-8s %(asctime)s %(name)s %(message)s",
+            "datefmt": "%Y-%m-%d %H:%M:%S",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+        "console_debug": {
+            "class": "logging.StreamHandler",
+            "filters": ["require_debug_true"],
+            "formatter": "verbose",
+        },
+    },
+    # "root": {
+    #     "level": "DEBUG" if DEBUG else "INFO",
+    #     "handlers": ["console_light"],
+    # },
+    "loggers": {
+        "": {  # root logger
+            "level": "DEBUG",
+            "handlers": ["console_debug"],
+        },
+        "more": {
+            "level": "DEBUG" if DEBUG else "INFO",
+            "handlers": ["console"],
+            "propagate": False,
+        },
+        # "django": {
+        #     "level": os.environ.get("DJANGO_LOG_LEVEL", "INFO"),
+        #     "handlers": ["console_debug"],
+        #     "propagate": False,
+        # },
+    },
+}
+
 # Email настройки
 EMAIL_ON = True
 if EMAIL_ON:
