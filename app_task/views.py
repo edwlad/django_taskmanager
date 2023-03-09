@@ -93,6 +93,7 @@ def ProjTemplate(self: TemplateView, oper):
             # фильтры
             if fnd := par.get("name_f", ""):
                 list_qs = list_qs.filter(name__icontains=fnd)
+                # list_qs = list_qs.filter(name__iregex=rf"{fnd}")
 
             match par.get(url_filt, ""):
                 case "on":

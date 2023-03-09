@@ -144,11 +144,34 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # ============================================================
 # My Settings
 
+# Email настройки
+EMAIL_ON = True
+if EMAIL_ON:
+    if DEBUG:
+        # выводит сообщения на стандартный вывод
+        EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+    else:
+        EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+else:
+    # фиктивный бэк - ничего не делает с сообщенияями
+    EMAIL_BACKEND = "django.core.mail.backends.dummy.EmailBackend"
+EMAIL_HOST = "localhost"
+EMAIL_PORT = "465"
+EMAIL_HOST_USER = "admin"
+EMAIL_HOST_PASSWORD = "admin"
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = True
+
+# Login настройки
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
+
+# Пагинация настройки
 PAGINATE_BY = 5  # элементов на странице
 # на последней странице элементов <= orphans, то добавить их к предыдущей странице
 PAGINATE_ORPHANS = 2
+
+# REST настройки
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
@@ -158,6 +181,7 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 10,
 }
+
 # теги для видов сообщений
 MESSAGE_TAGS = {
     10: "alert-dark",  # DEBUG - встроеный
@@ -166,6 +190,7 @@ MESSAGE_TAGS = {
     30: "alert-warning",  # WARNING - встроеный
     40: "alert-danger",  # ERROR - встроеный
 }
+
 # расшифровка операций
 MY_OPER = {
     "list": "Список",

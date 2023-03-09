@@ -378,7 +378,7 @@
 
     <div class="w-100"></div>
     
-    <div class="col d-flex align-items-center mb-1">
+    <div class="col d-flex flex-wrap align-items-center mb-1">
         {% for next in item.parent_nexts.all %}
         {% my_hp next as perms_nt %}
         {% with model_nt=next.META.url_name pk_nt=next.id %}
@@ -394,11 +394,13 @@
             <div>
                 {% include "buttons.html" with btn_min="delete" model=model_nt pk=pk_nt perms=perms_nt %}
             </div>
+
+            <div class="w-100 mt-1"></div>
+
         {% endwith %}
         {% endfor %}
     </div>
 
-    <div class="w-100"></div>
     
     {% endif %}
 

@@ -81,9 +81,9 @@ def get_perms(request: HttpRequest | Request, obj: Model = None):
     return out
 
 
-def gen_data(cnt=0, close=0, clear=False, parent=False):
-    # if not DEBUG:
-    #     return
+def gen_data(cnt=0, close=0, clear=False, parent=False, clear_user=False):
+    old_email_backend = getattr(settings, "EMAIL_BACKEND", "")
+    settings.EMAIL_BACKEND = "django.core.mail.backends.dummy.EmailBackend"
 
     print()  # перевод строки
     objs_proj = Proj.objects
@@ -92,18 +92,25 @@ def gen_data(cnt=0, close=0, clear=False, parent=False):
     user_model: User = get_user_model()
     beg = date.today() - timedelta(90)  # день начала назначения дат
     step = 180  # максимальный шаг в днях
+    user_start = "user"
 
-    users = user_model.objects.filter(username__startswith="user")
+    users = user_model.objects.filter(username__startswith=user_start)
+    if users and clear_user:
+        print("Удаление пользователей")
+        users.delete()
+        users = user_model.objects.filter(username__startswith=user_start)
     if not users.exists():
         print("Создание 5 пользователей")
         qp = Permission.objects.filter(content_type__app_label="app_task")
         for i in range(5):
-            p = "U-321rew"
-            user = user_model.objects.create_user(f"user{i}", "", p)
-            user.first_name = p
+            username = f"{user_start}{i}"
+            password = "U-321rew"
+            user = user_model.objects.create_user(username, "", password)
+            user.first_name = password
+            user.email = f"{username}@none.none"
             user.save()
             user.user_permissions.set([v.id for v in qp])
-        users = user_model.objects.filter(username__startswith="user")
+        users = user_model.objects.filter(username__startswith=user_start)
 
     if clear:
         print("Удаление старых данных")
@@ -211,5 +218,7 @@ def gen_data(cnt=0, close=0, clear=False, parent=False):
             proj.save()
 
     print("Генерация данных выполнена")
+
+    settings.EMAIL_BACKEND = old_email_backend
 
     return

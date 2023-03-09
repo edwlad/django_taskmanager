@@ -103,6 +103,8 @@ class Proj(models.Model):
         return
 
     class META:
+        verbose_name = "Проект"
+        verbose_name_plural = "Проекты"
         url_name = "projs"
         url_id = "projs_id"
         url_page = "projs_p"
@@ -219,6 +221,8 @@ class Sprint(models.Model):
         return
 
     class META:
+        verbose_name = "Спринт"
+        verbose_name_plural = "Спринты"
         url_name = "sprints"
         url_id = "sprints_id"
         url_page = "sprints_p"
@@ -388,6 +392,8 @@ class Task(models.Model):
         return
 
     class META:
+        verbose_name = "Задача"
+        verbose_name_plural = "Задачи"
         url_name = "tasks"
         url_id = "tasks_id"
         url_page = "tasks_p"
@@ -435,6 +441,8 @@ class TaskStep(models.Model):
         return super().save(**kwargs)
 
     class META:
+        verbose_name = "Шаг"
+        verbose_name_plural = "Шаги"
         url_name = "task_steps"
         url_id = "tsteps_id"
         url_page = "tsteps_p"
