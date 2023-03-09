@@ -1,5 +1,5 @@
 from django.test import TestCase
-from app_task.models import Proj, Sprint, Task, TaskStep  # noqa
+from app_task.models import Proj, Sprint, Task, TaskStep
 import app_task.functions as functions
 from django.db.models import QuerySet, F, Q, Case, When  # noqa
 from django.test import Client  # noqa
@@ -31,7 +31,6 @@ class BaseCorrectTestCase(TestCase):
 
     def test_proj(self):
         qs = Proj.objects.all()
-        # self.assertEqual(len(qs), self.CNT, "не верное количество созданых проектов")
         self.assertFalse(
             qs.exclude(date_max=None).filter(date_max__lt=F("date_beg")).exists(),
             "планируемая дата закрытия проекта меньше даты создания",

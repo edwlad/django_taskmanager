@@ -95,6 +95,12 @@ def gen_data(cnt=0, close=0, clear=False, parent=False, clear_user=False):
     user_start = "user"
 
     users = user_model.objects.filter(username__startswith=user_start)
+
+    if clear:
+        print("Удаление старых данных")
+        for user in users:
+            objs_proj.filter(author=user).delete()
+
     if users and clear_user:
         print("Удаление пользователей")
         users.delete()
@@ -111,11 +117,6 @@ def gen_data(cnt=0, close=0, clear=False, parent=False, clear_user=False):
             user.save()
             user.user_permissions.set([v.id for v in qp])
         users = user_model.objects.filter(username__startswith=user_start)
-
-    if clear:
-        print("Удаление старых данных")
-        for user in users:
-            objs_proj.filter(author=user).delete()
 
     cou = cnt
     print(f"Создание {cou} проектов")

@@ -37,8 +37,14 @@ def send_email_message(sender, **kwargs):
                 users.update({v.author.id: v.author})
             if v.user:
                 users.update({v.user.id: v.user})
-    elif sender is Task and obj.user:
-        users.update({obj.user.id: obj.user})
+    elif sender is Task:
+        if obj.user:
+            users.update({obj.user.id: obj.user})
+        for v in obj.parent_nexts.filter(date_end=None):
+            if v.author:
+                users.update({v.author.id: v.author})
+            if v.user:
+                users.update({v.user.id: v.user})
 
     # (subject, message, from_email, recipient_list)
     if users:
@@ -50,7 +56,7 @@ def send_email_message(sender, **kwargs):
             from_email = ""
         send_mass_mail(
             (
-                text,
+                f"{text}. {obj.META.verbose_name} ({obj.id})",
                 f"{text}. {obj.META.verbose_name}:\n{obj}\n{obj.desc}",
                 from_email,
                 (f"{user.username} <{user.email}>",),
