@@ -16,9 +16,31 @@ from django.conf import settings
 # TIME_ZONE = settings.TIME_ZONE
 
 
-def get_perms(request: HttpRequest | Request, obj: Model = None):
+def get_perms(request: HttpRequest | Request, obj: Model = None) -> dict:
+    """Вычисление прав доступа пользователя к объекту модели или к модели
+
+    Args:
+        request (HttpRequest | Request): Реквест
+        obj (Model, optional): Объект модели. Defaults to None.
+
+    Returns:
+        dict: Словарь прав доступа.
+        True - есть доступ
+        False - нет доступа
+    {
+        "list": доступ на просмотр списка
+        "detail": доступ к детальной информации
+        "is_author": пользователь - автор объекта
+        "is_user": пользователь - исполнитель
+        "add": право добавить запись
+        "delete": право удалить запись
+        "edit": право редактировать запись
+    }
+    """
+
     log = logging.getLogger(__name__ + ".perms")
 
+    # ищем данные о модели и ИД объекта и заносим в словарь
     kw = {}
     if isinstance(request, HttpRequest):
         kw = getattr(request.resolver_match, "kwargs", {})
@@ -27,6 +49,7 @@ def get_perms(request: HttpRequest | Request, obj: Model = None):
         kw["model"] = request.parser_context["view"].basename
     user = request.user
 
+    # если объект инстанс модели, то поытка найти объект по данным из url
     if isinstance(obj, Model):
         has_obj = True
     else:
@@ -49,6 +72,7 @@ def get_perms(request: HttpRequest | Request, obj: Model = None):
         if not has_obj:
             obj = model
 
+    # первоначально поиск прав доступа к модели
     temp: str = f"{obj._meta.app_label}.{{}}_{obj._meta.model_name}"
     out = {
         "list": True,
@@ -68,16 +92,22 @@ def get_perms(request: HttpRequest | Request, obj: Model = None):
         and hasattr(obj.sprint, "date_end")
         and obj.sprint.date_end
     )
+    # если объект зависит от проекта и проект закрыт
     if p_de:
         out.update({"edit": False, "delete": False})
+    # если объект зависит от спринта и спринт закрыт
     elif s_de:
         out.update({"edit": False, "delete": False})
+    # если пользователь суперпользователь
     elif user.is_superuser:
         pass
+    # если пользователь автор
     elif a_id and user.id == a_id:
         out.update({"is_author": True})
+    # если пользователь исполнитель
     elif u_id and user.id == u_id:
         out.update({"is_user": True, "delete": False})
+    # если есть автор
     elif a_id:
         out.update({"edit": False, "delete": False})
 
@@ -88,7 +118,45 @@ def get_perms(request: HttpRequest | Request, obj: Model = None):
     return out
 
 
-def gen_data(cnt=0, close=0, clear=False, parent=False, clear_user=False):
+def gen_data(cnt=0, close=0, clear=False, parent=False, clear_user=False) -> None:
+    """Генерация данных для базы. Даты выбираются случайно
+    в промежуте +/- 3 месяца от текущей даты.
+
+    Args:
+        cnt (int, optional): Количество генерируемых проектов.
+            Defaults to 0.
+        close (int, optional): Процент закрытия проектов и спринтов.
+            Defaults to 0.
+        clear (bool, optional): Очищать базу перед генерацией.
+            Defaults to False.
+        parent (bool, optional): Создавать зависимые задачи.
+            Defaults to False.
+        clear_user (bool, optional): Удалить и создать заново спецпользователей для
+            генерируемых данных.
+            Defaults to False.
+
+    Как работаает:
+        Создётся указанное число проектов.
+    Для проекта указывается случайные автор, дата создания и планируемая дата закрытия.
+        Создётся удвоеное число спринтов.
+    Для спринтов - случайные автор, проект, дата создания и планируемая дата закрытия.
+        Создётся в десять раз увеличеное число задач.
+    Для задач - случайные автор, исполнитель, проект, спринт, дата создания
+    и планируемая дата закрытия.
+        Если есть зависимые задачи, попытка в поекте создать их.
+    Выбираются две случайные задачи проекта главная и зависимая.
+        Попытка закрыть указанное число спринтов.
+    Выбираются случайные даты закрытия задач (не всех) спринта и дата закрытия спринта.
+        Попытка закрыть указанное число проектов.
+    Выбирается случайные даты закрытия задач (не всех) проекта и дата закрытия проекта.
+
+    При записи данных модели проверяют их корректность:
+    - даты больше/меньше чем надо,
+    - можно ли создать зависимости
+    - можно ли закрыть проект/спринт/задачу
+    - и пр.
+    """
+
     old_email_backend = getattr(settings, "EMAIL_BACKEND", "")
     settings.EMAIL_BACKEND = "django.core.mail.backends.dummy.EmailBackend"
     log = logging.getLogger("more")

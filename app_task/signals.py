@@ -16,20 +16,26 @@ def send_email_message(sender: Model, **kwargs) -> None:
     obj = kwargs.get("instance", None)
     created = kwargs.get("created", None)
 
-    text = ""
+    # Какая операция
+    oper = ""
     if created is None:
-        text += "Удаление"
+        oper += "Удаление"
     elif created:
-        text += "Создание"
+        oper += "Создание"
     else:
-        text += "Обновление"
+        oper += "Обновление"
 
-    LOG.info("SIGNAL: {}, obj={}".format(text, str(obj)[:50]))
+    LOG.info("SIGNAL: {}, obj={}".format(oper, str(obj)[:50]))
 
+    # создание списка адресатов и генерация темы и текста сообщения
     users = {}
+    subj = ""
+    text = ""
     if sender is not TaskStep and obj.author:
         users.update({obj.author.id: obj.author})
     if sender is Proj:
+        subj = f"{oper}. {Proj.META.verbose_name} ({obj.id})"
+        text = f"{oper}. {Proj.META.verbose_name}:\n{obj}\n{obj.desc}"
         users.update(
             {
                 v.author.id: v.author
@@ -42,12 +48,16 @@ def send_email_message(sender: Model, **kwargs) -> None:
             if v.user:
                 users.update({v.user.id: v.user})
     elif sender is Sprint:
+        subj = f"{oper}. {Sprint.META.verbose_name} ({obj.id})"
+        text = f"{oper}. {Sprint.META.verbose_name}:\n{obj}\n{obj.desc}"
         for v in obj.sprint_tasks.filter(date_end=None):
             if v.author:
                 users.update({v.author.id: v.author})
             if v.user:
                 users.update({v.user.id: v.user})
     elif sender is Task:
+        subj = f"{oper}. {Task.META.verbose_name} ({obj.id})"
+        text = f"{oper}. {Task.META.verbose_name}:\n{obj}\n{obj.desc}"
         if obj.user:
             users.update({obj.user.id: obj.user})
         for v in obj.parent_nexts.filter(date_end=None):
@@ -56,6 +66,15 @@ def send_email_message(sender: Model, **kwargs) -> None:
             if v.user:
                 users.update({v.user.id: v.user})
     elif sender is TaskStep and not obj.auto_create:
+        subj = (
+            f"{oper}. {TaskStep.META.verbose_name}"
+            f" для {Task.META.verbose_name_plural} ({obj.task.id})"
+        )
+        text = (
+            f"{oper}. {TaskStep.META.verbose_name}."
+            f"\n{Task.META.verbose_name}: {obj.task}"
+            f"\n{TaskStep.META.verbose_name}:\n{obj.desc}"
+        )
         obj.uweb = obj.task.author
         if obj.task.author:
             users.update({obj.task.author.id: obj.task.author})
@@ -65,6 +84,7 @@ def send_email_message(sender: Model, **kwargs) -> None:
     if LOG.isEnabledFor(logging.DEBUG):
         LOG.debug("USERS: {}".format(users))
 
+    # перебор списка адресатов и массовая отправка сообщений
     # (subject, message, from_email, recipient_list)
     if users:
         if hasattr(obj, "uweb") and obj.uweb:
@@ -74,12 +94,7 @@ def send_email_message(sender: Model, **kwargs) -> None:
             uweb_id = 0
             from_email = ""
         send_mass_mail(
-            (
-                f"{text}. {obj.META.verbose_name} ({obj.id})",
-                f"{text}. {obj.META.verbose_name}:\n{obj}\n{obj.desc}",
-                from_email,
-                (f"{user.username} <{user.email}>",),
-            )
+            (subj, text, from_email, (f"{user.username} <{user.email}>",))
             for user in users.values()
             if user.id != uweb_id
         )

@@ -185,7 +185,7 @@ LOGGING = {
     # },
     "loggers": {
         "": {  # root logger
-            "level": "DEBUG",
+            "level": "INFO",
             "handlers": ["console_debug"],
         },
         "app_task.functions.perms": {

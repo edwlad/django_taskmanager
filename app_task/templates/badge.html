@@ -1,4 +1,6 @@
 {% load poll_extras %}
+
+{# создание поля с информацией о статусе задачи #}
 {% if "_meta"|my_ha:item %}
     {% my_e "item._meta.model.objects.filter(id=item.id).first()" as item %}
     {% my_s "Срок " item.days_plan.days|default:0 item.days_plan.days|my_ds:" день, дня, дней" as temp %}

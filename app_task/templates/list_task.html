@@ -5,7 +5,9 @@
     {# заголовок #}
     <div class="h2 align-self-center col-4 col-sm-3">
         Задачи
+        {% if not view.kwargs.oper == "add" %}
         {% include "buttons.html" with btn_max="add" model=view.url_name pk=view.kwargs.pk %}
+        {% endif %}
         <div class="w-100 my-1"></div>
         {% include "paginate.html" %}
     </div>
@@ -22,7 +24,6 @@
 <table class="table table-sm table-hover align-middle">
     <tbody>
     {% for item in data %}
-
 
     {# основная задача #}
     {% my_hp item as perms %}

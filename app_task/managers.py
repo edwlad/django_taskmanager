@@ -7,7 +7,9 @@ from datetime import date, timedelta  # noqa
 class TaskManager(models.Manager):
     def get_queryset(self):
         qs: models.QuerySet = super().get_queryset()
-        qs = qs.annotate(  # вычисление планируемой даты закрытия
+
+        # вычисление планируемой даты закрытия
+        qs = qs.annotate(
             date_plan=Case(
                 When(proj__date_max=None, sprint__date_max=None, then=F("date_max")),
                 When(
@@ -33,21 +35,25 @@ class TaskManager(models.Manager):
             ),
         )
 
-        qs = qs.annotate(  # вычисление количества дней до планируемой даты закрытия
+        # вычисление количества дней до планируемой даты закрытия
+        qs = qs.annotate(
             days_plan=Case(
                 When(Q(date_plan=None) | Q(date_end__isnull=False), then=timedelta(0)),
                 default=F("date_plan") - date.today(),
             ),
         )
 
+        # вычисление минимальной возможной даты закрытия задачи
         qs = qs.annotate(date_end_task=F("date_beg"))
-        # print(qs.query)
+
         return qs
 
 
 class SprintManager(models.Manager):
     def get_queryset(self):
         qs: models.QuerySet = super().get_queryset()
+
+        # вычисление планируемой даты закрытия
         qs = qs.annotate(
             date_plan=Case(
                 When(proj__date_max=None, then=F("date_max")),
@@ -58,6 +64,8 @@ class SprintManager(models.Manager):
                 default=F("date_max"),
             )
         )
+
+        # вычисление количества дней до планируемой даты закрытия
         qs = qs.annotate(
             days_plan=Case(
                 When(Q(date_plan=None) | Q(date_end__isnull=False), then=timedelta(0)),
@@ -65,8 +73,10 @@ class SprintManager(models.Manager):
             )
         )
 
+        # вычисление максимальной даты закрытия задач спринта
         qs = qs.annotate(date_end_task=Max("sprint_tasks__date_end"))
 
+        # вычисление минимальной возможной даты закрытия спринта
         qs = qs.annotate(
             date_end_sprint=Case(
                 When(
@@ -76,14 +86,18 @@ class SprintManager(models.Manager):
                 default=F("date_end_task"),
             )
         )
-        # print(qs.query)
+
         return qs
 
 
 class ProjManager(models.Manager):
     def get_queryset(self):
         qs: models.QuerySet = super().get_queryset()
+
+        # вычисление планируемой даты закрытия
         qs = qs.annotate(date_plan=F("date_max"))
+
+        # вычисление количества дней до планируемой даты закрытия
         qs = qs.annotate(
             days_plan=Case(
                 When(Q(date_plan=None) | Q(date_end__isnull=False), then=timedelta(0)),
@@ -91,10 +105,13 @@ class ProjManager(models.Manager):
             )
         )
 
+        # вычисление максимальной даты закрытия спринтов проекта
         qs = qs.annotate(date_end_sprint=Max("proj_sprints__date_end"))
 
+        # вычисление максимальной даты закрытия задач проекта
         qs = qs.annotate(date_end_task=Max("proj_tasks__date_end"))
 
+        # вычисление минимальной возможной даты закрытия проекта
         qs = qs.annotate(
             date_end_proj=Case(
                 When(date_end_sprint=None, date_end_task=None, then=F("date_beg")),
@@ -119,5 +136,4 @@ class ProjManager(models.Manager):
             )
         )
 
-        # print(qs.query)
         return qs

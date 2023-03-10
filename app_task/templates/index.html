@@ -4,6 +4,7 @@
 
 {% block content %}
 
+{# если режим поиска то форма для ввода данных #}
 {% if model == "finds" %}
 <form action="" method="get" class="row mb-3 align-items-center">
     {% for key, val in request.GET.items %}
@@ -38,6 +39,7 @@
 </script>
 {% endif %}
 
+{# перебор отрендереных вью #}
 {% for detail in details %}
     {{ detail.rendered_content }}
 {% endfor %}

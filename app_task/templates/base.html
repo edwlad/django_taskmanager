@@ -37,11 +37,11 @@
         {% else %}
             <a href="{% url "login" %}" class="mx-1">Вход</a>
         {% endif %}
-
     </nav>
 
     <hr>
 
+    {# если есть сообщения #}
     {% if messages %}
         {% for message in messages %}
         <div class="alert alert-dismissible {{ message.tags }} fade show">
@@ -51,8 +51,10 @@
         {% endfor %}
     {% endif %}
 
+    {# вывод основной информации #}
     <h1>{% block header %}Base page{% endblock header %}</h1>
     {% block content %}{% endblock content %}
+    
     <div style="height: 50px;" class="">&nbsp;</div>
 </body>
 

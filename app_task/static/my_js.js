@@ -1,5 +1,5 @@
 async function find_sprints(el, el_parent, proj_id = 0) {
-    // console.log("Поиск спринтов", el.innerHTML, proj_id);
+    // console.log("Поиск спринтов в проекте", el.innerHTML, proj_id);
     if (el == null | el_parent == null) { return; }
 
     let out = document.createElement("div");

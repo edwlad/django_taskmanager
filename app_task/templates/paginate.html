@@ -2,6 +2,7 @@
 {% load poll_extras %}
 {% my_g view.get_par as get_par %}
 
+{# вывод кнопок пагинации если она есть #}
 {% if is_paginated and page_obj.paginator.num_pages > 1 %}
 <ul class="pagination pagination-sm mb-0">
     <li class="page-item">
