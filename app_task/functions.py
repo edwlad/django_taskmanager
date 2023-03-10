@@ -3,21 +3,22 @@ from django.http.request import HttpRequest  # noqa
 from rest_framework.request import Request
 from django.db.models import Model  # noqa
 from app_task.models import Proj, Sprint, Task, TaskStep
-from django.conf import settings
 from datetime import date, timedelta
 from random import randint, choice, sample
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User, Permission
 import logging
-
+from django.conf import settings
 
 # from django.contrib.contenttypes.models import ContentType  # noqa
 
-DEBUG = settings.DEBUG
+# DEBUG = settings.DEBUG
 # TIME_ZONE = settings.TIME_ZONE
 
 
 def get_perms(request: HttpRequest | Request, obj: Model = None):
+    log = logging.getLogger(__name__ + ".perms")
+
     kw = {}
     if isinstance(request, HttpRequest):
         kw = getattr(request.resolver_match, "kwargs", {})
@@ -79,6 +80,10 @@ def get_perms(request: HttpRequest | Request, obj: Model = None):
         out.update({"is_user": True, "delete": False})
     elif a_id:
         out.update({"edit": False, "delete": False})
+
+    if log.isEnabledFor(logging.DEBUG):
+        pass
+        log.debug("PERMS: user={}, obj={}, perms={}".format(user, str(obj)[:50], out))
 
     return out
 

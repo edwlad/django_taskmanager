@@ -159,7 +159,7 @@ LOGGING = {
     },
     "formatters": {
         "verbose": {
-            "format": "%(levelname)-8s %(asctime)s"
+            "format": "%(levelname)-8s %(asctime)s %(name)s"
             " [%(filename)s:%(lineno)d] %(message)s",
             "datefmt": "%Y-%m-%d %H:%M:%S",
         },
@@ -187,6 +187,11 @@ LOGGING = {
         "": {  # root logger
             "level": "DEBUG",
             "handlers": ["console_debug"],
+        },
+        "app_task.functions.perms": {
+            "level": "INFO",
+            "handlers": ["console_debug"],
+            "propagate": False,
         },
         "more": {
             "level": "DEBUG" if DEBUG else "INFO",
@@ -218,6 +223,8 @@ EMAIL_HOST_USER = "admin"
 EMAIL_HOST_PASSWORD = "admin"
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = True
+ADMINS = (("Admin", "admin@none.none"),)
+MANAGERS = ADMINS
 
 # Login настройки
 LOGIN_REDIRECT_URL = "/"

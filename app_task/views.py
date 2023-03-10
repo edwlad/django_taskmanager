@@ -5,7 +5,7 @@ from django.db import models  # noqa
 from django.urls import reverse, reverse_lazy  # noqa
 from django.conf import settings
 from django.contrib.auth import get_user_model
-
+import logging
 from django.contrib import messages
 
 # from django.contrib.messages.views import SuccessMessageMixin
@@ -24,12 +24,14 @@ import app_task.functions as functions
 PAGINATE_BY = settings.PAGINATE_BY
 PAGINATE_ORPHANS = settings.PAGINATE_ORPHANS
 MY_OPER = settings.MY_OPER
+LOG = logging.getLogger(__name__)
 
 
 def error(req: HttpRequest, *args, **kwargs) -> HttpResponse:
     status = int(kwargs.get("status", 400))
     title = kwargs.get("title", "Ошибка")
     content = kwargs.get("content", f"<p>Код ошибки: {status}</p>")
+    LOG.info(f"{title} {status} {content}")
     return render(
         req,
         "error.html",
@@ -628,6 +630,10 @@ class Index(TemplateView):
     def get(self, request: HttpRequest, *args, **kwargs):
         perms = functions.get_perms(request)
         oper = self.kwargs.get("oper", "")
+
+        LOG.info("GET: kwargs={}".format(self.kwargs))
+        LOG.debug("USER: {}, perms={}".format(request.user, perms))
+
         if not perms.get(oper, False):
             messages.warning(
                 request, f"Нет прав для выполнения операции {MY_OPER.get(oper, '')}"
@@ -638,6 +644,10 @@ class Index(TemplateView):
     def post(self, request: HttpRequest, *args, **kwargs):
         perms = functions.get_perms(request)
         oper = self.kwargs.get("oper", "")
+
+        LOG.info("POST: kwargs={}".format(self.kwargs))
+        LOG.debug("USER: {}, perms={}".format(request.user, perms))
+
         if not perms.get(oper, False):
             messages.warning(
                 request,

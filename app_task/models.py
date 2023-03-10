@@ -418,6 +418,11 @@ class TaskStep(models.Model):
         null=True,
         related_name="author_steps",
     )
+    auto_create = models.BooleanField(
+        help_text="Запись создана автоматически",
+        verbose_name="Автосоздано",
+        default=True,
+    )
     task = models.ForeignKey(
         help_text="Задача",
         verbose_name="Задача",
@@ -427,10 +432,11 @@ class TaskStep(models.Model):
     )
 
     def __str__(self) -> str:
-        return f"{self.id}: {self.desс[:30]}"
+        return f"{self.id}: {self.desc[:30]}"
 
     def save(self, cur_task=None, forse=False, **kwargs) -> None:
         if not isinstance(cur_task, Task):
+            self.auto_create = False
             cur_task = Task.objects.filter(id=self.task_id).first()
 
         # если задача закрыта то не записываем

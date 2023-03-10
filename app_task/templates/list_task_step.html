@@ -55,7 +55,11 @@
         class="btn btn-primary"
         >
     </div>
-
+    <script>
+        el = document.getElementById("id_{{ view.fld.desc.name }}");
+        el.focus();
+        el.selectionStart = el.selectionEnd = el.value.length;
+    </script>
 </form>
 {% endif %}
 
