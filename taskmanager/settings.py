@@ -152,6 +152,9 @@ LOGGING = {
         "require_debug_true": {
             "()": "django.utils.log.RequireDebugTrue",
         },
+        "require_debug_false": {
+            "()": "django.utils.log.RequireDebugFalse",
+        },
         # "full": {
         #     "()": "django.utils.log.CallbackFilter",
         #     "callback": lambda rec: True,
@@ -159,8 +162,8 @@ LOGGING = {
     },
     "formatters": {
         "verbose": {
-            "format": "%(levelname)-8s %(asctime)s %(name)s"
-            " [%(filename)s:%(lineno)d] %(message)s",
+            "format": "%(levelname)-8s %(asctime)s"
+            " [%(filename)s:%(lineno)4d] (%(name)s) %(message)s",
             "datefmt": "%Y-%m-%d %H:%M:%S",
         },
         "brief": {
@@ -178,6 +181,11 @@ LOGGING = {
             "filters": ["require_debug_true"],
             "formatter": "verbose",
         },
+        "console_no_debug": {
+            "class": "logging.StreamHandler",
+            "filters": ["require_debug_false"],
+            "formatter": "brief",
+        },
     },
     # "root": {
     #     "level": "DEBUG" if DEBUG else "INFO",
@@ -185,8 +193,8 @@ LOGGING = {
     # },
     "loggers": {
         "": {  # root logger
-            "level": "INFO",
-            "handlers": ["console_debug"],
+            "level": "INFO" if DEBUG else "WARNING",
+            "handlers": ["console_debug", "console_no_debug"],
         },
         "app_task.functions.perms": {
             "level": "INFO",
@@ -198,11 +206,11 @@ LOGGING = {
             "handlers": ["console"],
             "propagate": False,
         },
-        # "django": {
-        #     "level": os.environ.get("DJANGO_LOG_LEVEL", "INFO"),
-        #     "handlers": ["console_debug"],
-        #     "propagate": False,
-        # },
+        "django": {
+            "level": os.environ.get("DJANGO_LOG_LEVEL", "INFO"),
+            "handlers": ["console_debug"],
+            "propagate": False,
+        },
     },
 }
 

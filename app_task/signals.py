@@ -25,7 +25,7 @@ def send_email_message(sender: Model, **kwargs) -> None:
     else:
         oper += "Обновление"
 
-    LOG.info("SIGNAL: {}, obj={}".format(oper, str(obj)[:50]))
+    LOG.debug("SIGNAL: {}, obj={}".format(oper, str(obj)[:50]))
 
     # создание списка адресатов и генерация темы и текста сообщения
     users = {}
