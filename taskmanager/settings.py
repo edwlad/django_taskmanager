@@ -205,6 +205,11 @@ LOGGING = {
             "handlers": ["console"],
             "propagate": False,
         },
+        # "app_task": {
+        #     "level": "WARNING",
+        #     "handlers": ["console_debug"],
+        #     "propagate": False,
+        # },
         "app_task.functions.perms": {
             "level": "INFO",
             "handlers": ["console_debug"],
@@ -229,11 +234,11 @@ if EMAIL_ON:
 else:
     # фиктивный бэк - ничего не делает с сообщенияями
     EMAIL_BACKEND = "django.core.mail.backends.dummy.EmailBackend"
-EMAIL_HOST = "localhost"
+EMAIL_HOST = "127.0.0.1"
 EMAIL_PORT = "465"
-EMAIL_HOST_USER = "admin"
-EMAIL_HOST_PASSWORD = "admin"
-EMAIL_USE_TLS = True
+EMAIL_HOST_USER = ""
+EMAIL_HOST_PASSWORD = ""
+EMAIL_USE_TLS = False
 EMAIL_USE_SSL = True
 ADMINS = (("Admin", "admin@none.none"),)
 MANAGERS = ADMINS
