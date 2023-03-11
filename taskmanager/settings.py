@@ -197,16 +197,17 @@ LOGGING = {
     # },
     "loggers": {
         "": {  # root logger
+            "level": "DEBUG",
             "handlers": ["console_debug", "console_no_debug"],
-        },
-        "app_task.functions.perms": {
-            "level": "INFO",
-            "handlers": ["console_debug"],
-            "propagate": False,
         },
         "more": {
             "level": "DEBUG" if DEBUG else "INFO",
             "handlers": ["console"],
+            "propagate": False,
+        },
+        "app_task.functions.perms": {
+            "level": "INFO",
+            "handlers": ["console_debug"],
             "propagate": False,
         },
         # "django": {
