@@ -118,7 +118,7 @@ def ProjTemplate(self: TemplateView, oper: str) -> View:
             # фильтры
             # фильтр поиска в названии
             if fnd := par.get("name_f", ""):
-                list_qs = list_qs.filter(name__icontains=fnd)
+                list_qs = list_qs.filter(name_upper__contains=fnd.upper())
                 # list_qs = list_qs.filter(name__iregex=rf"{fnd}")
 
             # фильтр поиска по состоянию (выполнено, не выполнено, всё)
@@ -294,7 +294,7 @@ def SprintTemplate(self: TemplateView, oper: str) -> View:
             # фильтры
             # фильтр поиска в названии
             if fnd := par.get("name_f", ""):
-                list_qs = list_qs.filter(name__icontains=fnd)
+                list_qs = list_qs.filter(name_upper__contains=fnd.upper())
 
             # фильтр поиска по состоянию (выполнено, не выполнено, всё)
             match par.get(url_filt, ""):
@@ -483,7 +483,7 @@ def TaskTemplate(self: TemplateView, oper: str) -> View:
             # фильтры
             # фильтр поиска в названии
             if fnd := par.get("name_f", ""):
-                list_qs = list_qs.filter(name__icontains=fnd)
+                list_qs = list_qs.filter(name_upper__contains=fnd.upper())
 
             # фильтр поиска по состоянию (выполнено, не выполнено, всё)
             match par.get(url_filt, ""):

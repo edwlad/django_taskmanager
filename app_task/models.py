@@ -12,6 +12,11 @@ class Proj(models.Model):
     name = models.CharField(
         help_text="Название проекта", verbose_name="Название", max_length=120
     )
+    name_upper = models.CharField(
+        help_text="Название проекта в ВЕРХНЕМ регистре",
+        verbose_name="НАЗВАНИЕ",
+        max_length=120,
+    )
     desc = models.TextField(help_text="Описание проекта", verbose_name="Описание")
     date_beg = models.DateField(
         help_text="Дата создания проекта",
@@ -52,6 +57,8 @@ class Proj(models.Model):
         return f"({self.id}) {self.name}"
 
     def save(self, **kwargs) -> None:
+        self.name_upper = self.name.upper()
+
         # если планируемая дата меньше даты создания
         if self.date_max and self.date_max < self.date_beg:
             self.date_max = self.date_beg
@@ -74,7 +81,7 @@ class Proj(models.Model):
             desc = "Создание проекта"
         else:
             for v in self._meta.get_fields():
-                if v.name in ("uweb", "id"):
+                if v.name in ("uweb", "id", "name_upper"):
                     continue
                 v1 = getattr(self, v.name)
                 v2 = getattr(old, v.name)
@@ -117,6 +124,11 @@ class Sprint(models.Model):
 
     name = models.CharField(
         help_text="Название спринта", verbose_name="Название", max_length=120
+    )
+    name_upper = models.CharField(
+        help_text="Название спринта в ВЕРХНЕМ регистре",
+        verbose_name="НАЗВАНИЕ",
+        max_length=120,
     )
     desc = models.TextField(help_text="Описание спринта", verbose_name="Описание")
     date_beg = models.DateField(
@@ -165,6 +177,8 @@ class Sprint(models.Model):
         return f"({self.id}) {self.name}"
 
     def save(self, **kwargs) -> None:
+        self.name_upper = self.name.upper()
+
         # если закрыт проект то ничего не сохраняем
         if self.proj and self.proj.date_end:
             return
@@ -188,7 +202,7 @@ class Sprint(models.Model):
             desc = "Создание спринта"
         else:
             for v in self._meta.get_fields():
-                if v.name in ("uweb", "id"):
+                if v.name in ("uweb", "id", "name_upper"):
                     continue
                 v1 = getattr(self, v.name)
                 v2 = getattr(old, v.name)
@@ -235,6 +249,11 @@ class Task(models.Model):
 
     name = models.CharField(
         help_text="Название задачи", verbose_name="Название", max_length=120
+    )
+    name_upper = models.CharField(
+        help_text="Название задачи в ВЕРХНЕМ регистре",
+        verbose_name="НАЗВАНИЕ",
+        max_length=120,
     )
     desc = models.TextField(help_text="Описание задачи", verbose_name="Описание")
     date_beg = models.DateField(
@@ -314,6 +333,8 @@ class Task(models.Model):
         return f"({self.id}) {self.name}"
 
     def save(self, **kwargs) -> None:
+        self.name_upper = self.name.upper()
+
         # если закрыты спринт и/или проект то ничего не сохраняем
         if self.sprint and self.sprint.date_end or self.proj and self.proj.date_end:
             return
@@ -336,9 +357,6 @@ class Task(models.Model):
                 self.parent_id == self.id  # если ссылаетя сама на себя
                 or self.parent.parent  # если у предыдущей задачи есть родитель
                 or self.parent_nexts.all().exists()  # если у текущей задачи есть дети
-                # если есть спринт и спринты не совпадают
-                # or (self.sprint and self.sprint_id != self.parent.sprint_id)
-                # or self.proj_id != self.parent.proj_id  # если проекты не совпадают
             ):
                 self.parent = None
             else:
@@ -352,7 +370,7 @@ class Task(models.Model):
             desc = "Создание задачи"
         else:
             for v in self._meta.get_fields():
-                if v.name in ("uweb", "id"):
+                if v.name in ("uweb", "id", "name_upper"):
                     continue
                 v1 = getattr(self, v.name)
                 v2 = getattr(old, v.name)

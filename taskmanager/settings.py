@@ -91,6 +91,7 @@ WSGI_APPLICATION = "taskmanager.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
+        # "ENGINE": "django.db.backends.postgresql_psycopg2",
         "NAME": "postgres",
         "USER": "postgres",
         "PASSWORD": "",
@@ -123,6 +124,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
 LANGUAGE_CODE = "en-us"
+# LANGUAGE_CODE = "utf8"
 
 TIME_ZONE = "Etc/GMT-7"
 
@@ -179,11 +181,13 @@ LOGGING = {
         "console_debug": {
             "class": "logging.StreamHandler",
             "filters": ["require_debug_true"],
+            "level": "INFO",
             "formatter": "verbose",
         },
         "console_no_debug": {
             "class": "logging.StreamHandler",
             "filters": ["require_debug_false"],
+            "level": "WARNING",
             "formatter": "brief",
         },
     },
@@ -193,7 +197,6 @@ LOGGING = {
     # },
     "loggers": {
         "": {  # root logger
-            "level": "INFO" if DEBUG else "WARNING",
             "handlers": ["console_debug", "console_no_debug"],
         },
         "app_task.functions.perms": {
@@ -206,11 +209,11 @@ LOGGING = {
             "handlers": ["console"],
             "propagate": False,
         },
-        "django": {
-            "level": os.environ.get("DJANGO_LOG_LEVEL", "INFO"),
-            "handlers": ["console_debug"],
-            "propagate": False,
-        },
+        # "django": {
+        #     "level": os.environ.get("DJANGO_LOG_LEVEL", "INFO"),
+        #     "handlers": ["console_debug"],
+        #     "propagate": False,
+        # },
     },
 }
 
