@@ -146,6 +146,19 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # ============================================================
 # My Settings
 
+# расшифровка операций
+MY_OPER = {
+    "list": "Список",
+    "detail": "Просмотр",
+    "add": "Добавление",
+    "edit": "Редактирование",
+    "delete": "Удаление",
+}
+
+# шаблон начала имени тестовых пользователей и пароль
+MY_TEST_USER = "user"
+MY_TEST_PASS = "U-321rew"
+
 # настройки логирования
 LOGGING = {
     "version": 1,
@@ -191,10 +204,6 @@ LOGGING = {
             "formatter": "brief",
         },
     },
-    # "root": {
-    #     "level": "DEBUG" if DEBUG else "INFO",
-    #     "handlers": ["console_light"],
-    # },
     "loggers": {
         "": {  # root logger
             "level": "DEBUG",
@@ -206,8 +215,8 @@ LOGGING = {
             "propagate": False,
         },
         # "app_task": {
-        #     "level": "WARNING",
-        #     "handlers": ["console_debug"],
+        #     "level": "DEBUG",
+        #     "handlers": ["console"],
         #     "propagate": False,
         # },
         "app_task.functions.perms": {
@@ -224,8 +233,8 @@ LOGGING = {
 }
 
 # Email настройки
-EMAIL_ON = True
-if EMAIL_ON:
+MY_EMAIL_ON = True
+if MY_EMAIL_ON:
     if DEBUG:
         # выводит сообщения на стандартный вывод
         EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
@@ -270,13 +279,4 @@ MESSAGE_TAGS = {
     25: "alert-success",  # SUCCESS - встроеный
     30: "alert-warning",  # WARNING - встроеный
     40: "alert-danger",  # ERROR - встроеный
-}
-
-# расшифровка операций
-MY_OPER = {
-    "list": "Список",
-    "detail": "Просмотр",
-    "add": "Добавление",
-    "edit": "Редактирование",
-    "delete": "Удаление",
 }

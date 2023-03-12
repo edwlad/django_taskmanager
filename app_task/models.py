@@ -303,9 +303,6 @@ class Task(models.Model):
         help_text="Проект",
         verbose_name="Проект",
         to="Proj",
-        # blank=True,
-        # null=True,
-        # on_delete=models.SET_NULL,
         on_delete=models.CASCADE,
         related_name="proj_tasks",
     )
@@ -313,7 +310,6 @@ class Task(models.Model):
         help_text="Спринт",
         verbose_name="Спринт",
         to="Sprint",
-        # on_delete=models.SET_NULL,
         on_delete=models.CASCADE,
         blank=True,
         null=True,

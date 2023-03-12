@@ -167,7 +167,8 @@ def gen_data(cnt=0, close=0, clear=False, parent=False, clear_user=False) -> Non
     user_model: User = get_user_model()
     beg = date.today() - timedelta(90)  # день начала назначения дат
     step = 180  # максимальный шаг в днях
-    user_start = "user"
+    user_start = getattr(settings, "MY_TEST_USER", "user")
+    user_pass = getattr(settings, "MY_TEST_PASS", "U-321rew")
 
     users = user_model.objects.filter(username__startswith=user_start)
 
@@ -181,14 +182,13 @@ def gen_data(cnt=0, close=0, clear=False, parent=False, clear_user=False) -> Non
         users.delete()
         users = user_model.objects.filter(username__startswith=user_start)
 
-    if not users.exists():
+    if cnt and not users.exists():
         log.info("Создание 5 пользователей")
         qp = Permission.objects.filter(content_type__app_label="app_task")
         for i in range(5):
             username = f"{user_start}{i}"
-            password = "U-321rew"
-            user = user_model.objects.create_user(username, "", password)
-            user.first_name = password
+            user = user_model.objects.create_user(username, "", user_pass)
+            user.first_name = user_pass
             user.email = f"{username}@none.none"
             user.save()
             user.user_permissions.set([v.id for v in qp])

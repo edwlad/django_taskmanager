@@ -26,7 +26,7 @@
 {% for item in data %}
     {# Название спринта #}
     <div class="col-2 text-end mb-1">
-        <label class="{% if oper == "edit" or oper == "add" %}fw-bold required{% endif %}" 
+        <label class="{% if oper == "edit" or oper == "add" %}required{% endif %}" 
         for="id_{{ view.fld.name.name }}">
             {{view.fld.name.verbose_name}}
         </label>
@@ -50,7 +50,7 @@
 
     {# Описание спринта #}
     <div class="col-2 text-end mb-1">
-        <label class="{% if oper == "edit" or oper == "add" %}fw-bold required{% endif %}" 
+        <label class="{% if oper == "edit" or oper == "add" %}required{% endif %}" 
         for="id_{{ view.fld.desc.name }}">
             {{view.fld.desc.verbose_name}}
         </label>
@@ -73,7 +73,7 @@
 
     {# Проект спринта #}
     <div class="col-2 text-end mb-1">
-        <label class="{% if oper == "edit" or oper == "add" %}fw-bold required{% endif %}" 
+        <label class="{% if oper == "edit" or oper == "add" %}required{% endif %}" 
         for="id_{{ view.fld.proj.name }}">
             {{view.fld.proj.verbose_name}}
         </label>
@@ -92,7 +92,7 @@
             >{{ pr }}
             </option>
         {% empty %}
-            <option disabled>Все проекты завершены</option>
+            <option disabled>Проекты не найдены</option>
         {% endfor %}
         </select>
     {% else %}

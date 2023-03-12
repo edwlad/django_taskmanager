@@ -1,3 +1,7 @@
+.required {
+    font-weight: bold;
+}
+
 .required::after {
     content: "*";
     color: red;
