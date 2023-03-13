@@ -224,11 +224,12 @@ LOGGING = {
             "handlers": ["console_debug"],
             "propagate": False,
         },
-        # "django": {
-        #     "level": os.environ.get("DJANGO_LOG_LEVEL", "INFO"),
-        #     "handlers": ["console_debug"],
-        #     "propagate": False,
-        # },
+        "django": {
+            # "level": os.environ.get("DJANGO_LOG_LEVEL", "INFO"),
+            "level": "INFO",
+            "handlers": ["console_debug"],
+            "propagate": False,
+        },
     },
 }
 
