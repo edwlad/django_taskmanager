@@ -759,8 +759,10 @@ class Index(TemplateView):
     template_name = "index.html"
 
     def get(self, request: HttpRequest, *args, **kwargs):
-        perms = functions.get_perms(request)
         oper = self.kwargs.get("oper", "")
+        pk = self.kwargs.get("pk", 0)
+        model = self.kwargs.get("model", "")
+        perms = functions.get_perms(request)
 
         LOG.info("GET {}".format(self.kwargs))
         LOG.debug("PERMS Права доступа к модели {}={}".format(request.user, perms))
@@ -769,12 +771,20 @@ class Index(TemplateView):
             text = "Нет прав для выполнения операции {}.".format(MY_OPER.get(oper, ""))
             LOG.warning(text)
             messages.warning(request, text)
-            return HttpResponseRedirect(reverse("index"))
+            return HttpResponseRedirect("detail", kwargs={"model": model, "pk": pk})
         return super().get(request, *args, **kwargs)
 
     def post(self, request: HttpRequest, *args, **kwargs):
-        perms = functions.get_perms(request)
         oper = self.kwargs.get("oper", "")
+        pk = self.kwargs.get("pk", 0)
+        model = self.kwargs.get("model", "")
+        if oper not in ("add", "edit", "delete"):
+            LOG.info("REDIRECT POST -> GET {}".format(self.kwargs))
+            return HttpResponseRedirect(
+                reverse("detail", kwargs={"model": model, "pk": pk})
+            )
+
+        perms = functions.get_perms(request)
 
         LOG.info("POST {}".format(self.kwargs))
         LOG.debug("PERMS Права доступа к модели {}={}".format(request.user, perms))
@@ -783,31 +793,35 @@ class Index(TemplateView):
             text = "Нет прав для выполнения операции {}.".format(MY_OPER.get(oper, ""))
             LOG.warning(text)
             messages.warning(request, text)
-            return HttpResponseRedirect(reverse("index"))
+            return HttpResponseRedirect(
+                reverse("detail", kwargs={"model": model, "pk": pk})
+            )
 
-        match self.kwargs.get("model"):
+        match model:
             case Proj.META.url_name:
-                obj = ProjTemplate(self, self.kwargs.get("oper"))
+                obj = ProjTemplate(self, oper)
             case Sprint.META.url_name:
-                obj = SprintTemplate(self, self.kwargs.get("oper"))
+                obj = SprintTemplate(self, oper)
             case Task.META.url_name:
-                obj = TaskTemplate(self, self.kwargs.get("oper"))
+                obj = TaskTemplate(self, oper)
             case TaskStep.META.url_name:
-                obj = TaskStepTemplate(self, self.kwargs.get("oper"))
+                obj = TaskStepTemplate(self, oper)
             case _:
-                messages.warning(
-                    request, f"Не найдена модель {self.kwargs.get('model', '')}"
-                )
+                text = f"Не найдена модель {model}"
+                messages.warning(request, text)
+                LOG.warning("POST {}".format(text))
                 return HttpResponseRedirect(reverse("index"))
         out = obj.post(self, request, *args, **kwargs)
-        messages.info(request, f"Операция {MY_OPER.get(oper, '')} выполнена.")
+        messages.info(request, f"Операция {MY_OPER.get(oper, '')}.")
         return out
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        model = self.kwargs.get("model", "")
+        pk = self.kwargs.get("pk", 0)
         objs = []
 
-        match self.kwargs.get("model"), self.kwargs.get("pk"):
+        match model, pk:
             case "finds", _:
                 context["title"] = "Поиск"
                 context["header"] = "Поиск в названиях проектов, спринтов и задач"
@@ -851,10 +865,9 @@ class Index(TemplateView):
                 objs.append(TaskTemplate(self, "detail"))
                 objs.append(TaskStepTemplate(self, "list"))
             case _:
-                LOG.warning("Не найдена модель {}".format(self.kwargs.get("model", "")))
-                messages.warning(
-                    self.request, f"Не найдена модель {self.kwargs.get('model', '')}"
-                )
+                text = f"Не найдена модель {model}"
+                messages.warning(self.request, text)
+                LOG.warning("GET {}".format(text))
 
         try:
             context["details"] = [v.get(self.request) for v in objs]
