@@ -13,6 +13,11 @@ def send_email_message(sender: Model, **kwargs) -> None:
     Args:
         sender (Model): Модель отправившая сигнал
     """
+    # отключение отправки Email при при любой десериализации фикстуры
+    # когда raw == True (например при загрузке с помошью loaddata)
+    if kwargs["raw"]:
+        return
+
     obj = kwargs.get("instance", None)
     created = kwargs.get("created", None)
 
