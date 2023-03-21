@@ -220,7 +220,7 @@ LOGGING = {
         #     "propagate": False,
         # },
         "app_task.functions.perms": {
-            "level": "INFO",
+            "level": "WARNING",
             "handlers": ["console_debug"],
             "propagate": False,
         },
