@@ -15,7 +15,7 @@ def send_email_message(sender: Model, **kwargs) -> None:
     """
     # отключение отправки Email при при любой десериализации фикстуры
     # когда raw == True (например при загрузке с помошью loaddata)
-    if kwargs["raw"]:
+    if kwargs.get("raw", False):
         return
 
     obj = kwargs.get("instance", None)
