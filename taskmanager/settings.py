@@ -23,15 +23,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 # SECRET_KEY = "django-insecure-pj+s*o#gdc$nhlyo&$dr-mgntcw_gp%c5fn#$=#wb0i*eebo=2"
 SECRET_KEY = os.environ.get(
-    "DJANGO_SECRET_KEY",
-    "django-insecure-pj+s*o#gdc$nhlyo&$dr-mgntcw_gp%c5fn#$=#wb0i*eebo=2",
+    "DJANGO_SECRET_KEY", "django-insecure-pj+s*o#gdc$nhlyo&$dr-mgntcw_gp%c5fn#$=#wb0i*eebo=2"
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = True
-DEBUG = bool(os.environ.get("DJANGO_DEBUG", True))
+DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "edwlad.ru", "www.edwlad.ru"]
 
 
 # Application definition
@@ -82,21 +81,15 @@ WSGI_APPLICATION = "taskmanager.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": BASE_DIR / "db.sqlite3",
-#     }
-# }
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        # "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": "postgres",
-        "USER": "postgres",
-        "PASSWORD": "",
-        "HOST": "127.0.0.1",
-        "PORT": "5432",
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": os.environ.get("DJANGO_DB_NAME", "base"),
+        "USER": os.environ.get("DJANGO_DB_USER", "user"),
+        "PASSWORD": os.environ.get("DJANGO_DB_PASSWORD", ""),
+        "HOST": "localhost",
+        "PORT": "3306",
+        "OPTIONS": {"init_command": "SET sql_mode='STRICT_TRANS_TABLES'"},
     }
 }
 
@@ -106,7 +99,7 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",  # noqa
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
         "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
@@ -123,20 +116,23 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
-# LANGUAGE_CODE = "utf8"
+# LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "ru-ru"
 
-TIME_ZONE = "Etc/GMT-7"
+# TIME_ZONE = "UTC"
+TIME_ZONE = "Etc/GMT-7"  # Asia/Barnaul
+# TIME_ZONE = "GMT+7"  # Asia/Barnaul
+# TIME_ZONE = "Asia/Barnaul"  # Asia/Barnaul
 
 USE_I18N = True
 
 USE_TZ = False
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = "static/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -156,8 +152,8 @@ MY_OPER = {
 }
 
 # шаблон начала имени тестовых пользователей и пароль
-MY_TEST_USER = "user"
-MY_TEST_PASS = "U-321rew"
+MY_TEST_USER = os.environ.get("DJANGO_MY_TEST_USER", "user")
+MY_TEST_PASS = os.environ.get("DJANGO_MY_TEST_PASS", "U-321rew")
 
 # настройки логирования
 LOGGING = {
