@@ -30,7 +30,7 @@ SECRET_KEY = os.environ.get(
 # DEBUG = True
 DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "edwlad.ru", "www.edwlad.ru"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "todolist.edwlad.ru", "www.todolist.edwlad.ru"]
 
 
 # Application definition
