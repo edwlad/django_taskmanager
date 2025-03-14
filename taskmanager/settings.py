@@ -21,10 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = "django-insecure-pj+s*o#gdc$nhlyo&$dr-mgntcw_gp%c5fn#$=#wb0i*eebo=2"
-SECRET_KEY = os.environ.get(
-    "DJANGO_SECRET_KEY", "django-insecure-pj+s*o#gdc$nhlyo&$dr-mgntcw_gp%c5fn#$=#wb0i*eebo=2"
-)
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-0123456789asdfghjkl")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = True
@@ -84,11 +81,11 @@ WSGI_APPLICATION = "taskmanager.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": os.environ.get("DJANGO_DB_NAME", "base"),
-        "USER": os.environ.get("DJANGO_DB_USER", "user"),
+        "NAME": os.environ.get("DJANGO_DB_NAME", "taskmanager"),
+        "USER": os.environ.get("DJANGO_DB_USER", "root"),
         "PASSWORD": os.environ.get("DJANGO_DB_PASSWORD", ""),
-        "HOST": "localhost",
-        "PORT": "3306",
+        "HOST": os.environ.get("DJANGO_DB_HOST", "MariaDB-10.5"),
+        "PORT": os.environ.get("DJANGO_DB_PORT", "3306"),
         "OPTIONS": {"init_command": "SET sql_mode='STRICT_TRANS_TABLES'"},
     }
 }

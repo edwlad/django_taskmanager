@@ -1,6 +1,7 @@
 # .vscode/
 temp-*
 temp_*
+.htaccess
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
