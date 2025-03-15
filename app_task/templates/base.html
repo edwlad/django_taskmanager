@@ -23,7 +23,8 @@
         <a href="{% url "list" model="tasks" %}" class="mx-1">Задачи</a> | 
         <a href="{% url "list" model="finds" %}" class="mx-1">Поиск</a> | 
         <a href="/api/" class="mx-1">API</a> | 
-        <a href="/admin/" class="mx-1">Администрирование</a>
+        <a href="/admin/" class="mx-1">Администрирование</a> | 
+        <a href="https://gitverse.ru/edwlad/django_taskmanager/content/main/README.md" target=_blank class="mx-1">О пректе</a>
         <div class="flex-grow-1"></div>
         {% if view.request.user.is_authenticated %}
             <span class="mx-1">{{ view.request.user.username }}:</span>
